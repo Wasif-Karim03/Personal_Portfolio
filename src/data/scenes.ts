@@ -153,7 +153,7 @@ export const scenes: Scene[] = [
     sources: ['REAL', 'CODE'],
     technique: 'Counters on scroll',
     status: 'blocked-on-media',
-    blockedOn: 'Early robotics club photos',
+    blockedOn: 'Real club photos for the three frames. The counters are built.',
   },
   {
     fig: '07',

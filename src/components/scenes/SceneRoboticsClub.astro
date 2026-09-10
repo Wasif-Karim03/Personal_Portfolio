@@ -1,0 +1,147 @@
+---
+/**
+ * FIG. 06 — Robotics Club.
+ *
+ * Two counters roll up with the scroll, 0 to 267 members and $0 to $68K raised,
+ * beside the title that matters most here: founding president.
+ *
+ * The photos have to be real club photos, still to be dug up
+ * (docs/storyboard.md), so until then their slots are drawn as empty frames on
+ * the sheet rather than filled with anything that isn't the club.
+ *
+ * Without script, or under reduced motion, the counters show their final
+ * values. Script winds them back to zero and lets the scroll carry them up;
+ * screen readers always get the final values.
+ */
+type Kind = 'count' | 'thousands';
+
+const counters: Array<{ value: number; kind: Kind; label: string }> = [
+  { value: 267, kind: 'count', label: 'members' },
+  { value: 68, kind: 'thousands', label: 'raised' },
+];
+
+const format = (value: number, kind: Kind) => (kind === 'thousands' ? `$${value}K` : String(value));
+
+const photoSlots = [1, 2, 3];
+---
+
+<div class="club" data-scene-club>
+  <p class="club__role label">Founding President</p>
+
+  <dl class="counters">
+    {
+      counters.map(({ value, kind, label }) => (
+        <div class="counter">
+          <dt class="counter__label label">{label}</dt>
+          <dd class="counter__value">
+            <span aria-hidden="true" data-counter data-target={value} data-kind={kind}>
+              {format(value, kind)}
+            </span>
+            <span class="sr-only">{format(value, kind)}</span>
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+
+  <ul class="photos" aria-label="Club photos, still to come">
+    {
+      photoSlots.map((n) => (
+        <li class="photo">
+          <span class="photo__label label">Club photo {n} · to come</span>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .club {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+  }
+
+  .club__role {
+    color: var(--ink-60);
+  }
+
+  .counters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xl);
+    margin: 0;
+  }
+
+  /* Label first in the markup, so it reads "members, 267"; number first on the sheet. */
+  .counter {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-3xs);
+  }
+
+  .counter__value {
+    margin: 0;
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-display);
+    font-weight: 700;
+    font-size: clamp(4rem, 3rem + 6vw, 8rem);
+    line-height: 0.9;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .photo {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    border: var(--rule) dashed var(--rule-colour);
+  }
+
+  .photo__label {
+    text-transform: none;
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, scene } from '../../lib/motion';
+
+  const ease = gsap.parseEase('power2.out');
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-scene-club]')) {
+    scene(root, () => {
+      const counters = [...root.querySelectorAll<HTMLElement>('[data-counter]')].map((el) => ({
+        el,
+        target: Number(el.dataset.target),
+        thousands: el.dataset.kind === 'thousands',
+      }));
+
+      const render = (progress: number) => {
+        const eased = ease(Math.min(Math.max(progress, 0), 1));
+        for (const { el, target, thousands } of counters) {
+          const value = Math.round(target * eased);
+          el.textContent = thousands ? `$${value}K` : String(value);
+        }
+      };
+
+      // Counts across the stretch where the numbers come into view and settle,
+      // following the scroll both ways rather than playing once.
+      const trigger = ScrollTrigger.create({
+        trigger: root,
+        start: 'top 80%',
+        end: 'center 45%',
+        onUpdate: (self) => render(self.progress),
+      });
+
+      render(trigger.progress);
+    });
+  }
+</script>
