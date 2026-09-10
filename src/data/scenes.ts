@@ -107,7 +107,8 @@ export const scenes: Scene[] = [
     sources: ['AI', 'CODE'],
     technique: 'Higgsfield shot plus SVG route drawn on scroll',
     status: 'blocked-on-media',
-    blockedOn: 'Higgsfield shots AI-1 to AI-3, generated after filming day',
+    blockedOn:
+      'Higgsfield shots AI-1 to AI-3 for the airport and the window seat, generated after filming day. The route map is built.',
     aiShots: [
       {
         id: 'AI-1',

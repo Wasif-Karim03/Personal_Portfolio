@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SceneSection from '../components/SceneSection.astro';
 import FrameScrub from '../components/FrameScrub.astro';
 import SceneBoot from '../components/scenes/SceneBoot.astro';
+import SceneFlight from '../components/scenes/SceneFlight.astro';
 import SceneHilton from '../components/scenes/SceneHilton.astro';
 import SceneAirbnb from '../components/scenes/SceneAirbnb.astro';
 import SceneContact from '../components/scenes/SceneContact.astro';
@@ -38,6 +39,13 @@ const sections = scenes.filter((scene) => scene.presentation !== 'overlay');
               priority
               bleed
             />
+          </SceneSection>
+        );
+      }
+      if (scene.slug === 'flight') {
+        return (
+          <SceneSection scene={scene}>
+            <SceneFlight />
           </SceneSection>
         );
       }

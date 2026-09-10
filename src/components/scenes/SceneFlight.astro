@@ -1,0 +1,267 @@
+---
+/**
+ * FIG. 04 — The flight · 10 AUG 2022.
+ *
+ * A globe with an orange line drawing from Bangladesh to Ohio as you scroll,
+ * coordinates ticking, landing on Delaware, OH. Route lines are part of the
+ * robot-vision layer, so the route and its marker are the only orange here.
+ *
+ * The geometry is projected at build time (src/data/flight.ts). Without script,
+ * or under reduced motion, this renders the finished state: the whole route
+ * drawn and the readout at the destination. Script only rewinds it to the start
+ * and plays it forward with the scroll, which it never drives.
+ *
+ * The AI shots for the airport and the window seat (AI-1 to AI-3) come later.
+ */
+import { flight } from '../../data/flight';
+import { formatCoordinates, kilometres } from '../../lib/geo-format';
+
+const km = kilometres.format(flight.distanceKm);
+const places = [flight.origin, flight.destination];
+
+const config = JSON.stringify({
+  samples: flight.samples,
+  lengths: flight.lengths,
+  total: flight.total,
+  distanceKm: flight.distanceKm,
+});
+---
+
+<div class="flight is-landed" data-scene-flight data-config={config}>
+  <div class="flight__stage">
+    <svg
+      class="flight__globe"
+      viewBox={`0 0 ${flight.size} ${flight.size}`}
+      role="img"
+      aria-label={`A globe with the great-circle route from Dhaka, Bangladesh to Delaware, Ohio, ${km} km.`}
+    >
+      <path class="sphere" d={flight.sphere} />
+      <path class="land" d={flight.land} />
+      <path class="graticule" d={flight.graticule} />
+      <path class="route" data-route d={flight.route} />
+
+      {
+        places.map((place, index) => (
+          <g class:list={['place', index === 1 && 'place--destination']}>
+            <circle cx={place.x} cy={place.y} r="6" />
+            <text x={place.labelX} y={place.y + 5} text-anchor={place.anchor}>
+              {place.label.toUpperCase()}
+            </text>
+          </g>
+        ))
+      }
+
+      <circle
+        class="marker"
+        data-marker
+        cx={flight.destination.x}
+        cy={flight.destination.y}
+        r="7"
+      />
+    </svg>
+
+    <dl class="readout">
+      <div>
+        <dt class="label">Position</dt>
+        <dd data-position>
+          {formatCoordinates(flight.destination.lat, flight.destination.lon)}
+        </dd>
+      </div>
+      <div>
+        <dt class="label">Flown</dt>
+        <dd data-flown>{km} km of {km} km</dd>
+      </div>
+      <div>
+        <dt class="label">Route</dt>
+        <dd class="readout__note">
+          Great circle: the shortest path over the globe, not the flights taken.
+        </dd>
+      </div>
+    </dl>
+  </div>
+</div>
+
+<style>
+  .flight {
+    position: relative;
+    height: 220svh;
+  }
+
+  .flight__stage {
+    position: sticky;
+    inset-block-start: 0;
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-m);
+    /* Clears the fixed nav, so the top of the globe is never under it. */
+    padding-block-start: var(--space-xl);
+  }
+
+  .flight__globe {
+    width: 100%;
+    max-width: min(66svh, 44rem);
+    height: auto;
+    margin-inline: auto;
+    overflow: visible;
+  }
+
+  .sphere {
+    fill: var(--paper);
+    stroke: var(--ink-30);
+    stroke-width: 1.5;
+  }
+
+  .land {
+    fill: var(--ink-12);
+    stroke: var(--ink-30);
+    stroke-width: 0.75;
+  }
+
+  .graticule {
+    fill: none;
+    stroke: var(--ink-30);
+    stroke-width: 0.6;
+    opacity: 0.5;
+  }
+
+  .route {
+    fill: none;
+    stroke: var(--signal);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .place circle {
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 2;
+  }
+
+  .place text {
+    fill: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 17px;
+    letter-spacing: 0.06em;
+  }
+
+  .flight.is-landed .place--destination circle {
+    stroke: var(--signal);
+  }
+
+  .marker {
+    fill: var(--signal);
+  }
+
+  .readout {
+    display: grid;
+    gap: var(--space-xs);
+    width: 100%;
+    max-width: 26rem;
+    margin: 0;
+  }
+
+  .readout > div {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    align-items: baseline;
+    gap: var(--space-s);
+    padding-block-end: var(--space-2xs);
+    border-block-end: var(--rule) solid var(--rule-colour);
+  }
+
+  .readout dd {
+    margin: 0;
+    font-family: var(--font-mono);
+  }
+
+  .readout__note {
+    font-size: var(--step--1);
+    color: var(--ink-60);
+  }
+
+  @media (min-width: 60rem) {
+    .flight__stage {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .flight__globe {
+      margin-inline: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flight {
+      height: auto;
+    }
+
+    .flight__stage {
+      position: static;
+      height: auto;
+      padding-block-start: 0;
+    }
+  }
+</style>
+
+<script>
+  import { ScrollTrigger, scene } from '../../lib/motion';
+  import { formatCoordinates, kilometres } from '../../lib/geo-format';
+
+  interface FlightConfig {
+    samples: Array<[x: number, y: number, lat: number, lon: number]>;
+    lengths: number[];
+    total: number;
+    distanceKm: number;
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-scene-flight]')) {
+    scene(root, () => {
+      const route = root.querySelector<SVGPathElement>('[data-route]');
+      const marker = root.querySelector<SVGCircleElement>('[data-marker]');
+      const position = root.querySelector<HTMLElement>('[data-position]');
+      const flown = root.querySelector<HTMLElement>('[data-flown]');
+      const config = root.dataset.config;
+      if (!route || !marker || !position || !flown || !config) return;
+
+      const { samples, lengths, total, distanceKm } = JSON.parse(config) as FlightConfig;
+      const last = samples.length - 1;
+      const totalKm = kilometres.format(distanceKm);
+
+      route.style.strokeDasharray = `${total} ${total}`;
+
+      const render = (progress: number) => {
+        const p = Math.min(Math.max(progress, 0), 1);
+        const f = p * last;
+        const i = Math.min(Math.floor(f), last - 1);
+        const t = f - i;
+        const [x0, y0] = samples[i];
+        const [x1, y1] = samples[i + 1];
+
+        route.style.strokeDashoffset = String(total - (lengths[i] + (lengths[i + 1] - lengths[i]) * t));
+        marker.setAttribute('cx', String(x0 + (x1 - x0) * t));
+        marker.setAttribute('cy', String(y0 + (y1 - y0) * t));
+
+        // Coordinates step with the samples instead of blending between them:
+        // the route passes near the pole, where longitude jumps.
+        const [, , lat, lon] = samples[Math.round(f)];
+        position.textContent = formatCoordinates(lat, lon);
+        flown.textContent = `${kilometres.format(Math.round(distanceKm * p))} km of ${totalKm} km`;
+        root.classList.toggle('is-landed', p >= 0.999);
+      };
+
+      const trigger = ScrollTrigger.create({
+        trigger: root,
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => render(self.progress),
+      });
+
+      // A reload can land mid-flight; start from wherever the page actually is.
+      render(trigger.progress);
+    });
+  }
+</script>
