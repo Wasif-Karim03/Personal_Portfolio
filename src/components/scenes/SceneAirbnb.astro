@@ -1,0 +1,222 @@
+---
+/**
+ * FIG. 09 — Summer 2025 · Airbnb.
+ *
+ * An AI draft types itself into a message box, then a person edits it. The point
+ * of the scene is that shape: the model proposes, the human decides.
+ *
+ * This is a plain box drawn in the site's own style. It is deliberately not
+ * Airbnb's interface, and carries no Airbnb branding — see CLAUDE.md.
+ *
+ * Without script the box shows the finished, edited message: the AI sentence
+ * struck through and the host's replacement after it. The animation only replays
+ * how it got there.
+ */
+
+const guest = 'Hi! Is early check-in possible on the 14th?';
+const draftOpening =
+  'Hi there — thanks for reaching out! Early check-in is usually possible on weekdays. ';
+const draftEnding = 'Let me confirm and get back to you shortly.';
+const hostEdit = "I can do 1pm — I'll leave the keypad code in your itinerary.";
+
+const facts = [
+  { value: '10', label: 'production PRs' },
+  { value: 'Java / Kotlin', label: 'microservices' },
+  { value: 'Flagged', label: 'every change behind a flag' },
+];
+---
+
+<div class="ab" data-scene-airbnb>
+  <p class="ab__role label">Software Engineering Intern · Summer 2025</p>
+
+  <div class="box">
+    <p class="box__chrome label">Message · generic mock, not a real product UI</p>
+
+    <div class="box__body">
+      <p class="msg msg--in">
+        <span class="msg__who label">Guest</span>
+        <span class="msg__text">{guest}</span>
+      </p>
+
+      <p class="msg msg--out">
+        <span class="msg__who label">
+          Draft <span class="robot-vision">· AI</span>
+        </span>
+        <span class="msg__text">
+          <span data-typed>{draftOpening}</span><span
+            class="edit-old"
+            data-edit-old>{draftEnding}</span
+          ><span class="edit-new" data-edit-new> {hostEdit}</span>
+        </span>
+      </p>
+
+      <p class="box__note label" data-note>Edited by the host before sending</p>
+    </div>
+  </div>
+
+  <dl class="facts">
+    {
+      facts.map(({ value, label }) => (
+        <div class="fact">
+          <dt class="fact__value">{value}</dt>
+          <dd class="fact__label label">{label}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</div>
+
+<style>
+  .ab {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
+  .ab__role {
+    color: var(--ink-60);
+  }
+
+  .box {
+    width: 100%;
+    max-width: 34rem;
+    border: var(--rule) solid var(--ink);
+  }
+
+  .box__chrome {
+    padding: var(--space-2xs) var(--space-s);
+    border-block-end: var(--rule) solid var(--rule-colour);
+    color: var(--ink-30);
+    text-transform: none;
+  }
+
+  .box__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    padding: var(--space-s);
+  }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+
+  .msg__who {
+    color: var(--ink-30);
+  }
+
+  .msg--in .msg__text {
+    color: var(--ink-60);
+  }
+
+  .msg__text {
+    /* Holds height steady while the draft types, so nothing below jumps. */
+    min-height: 1lh;
+  }
+
+  .edit-old {
+    text-decoration: line-through;
+    text-decoration-color: var(--signal);
+    color: var(--ink-30);
+  }
+
+  .edit-new {
+    color: var(--signal);
+  }
+
+  .box__note {
+    padding-block-start: var(--space-2xs);
+    border-block-start: var(--rule) dashed var(--rule-colour);
+    color: var(--ink-30);
+    text-transform: none;
+  }
+
+  /* While the draft is being typed, the edit has not happened yet. */
+  .ab.is-drafting .edit-old {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .ab.is-drafting .edit-new,
+  .ab.is-drafting .box__note {
+    opacity: 0;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-l);
+    margin: 0;
+  }
+
+  .fact__value {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: 1;
+  }
+
+  .fact__label {
+    margin: var(--space-3xs) 0 0;
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, scene } from '../../lib/motion';
+
+  const root = document.querySelector<HTMLElement>('[data-scene-airbnb]');
+  if (root) {
+    scene(root, () => {
+      const opening = root.querySelector<HTMLElement>('[data-typed]');
+      const ending = root.querySelector<HTMLElement>('[data-edit-old]');
+      const replacement = root.querySelector<HTMLElement>('[data-edit-new]');
+      const note = root.querySelector<HTMLElement>('[data-note]');
+      if (!opening || !ending || !replacement || !note) return;
+
+      const openingText = opening.textContent ?? '';
+      const endingText = ending.textContent ?? '';
+
+      /** Types `text` into `el` by slicing, so no per-character DOM churn. */
+      const type = (el: HTMLElement, text: string, duration: number) => {
+        const state = { chars: 0 };
+        return gsap.to(state, {
+          chars: text.length,
+          duration,
+          ease: 'none',
+          onUpdate: () => {
+            el.textContent = text.slice(0, Math.round(state.chars));
+          },
+        });
+      };
+
+      ScrollTrigger.create({
+        trigger: root,
+        start: 'top 70%',
+        // Plays once. A message being drafted on a loop reads as a screensaver.
+        once: true,
+        onEnter: () => {
+          root.classList.add('is-drafting');
+          opening.textContent = '';
+          ending.textContent = '';
+
+          gsap
+            .timeline({
+              onComplete: () => root.classList.remove('is-drafting'),
+            })
+            .add(type(opening, openingText, 1.5))
+            .add(type(ending, endingText, 0.9))
+            // The pause is the point: the host reads it, then changes it.
+            .to({}, { duration: 0.7 })
+            .to(ending, { color: 'var(--ink-30)', duration: 0.25 })
+            .fromTo(
+              replacement,
+              { opacity: 0, y: 4 },
+              { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+            )
+            .fromTo(note, { opacity: 0 }, { opacity: 1, duration: 0.3 }, '<0.1');
+        },
+      });
+    });
+  }
+</script>

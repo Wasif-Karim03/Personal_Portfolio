@@ -1,0 +1,194 @@
+---
+/**
+ * FIG. 00 — Boot.
+ *
+ * A short boot log types out over the page, then clears. It doubles as the
+ * loading screen, so it sits above everything rather than in the scroll flow.
+ *
+ * It is rendered hidden and only revealed by script. That way a visitor with no
+ * JavaScript, or with prefers-reduced-motion, never sees an overlay they cannot
+ * dismiss — they just get the page. It also self-dismisses on a hard timeout,
+ * on any key, and on click, so it can never trap anyone.
+ */
+
+const lines = [
+  { time: '0.000', task: 'init drawing sheet', result: 'ok' },
+  { time: '0.114', task: 'mount /assets/real', result: 'ok' },
+  { time: '0.229', task: 'load scenes 00–16', result: 'ok' },
+  { time: '0.341', task: 'calibrate scroll', result: 'ok' },
+  { time: '0.478', task: 'detector online', result: 'person 0.96' },
+];
+---
+
+<div class="boot" id="boot" hidden role="status" aria-live="off">
+  <div class="boot__inner">
+    <p class="boot__head">wasifkarim.com — boot</p>
+    <ol class="boot__log">
+      {
+        lines.map(({ time, task, result }) => (
+          <li class="boot__line" data-boot-line>
+            <span class="boot__time">[ {time} ]</span>
+            <span class="boot__task">{task}</span>
+            <span class:list={['boot__result', result !== 'ok' && 'robot-vision']}>
+              {result}
+            </span>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="boot__ready" data-boot-ready>ready.</p>
+  </div>
+  <button class="boot__skip label" type="button" data-boot-skip>Skip</button>
+</div>
+
+<style>
+  .boot {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    background: var(--paper);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+  }
+
+  .boot__inner {
+    width: min(100% - var(--gutter) * 2, 34rem);
+  }
+
+  .boot__head {
+    color: var(--ink-30);
+    margin-block-end: var(--space-s);
+  }
+
+  .boot__log {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .boot__line {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--space-2xs);
+    align-items: baseline;
+    padding-block: 0.15rem;
+    /* Revealed one at a time by script. */
+    opacity: 0;
+  }
+
+  /* Dotted leader between the task and its result, like a real log. */
+  .boot__task::after {
+    content: '';
+    display: inline-block;
+    width: 100%;
+    margin-inline-start: var(--space-2xs);
+    border-block-end: 1px dotted var(--ink-30);
+    transform: translateY(-0.25em);
+  }
+
+  .boot__task {
+    display: flex;
+    color: var(--ink-60);
+    white-space: nowrap;
+  }
+
+  .boot__time {
+    color: var(--ink-30);
+  }
+
+  .boot__ready {
+    margin-block-start: var(--space-s);
+    opacity: 0;
+  }
+
+  .boot__ready::after {
+    content: '▋';
+    margin-inline-start: 0.2em;
+    color: var(--signal);
+  }
+
+  .boot__skip {
+    position: absolute;
+    inset-block-end: var(--space-m);
+    inset-inline-end: var(--gutter);
+    padding: var(--space-3xs) var(--space-2xs);
+    background: none;
+    border: var(--rule) solid var(--rule-colour);
+    cursor: pointer;
+  }
+
+  .boot__skip:hover {
+    color: var(--signal);
+    border-color: var(--signal);
+  }
+
+  /* Belt and braces: if script somehow reveals it under reduced motion, it is
+     still instantly gone rather than covering the page. */
+  @media (prefers-reduced-motion: reduce) {
+    .boot {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../../lib/motion';
+
+  const boot = document.getElementById('boot');
+  if (boot && !prefersReducedMotion()) {
+    // Once per session. A boot log is charming the first time, tedious on every
+    // back-navigation.
+    let alreadyBooted = false;
+    try {
+      alreadyBooted = sessionStorage.getItem('booted') === '1';
+    } catch {
+      // Private windows and blocked storage throw. Treat as first visit.
+    }
+
+    if (!alreadyBooted) {
+      const lines = boot.querySelectorAll('[data-boot-line]');
+      const ready = boot.querySelector('[data-boot-ready]');
+      const skip = boot.querySelector('[data-boot-skip]');
+
+      boot.hidden = false;
+      document.body.style.overflow = 'hidden';
+
+      let finished = false;
+      const dismiss = () => {
+        if (finished) return;
+        finished = true;
+        try {
+          sessionStorage.setItem('booted', '1');
+        } catch {
+          // Ignore: not being able to remember is harmless.
+        }
+        clearTimeout(failsafe);
+        window.removeEventListener('keydown', dismiss);
+        skip?.removeEventListener('click', dismiss);
+        gsap.to(boot, {
+          opacity: 0,
+          duration: 0.4,
+          ease: 'power2.out',
+          onComplete: () => {
+            boot.remove();
+            document.body.style.overflow = '';
+          },
+        });
+      };
+
+      // Nothing here may hold the page hostage: a hard ceiling regardless of
+      // what the timeline is doing.
+      const failsafe = setTimeout(dismiss, 4000);
+      window.addEventListener('keydown', dismiss);
+      skip?.addEventListener('click', dismiss);
+
+      gsap
+        .timeline({ onComplete: dismiss })
+        .to(lines, { opacity: 1, duration: 0.01, stagger: 0.13 })
+        .to(ready, { opacity: 1, duration: 0.01 }, '+=0.1')
+        .to({}, { duration: 0.45 });
+    }
+  }
+</script>

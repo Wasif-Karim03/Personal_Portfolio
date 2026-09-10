@@ -44,6 +44,11 @@ export interface Scene {
   sources: MediaSource[];
   technique: string;
   status: SceneStatus;
+  /**
+   * How the scene sits on the page. Almost everything is a scroll section; the
+   * boot log is an overlay because it doubles as the loading screen.
+   */
+  presentation?: 'section' | 'overlay';
   /** What the scene is waiting on, when status is blocked. */
   blockedOn?: string;
   aiShots?: AiShot[];
@@ -57,7 +62,8 @@ export const scenes: Scene[] = [
     summary: 'A few lines of a boot log type out while assets load, then clear.',
     sources: ['CODE'],
     technique: 'Text animation, doubles as the loading screen',
-    status: 'ready',
+    status: 'done',
+    presentation: 'overlay',
   },
   {
     fig: '01',
@@ -165,7 +171,7 @@ export const scenes: Scene[] = [
       'Software Engineering Intern. An API request animates through a small diagram: app → endpoint → PostgreSQL. 6 REST endpoints, Tableau dashboard, CI/CD.',
     sources: ['CODE'],
     technique: 'Animated diagram, no internal screens',
-    status: 'ready',
+    status: 'done',
   },
   {
     fig: '09',
@@ -175,7 +181,7 @@ export const scenes: Scene[] = [
       'Software Engineering Intern. A generic message box where an AI draft types itself out, then a host edits it. 10 production PRs behind feature flags, Java/Kotlin microservices.',
     sources: ['CODE'],
     technique: "Generic mock UI, not Airbnb's real interface",
-    status: 'ready',
+    status: 'done',
   },
   {
     fig: '10',
@@ -250,8 +256,10 @@ export const scenes: Scene[] = [
     summary:
       'An email-compose window: To: Wasif, with subject and body fields. It really sends.',
     sources: ['CODE'],
-    technique: 'Formspree or Resend',
-    status: 'ready',
+    technique: 'Formspree, posted from a plain HTML form so it works without JS',
+    status: 'blocked-on-decision',
+    blockedOn:
+      'Wasif to create a Formspree form and set PUBLIC_FORMSPREE_ENDPOINT. Until then the form falls back to a mailto link.',
   },
 ];
 

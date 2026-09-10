@@ -1,19 +1,56 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SceneSection from '../components/SceneSection.astro';
+import SceneBoot from '../components/scenes/SceneBoot.astro';
+import SceneHilton from '../components/scenes/SceneHilton.astro';
+import SceneAirbnb from '../components/scenes/SceneAirbnb.astro';
+import SceneContact from '../components/scenes/SceneContact.astro';
 import { scenes } from '../data/scenes';
 
 /**
  * The scroll story, FIG. 00 through FIG. 16.
  *
- * Scenes render from the registry in src/data/scenes.ts. As each one is actually
- * built it gets its own component slotted into the <SceneSection> body; until
- * then the section stands in with its summary and what it is waiting on.
+ * Scenes come from the registry in src/data/scenes.ts. A built scene supplies a
+ * component below; the rest are rendered with no body, so <SceneSection> falls
+ * back to the summary and what the scene is waiting on. That keeps the whole
+ * spine walkable while media is still being shot.
+ *
+ * FIG. 00 is the exception — it is the loading overlay, not a scroll section.
  */
+const sections = scenes.filter((scene) => scene.presentation !== 'overlay');
 ---
 
 <BaseLayout title="Wasif Karim">
-  {scenes.map((scene) => <SceneSection scene={scene} />)}
+  <SceneBoot />
+
+  {
+    sections.map((scene) => {
+      // Passing an empty expression would count as filling the slot and
+      // suppress the fallback, so built scenes branch explicitly.
+      if (scene.slug === 'hilton') {
+        return (
+          <SceneSection scene={scene}>
+            <SceneHilton />
+          </SceneSection>
+        );
+      }
+      if (scene.slug === 'airbnb') {
+        return (
+          <SceneSection scene={scene}>
+            <SceneAirbnb />
+          </SceneSection>
+        );
+      }
+      if (scene.slug === 'contact') {
+        return (
+          <SceneSection scene={scene}>
+            <SceneContact idPrefix="story" />
+          </SceneSection>
+        );
+      }
+      return <SceneSection scene={scene} />;
+    })
+  }
 </BaseLayout>
 
 <script>
