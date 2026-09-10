@@ -15,6 +15,9 @@ assertFaceRule();
 const aiShots = shippingAiShots();
 const personShots = aiShots.filter((shot) => shot.depictsPerson);
 
+/** "1 scene", not "1 scenes". */
+const sceneCount = (n: number) => `${n} scene${n === 1 ? '' : 's'}`;
+
 const sourceCounts = {
   REAL: scenes.filter((s) => s.sources.includes('REAL')).length,
   DATA: scenes.filter((s) => s.sources.includes('DATA')).length,
@@ -41,22 +44,22 @@ const sourceCounts = {
       <h2>Where the visuals come from</h2>
       <dl class="sources">
         <div>
-          <dt class="label">REAL — {sourceCounts.REAL} scenes</dt>
+          <dt class="label">REAL — {sceneCount(sourceCounts.REAL)}</dt>
           <dd>Filmed or photographed by me. My face, my hardware, my documents.</dd>
         </div>
         <div>
-          <dt class="label">DATA — {sourceCounts.DATA} scenes</dt>
+          <dt class="label">DATA — {sceneCount(sourceCounts.DATA)}</dt>
           <dd>
             Output from my own robots and tools: YOLO detections, LiDAR point
             clouds, Gaussian splats I captured myself.
           </dd>
         </div>
         <div>
-          <dt class="label">CODE — {sourceCounts.CODE} scenes</dt>
+          <dt class="label">CODE — {sceneCount(sourceCounts.CODE)}</dt>
           <dd>Drawn live in the browser: counters, lines, maps, text.</dd>
         </div>
         <div>
-          <dt class="label robot-vision">AI — {sourceCounts.AI} scenes</dt>
+          <dt class="label robot-vision">AI — {sceneCount(sourceCounts.AI)}</dt>
           <dd>
             Generated, and only for things nobody could film: a flight I took in
             2022, transitions, mood. Listed individually below.
