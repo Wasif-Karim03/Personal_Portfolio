@@ -30,9 +30,9 @@ export interface SequenceManifest {
   desktop: SequenceVariant;
   /** Fewer, smaller frames for phones — a storyboard non-negotiable. */
   mobile: SequenceVariant;
-  /** First frame: shown until the canvas takes over. */
+  /** The clip's first frame as a single image. <FrameScrub> picks its role by direction. */
   poster: string;
-  /** Last frame: the calm, static version for reduced motion. */
+  /** The clip's last frame as a single image. */
   still: string;
 }
 

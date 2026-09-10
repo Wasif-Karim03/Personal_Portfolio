@@ -85,7 +85,8 @@ export const scenes: Scene[] = [
     sources: ['CODE'],
     technique: 'Counter plus reversed sequence',
     status: 'blocked-on-media',
-    blockedOn: 'Reuses shot A from scene 01',
+    blockedOn:
+      'Shot A, shared with FIG. 01 (placeholder frames for now), and frames from later chapters to flicker past once they exist.',
   },
   {
     fig: '03',

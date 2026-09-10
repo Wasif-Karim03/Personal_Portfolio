@@ -1,0 +1,106 @@
+---
+/**
+ * FIG. 02 — Rewind.
+ *
+ * FIG. 01's clip plays backwards while a timecode spins from the present back to
+ * 10 August 2022, the day of the flight in FIG. 04, where the story restarts.
+ * The frames come from <FrameScrub reverse>; this adds the timecode, following
+ * the scrub through its `scrub:progress` events.
+ *
+ * Without script, or under reduced motion, it shows the finished rewind: the
+ * clip's first frame, and the timecode stopped on 10 August 2022.
+ *
+ * Still to come: frames from later chapters flickering past, once they exist.
+ */
+import FrameScrub from '../FrameScrub.astro';
+import { heroSequence } from '../../data/sequences';
+import { timecode } from '../../lib/timecode';
+
+// "Now" is when the site was built, so the rewind always starts from the present.
+const from = Date.now();
+const to = Date.UTC(2022, 7, 10);
+const rested = timecode(to, 0);
+const fromYear = new Date(from).getUTCFullYear();
+---
+
+<div class="rewind" data-scene-rewind data-from={from} data-to={to}>
+  <FrameScrub sequence={heroSequence} length={2} reverse bleed>
+    <div
+      class="timecode"
+      role="img"
+      aria-label={`A timecode rewinding from ${fromYear} to 10 August 2022`}
+    >
+      <span class="timecode__day" data-day aria-hidden="true">{rested.day}</span>
+      <span class="timecode__clock" data-clock aria-hidden="true">{rested.clock}</span>
+    </div>
+  </FrameScrub>
+</div>
+
+<style>
+  .timecode {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: var(--space-xl);
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .timecode__day,
+  .timecode__clock {
+    padding-inline: var(--space-2xs);
+    background: var(--paper);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timecode__day {
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-display);
+    font-weight: 700;
+    font-size: var(--step-5);
+    line-height: 1.1;
+  }
+
+  .timecode__clock {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    color: var(--ink-60);
+  }
+</style>
+
+<script>
+  import { initMotion } from '../../lib/motion';
+  import { TIMECODE_FPS, timecode } from '../../lib/timecode';
+
+  /**
+   * Frames the counter runs through across the whole rewind: twenty seconds'
+   * worth, so it reads as a counter spinning rather than a date being picked.
+   */
+  const SPIN = TIMECODE_FPS * 20;
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-scene-rewind]')) {
+    const scrub = root.querySelector<HTMLElement>('[data-frame-scrub]');
+    const day = root.querySelector<HTMLElement>('[data-day]');
+    const clock = root.querySelector<HTMLElement>('[data-clock]');
+    const from = Number(root.dataset.from);
+    const to = Number(root.dataset.to);
+    // Under reduced motion the scrub never runs, so the rested timecode stays.
+    if (!scrub || !day || !clock || !initMotion()) continue;
+
+    const render = (progress: number) => {
+      const stamp = timecode(from + (to - from) * progress, Math.floor(progress * SPIN));
+      day.textContent = stamp.day;
+      clock.textContent = stamp.clock;
+    };
+
+    root.addEventListener('scrub:progress', (event) => {
+      render((event as CustomEvent<{ progress: number }>).detail.progress);
+    });
+
+    // The rested value is the end of the rewind, so left alone it would show
+    // 2022 while the scene scrolls in. Start from the scrub's last report, or
+    // from the top if it hasn't reported yet; that report then arrives as an event.
+    render(Number(scrub.dataset.progress ?? 0));
+  }
+</script>

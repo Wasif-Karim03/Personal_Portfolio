@@ -1,15 +1,18 @@
 ---
 /**
  * A scroll-scrubbed image sequence: a tall track with a sticky canvas stage.
- * Used by FIG. 01, and built to serve FIG. 02 and FIG. 15 as well.
+ * Used by FIG. 01, and played backwards by FIG. 02; built to serve FIG. 15 too.
  *
  * Scroll position maps to a frame. Nothing here drives the scroll, so scroll
  * speed is never taken over — the stage is held with CSS sticky, not a pin.
  *
  * Without script, or under reduced motion, the <picture> is all there is. It
- * shows the first frame normally and the last frame under reduced motion — the
- * held end state is the calm, static version the storyboard asks for. The
- * canvas only stacks over it once a frame has actually been drawn.
+ * shows the frame the scrub starts on normally, and the frame it ends on under
+ * reduced motion — the held end state is the calm, static version the
+ * storyboard asks for. The canvas only stacks over it once a frame is drawn.
+ *
+ * Each scroll update is also dispatched as a bubbling `scrub:progress` event,
+ * scroll progress in `detail.progress`, so an overlay can follow the scrub.
  */
 import type { DetectionTrack, SequenceManifest } from '../lib/frames';
 
@@ -22,11 +25,24 @@ interface Props {
   priority?: boolean;
   /** Break out of a <SceneSection>'s side padding to the full viewport width. */
   bleed?: boolean;
+  /** Play the clip backwards, starting on its last frame. */
+  reverse?: boolean;
 }
 
-const { sequence, detections, length = 2.5, priority = false, bleed = false } = Astro.props;
+const {
+  sequence,
+  detections,
+  length = 2.5,
+  priority = false,
+  bleed = false,
+  reverse = false,
+} = Astro.props;
 
-const config = JSON.stringify({ sequence, detections });
+// The frame the scrub starts on, and the one it comes to rest on.
+const startImage = reverse ? sequence.still : sequence.poster;
+const endImage = reverse ? sequence.poster : sequence.still;
+
+const config = JSON.stringify({ sequence, detections, reverse });
 ---
 
 <div
@@ -37,10 +53,10 @@ const config = JSON.stringify({ sequence, detections });
 >
   <div class="scrub__stage">
     <picture>
-      <source media="(prefers-reduced-motion: reduce)" srcset={sequence.still} />
+      <source media="(prefers-reduced-motion: reduce)" srcset={endImage} />
       <img
         class="scrub__poster"
-        src={sequence.poster}
+        src={startImage}
         alt={sequence.alt}
         width={sequence.desktop.width}
         height={sequence.desktop.height}
@@ -140,6 +156,7 @@ const config = JSON.stringify({ sequence, detections });
   interface ScrubConfig {
     sequence: SequenceManifest;
     detections?: DetectionTrack;
+    reverse?: boolean;
   }
 
   /** Phones, and anyone asking to save data, get the lighter frame set. */
@@ -154,7 +171,7 @@ const config = JSON.stringify({ sequence, detections });
       const config = root.dataset.config;
       if (!canvas || !config) return;
 
-      const { sequence, detections } = JSON.parse(config) as ScrubConfig;
+      const { sequence, detections, reverse = false } = JSON.parse(config) as ScrubConfig;
       const frames = new FrameSequence(
         wantsLightFrames() ? sequence.mobile : sequence.desktop,
       );
@@ -180,15 +197,25 @@ const config = JSON.stringify({ sequence, detections });
         drawIfReady();
       }).observe(canvas);
 
+      const update = (progress: number) => {
+        renderer.setProgress(reverse ? 1 - progress : progress);
+        // Also kept on the element, for an overlay whose script runs after the
+        // first report and so missed the event.
+        root.dataset.progress = String(progress);
+        root.dispatchEvent(
+          new CustomEvent('scrub:progress', { bubbles: true, detail: { progress } }),
+        );
+      };
+
       const trigger = ScrollTrigger.create({
         trigger: root,
         start: 'top top',
         end: 'bottom bottom',
-        onUpdate: (self) => renderer.setProgress(self.progress),
+        onUpdate: (self) => update(self.progress),
       });
 
       // A reload can land mid-scrub; start from wherever the page actually is.
-      renderer.setProgress(trigger.progress);
+      update(trigger.progress);
     });
   }
 </script>
