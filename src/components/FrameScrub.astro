@@ -1,0 +1,194 @@
+---
+/**
+ * A scroll-scrubbed image sequence: a tall track with a sticky canvas stage.
+ * Used by FIG. 01, and built to serve FIG. 02 and FIG. 15 as well.
+ *
+ * Scroll position maps to a frame. Nothing here drives the scroll, so scroll
+ * speed is never taken over — the stage is held with CSS sticky, not a pin.
+ *
+ * Without script, or under reduced motion, the <picture> is all there is. It
+ * shows the first frame normally and the last frame under reduced motion — the
+ * held end state is the calm, static version the storyboard asks for. The
+ * canvas only stacks over it once a frame has actually been drawn.
+ */
+import type { DetectionTrack, SequenceManifest } from '../lib/frames';
+
+interface Props {
+  sequence: SequenceManifest;
+  detections?: DetectionTrack;
+  /** Scroll distance the scrub spans, in viewport heights. */
+  length?: number;
+  /** For the hero: the poster is the LCP image, so fetch it first. */
+  priority?: boolean;
+  /** Break out of a <SceneSection>'s side padding to the full viewport width. */
+  bleed?: boolean;
+}
+
+const { sequence, detections, length = 2.5, priority = false, bleed = false } = Astro.props;
+
+const config = JSON.stringify({ sequence, detections });
+---
+
+<div
+  class:list={['scrub', bleed && 'scrub--bleed']}
+  style={`--track: ${length * 100}svh`}
+  data-frame-scrub
+  data-config={config}
+>
+  <div class="scrub__stage">
+    <picture>
+      <source media="(prefers-reduced-motion: reduce)" srcset={sequence.still} />
+      <img
+        class="scrub__poster"
+        src={sequence.poster}
+        alt={sequence.alt}
+        width={sequence.desktop.width}
+        height={sequence.desktop.height}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : 'auto'}
+        decoding="async"
+      />
+    </picture>
+
+    <canvas class="scrub__canvas" data-scrub-canvas aria-hidden="true"></canvas>
+
+    <div class="scrub__overlay"><slot /></div>
+
+    {
+      sequence.source === 'placeholder' && (
+        <p class="scrub__placeholder label">
+          Placeholder frames · real footage after filming day
+        </p>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .scrub {
+    position: relative;
+    height: var(--track);
+  }
+
+  /* Cancels exactly the gutter padding <SceneSection> applies. */
+  .scrub--bleed {
+    margin-inline: calc(var(--gutter) * -1);
+  }
+
+  .scrub__stage {
+    position: sticky;
+    inset-block-start: 0;
+    height: 100svh;
+    overflow: hidden;
+    background: var(--ink-12);
+  }
+
+  .scrub__poster,
+  .scrub__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .scrub__poster {
+    object-fit: cover;
+  }
+
+  .scrub__canvas {
+    opacity: 0;
+    transition: opacity var(--dur-fast) linear;
+  }
+
+  .scrub.is-ready .scrub__canvas {
+    opacity: 1;
+  }
+
+  .scrub__overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .scrub__placeholder {
+    position: absolute;
+    inset-block-end: var(--space-s);
+    inset-inline-start: var(--gutter);
+    padding: var(--space-3xs) var(--space-2xs);
+    background: var(--paper);
+    border: var(--rule) dashed var(--rule-colour);
+    text-transform: none;
+  }
+
+  /* No scrubbing means no reason to make anyone scroll past a held image. */
+  @media (prefers-reduced-motion: reduce) {
+    .scrub {
+      height: 100svh;
+    }
+  }
+</style>
+
+<script>
+  import { ScrollTrigger, scene } from '../lib/motion';
+  import {
+    FrameSequence,
+    ScrubRenderer,
+    type DetectionTrack,
+    type SequenceManifest,
+  } from '../lib/frames';
+
+  interface ScrubConfig {
+    sequence: SequenceManifest;
+    detections?: DetectionTrack;
+  }
+
+  /** Phones, and anyone asking to save data, get the lighter frame set. */
+  const wantsLightFrames = () =>
+    matchMedia('(max-width: 48rem)').matches ||
+    (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+      ?.saveData === true;
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-frame-scrub]')) {
+    scene(root, () => {
+      const canvas = root.querySelector<HTMLCanvasElement>('[data-scrub-canvas]');
+      const config = root.dataset.config;
+      if (!canvas || !config) return;
+
+      const { sequence, detections } = JSON.parse(config) as ScrubConfig;
+      const frames = new FrameSequence(
+        wantsLightFrames() ? sequence.mobile : sequence.desktop,
+      );
+      const renderer = new ScrubRenderer(canvas, frames, detections);
+
+      const drawIfReady = () => {
+        if (renderer.draw()) root.classList.add('is-ready');
+      };
+
+      // Load a viewport ahead of the scene, not with the rest of the page.
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          observer.disconnect();
+          frames.load(drawIfReady);
+        },
+        { rootMargin: '100% 0px' },
+      );
+      observer.observe(root);
+
+      new ResizeObserver(() => {
+        renderer.resize();
+        drawIfReady();
+      }).observe(canvas);
+
+      const trigger = ScrollTrigger.create({
+        trigger: root,
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => renderer.setProgress(self.progress),
+      });
+
+      // A reload can land mid-scrub; start from wherever the page actually is.
+      renderer.setProgress(trigger.progress);
+    });
+  }
+</script>

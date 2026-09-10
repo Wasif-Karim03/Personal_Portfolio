@@ -1,11 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SceneSection from '../components/SceneSection.astro';
+import FrameScrub from '../components/FrameScrub.astro';
 import SceneBoot from '../components/scenes/SceneBoot.astro';
 import SceneHilton from '../components/scenes/SceneHilton.astro';
 import SceneAirbnb from '../components/scenes/SceneAirbnb.astro';
 import SceneContact from '../components/scenes/SceneContact.astro';
 import { scenes } from '../data/scenes';
+import { heroDetections, heroSequence } from '../data/sequences';
 
 /**
  * The scroll story, FIG. 00 through FIG. 16.
@@ -27,6 +29,18 @@ const sections = scenes.filter((scene) => scene.presentation !== 'overlay');
     sections.map((scene) => {
       // Passing an empty expression would count as filling the slot and
       // suppress the fallback, so built scenes branch explicitly.
+      if (scene.slug === 'now') {
+        return (
+          <SceneSection scene={scene}>
+            <FrameScrub
+              sequence={heroSequence}
+              detections={heroDetections}
+              priority
+              bleed
+            />
+          </SceneSection>
+        );
+      }
       if (scene.slug === 'hilton') {
         return (
           <SceneSection scene={scene}>

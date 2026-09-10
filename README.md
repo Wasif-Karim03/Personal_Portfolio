@@ -36,3 +36,23 @@ pnpm check    # astro + typescript diagnostics
 Raw source photos and footage are **not** in this repo — they run to hundreds of
 megabytes. `assets/raw/` is gitignored; originals live outside git, and only
 optimized web-sized derivatives get committed.
+
+### Scrub sequences
+
+Scroll-scrubbed scenes (FIG. 01 now, FIG. 02 and 15 later) read frame sets made
+by `scripts/extract-frames.sh`. Swapping in real footage is one command:
+
+```sh
+scripts/extract-frames.sh ~/footage/hero-take3.mov hero \
+  --alt "Wasif Karim turning toward the camera"
+```
+
+That writes the frames to `public/sequences/<name>/` and a manifest to
+`src/data/sequences/<name>.json`, and the build fails if the two ever disagree.
+Frames are JPEG: they decode fastest, which is what scrubbing needs.
+
+Until filming day, the hero runs on abstract placeholder frames from
+`scripts/make-hero-placeholder.sh`, labelled as such on the page. The orange
+detection box reads `src/data/sequences/hero.detections.json`, one normalized
+`[x, y, w, h, confidence]` box (or `null`) per frame, which a YOLO pass over the
+real clip will replace.
