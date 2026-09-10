@@ -1,0 +1,32 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# raw media — 269MB+ of source photos and 4K footage, far past what git should carry.
+# Keep originals in cloud storage / an external drive. Only optimized, web-sized
+# derivatives in public/ or src/assets/ get committed.
+assets/raw/
+
+# vercel
+.vercel/

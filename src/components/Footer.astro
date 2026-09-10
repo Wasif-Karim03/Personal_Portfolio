@@ -1,0 +1,20 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="foot">
+  <p class="label">© {year} Wasif Karim · Cleveland, OH</p>
+  <p class="label"><a href="/colophon">How this site was made</a></p>
+</footer>
+
+<style>
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding: var(--space-m) var(--gutter);
+    border-block-start: var(--rule) solid var(--rule-colour);
+  }
+</style>

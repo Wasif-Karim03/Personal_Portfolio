@@ -1,0 +1,77 @@
+---
+/** Always visible. "Work" is always one click away — a non-negotiable. */
+const links = [
+  { href: '/work', label: 'Work' },
+  { href: '/#about', label: 'About' },
+  { href: '/resume', label: 'Resume' },
+  { href: '/contact', label: 'Contact' },
+];
+
+const path = Astro.url.pathname;
+---
+
+<header class="nav">
+  <a class="nav__mark label" href="/">WK</a>
+  <nav aria-label="Primary">
+    <ul class="nav__list">
+      {
+        links.map(({ href, label }) => (
+          <li>
+            <a
+              href={href}
+              class="nav__link label"
+              aria-current={path === href ? 'page' : undefined}
+            >
+              {label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .nav {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    padding: var(--space-xs) var(--gutter);
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-block-end: var(--rule) solid var(--rule-colour);
+  }
+
+  .nav__mark {
+    color: var(--ink);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .nav__list {
+    display: flex;
+    gap: var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav__link {
+    text-decoration: none;
+  }
+
+  .nav__link[aria-current='page'] {
+    color: var(--signal);
+  }
+
+  @media (max-width: 30rem) {
+    .nav__list {
+      gap: var(--space-s);
+    }
+  }
+</style>

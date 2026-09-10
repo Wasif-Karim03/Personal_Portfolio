@@ -1,0 +1,98 @@
+---
+import type { Scene } from '../data/scenes';
+
+interface Props {
+  scene: Scene;
+}
+
+const { scene } = Astro.props;
+---
+
+<section
+  class="scene"
+  id={`fig-${scene.fig}`}
+  data-scene={scene.slug}
+  aria-labelledby={`fig-${scene.fig}-title`}
+>
+  <header class="scene__head">
+    <p class="label scene__fig">FIG. {scene.fig}</p>
+    <ul class="scene__sources" aria-label="Media sources">
+      {scene.sources.map((source) => <li class="label">{source}</li>)}
+    </ul>
+  </header>
+
+  <h2 class="scene__title" id={`fig-${scene.fig}-title`}>{scene.title}</h2>
+
+  <div class="scene__body">
+    <slot>
+      <p class="scene__summary">{scene.summary}</p>
+    </slot>
+  </div>
+
+  {
+    scene.blockedOn && (
+      <p class="scene__blocked label">
+        Not built yet — waiting on: {scene.blockedOn}
+      </p>
+    )
+  }
+</section>
+
+<style>
+  .scene {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-m);
+    padding-block: var(--space-2xl);
+    padding-inline: var(--gutter);
+    border-block-end: var(--rule) solid var(--rule-colour);
+  }
+
+  .scene__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-m);
+  }
+
+  .scene__fig {
+    color: var(--signal);
+  }
+
+  .scene__sources {
+    display: flex;
+    gap: var(--space-2xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .scene__sources li::before {
+    content: '[';
+  }
+
+  .scene__sources li::after {
+    content: ']';
+  }
+
+  .scene__title {
+    font-size: var(--step-4);
+    max-width: 20ch;
+  }
+
+  .scene__summary {
+    max-width: var(--measure);
+    color: var(--ink-60);
+  }
+
+  .scene__blocked {
+    max-width: var(--measure);
+    padding: var(--space-xs);
+    border: var(--rule) dashed var(--rule-colour);
+    background: var(--signal-12);
+    color: var(--ink-60);
+    text-transform: none;
+  }
+</style>

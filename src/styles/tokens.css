@@ -1,0 +1,67 @@
+/**
+ * Design tokens. The engineering-drawing system from docs/storyboard.md.
+ * Every colour, type and spacing decision on the site resolves to something here.
+ */
+
+:root {
+  /* Ink on paper, plus the one accent. */
+  --paper: #f2efe8;
+  --ink: #141414;
+  --signal: #ff4f00;
+
+  /* Derived tones. Kept few on purpose — this is a two-colour system. */
+  --ink-60: color-mix(in srgb, var(--ink) 60%, var(--paper));
+  --ink-30: color-mix(in srgb, var(--ink) 30%, var(--paper));
+  --ink-12: color-mix(in srgb, var(--ink) 12%, var(--paper));
+  --signal-12: color-mix(in srgb, var(--signal) 12%, var(--paper));
+
+  /*
+   * Type. Generic stacks for now — real faces get picked and self-hosted before
+   * launch. A tight grotesk for headlines, a clean sans for body, mono for
+   * labels, dates and coordinates.
+   */
+  --font-display: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* A fifth-based scale. */
+  --step--1: clamp(0.79rem, 0.77rem + 0.1vw, 0.84rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.13rem);
+  --step-1: clamp(1.27rem, 1.19rem + 0.38vw, 1.5rem);
+  --step-2: clamp(1.6rem, 1.47rem + 0.66vw, 2rem);
+  --step-3: clamp(2.03rem, 1.8rem + 1.13vw, 2.67rem);
+  --step-4: clamp(2.57rem, 2.21rem + 1.83vw, 3.55rem);
+  --step-5: clamp(3.25rem, 2.68rem + 2.87vw, 4.74rem);
+
+  /* Spacing. */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2.5rem;
+  --space-xl: 4rem;
+  --space-2xl: 6rem;
+  --space-3xl: 9rem;
+
+  /* Drawing-sheet furniture. */
+  --rule: 1px;
+  --rule-colour: var(--ink-30);
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --measure: 68ch;
+
+  /* Motion. Scenes read these so timing stays consistent across the story. */
+  --dur-fast: 180ms;
+  --dur-base: 320ms;
+  --dur-slow: 640ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * The site is deliberately single-theme: it is a printed drawing sheet, and it
+ * looks like one in both OS themes. Colours are stated explicitly so a dark-mode
+ * browser cannot reinterpret them.
+ */
+:root {
+  color-scheme: light;
+}

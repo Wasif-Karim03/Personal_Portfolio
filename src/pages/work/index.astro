@@ -1,0 +1,93 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const projects = (await getCollection('projects', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<BaseLayout title="Work" description="Selected projects by Wasif Karim.">
+  <div class="sheet page">
+    <p class="label">FIG. 14 — Index</p>
+    <h1>Work</h1>
+
+    {
+      projects.length === 0 ? (
+        <p class="empty">
+          No case studies published yet. Every project is held as a draft until
+          its copy and media are signed off.
+        </p>
+      ) : (
+        <ul class="cards">
+          {projects.map(({ id, data }) => (
+            <li class="card">
+              <a href={`/work/${id}`}>
+                <p class="label">
+                  {data.year}
+                  {data.inProgress && <span class="robot-vision"> · In progress</span>}
+                </p>
+                <h2>{data.title}</h2>
+                <p>{data.summary}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-3xl) var(--space-2xl);
+  }
+
+  h1 {
+    font-size: var(--step-5);
+    margin-block: var(--space-2xs) var(--space-l);
+  }
+
+  .empty {
+    max-width: var(--measure);
+    padding: var(--space-s);
+    border: var(--rule) dashed var(--rule-colour);
+    color: var(--ink-60);
+  }
+
+  .cards {
+    display: grid;
+    gap: var(--rule);
+    grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: var(--rule-colour);
+    border: var(--rule) solid var(--rule-colour);
+  }
+
+  .card {
+    background: var(--paper);
+  }
+
+  .card a {
+    display: block;
+    padding: var(--space-m);
+    text-decoration: none;
+    height: 100%;
+  }
+
+  .card a:hover {
+    background: var(--signal-12);
+    color: inherit;
+  }
+
+  .card h2 {
+    font-size: var(--step-2);
+    margin-block: var(--space-3xs) var(--space-2xs);
+  }
+
+  .card p:last-child {
+    color: var(--ink-60);
+  }
+</style>

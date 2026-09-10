@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SceneSection from '../components/SceneSection.astro';
+import { scenes } from '../data/scenes';
+
+/**
+ * The scroll story, FIG. 00 through FIG. 16.
+ *
+ * Scenes render from the registry in src/data/scenes.ts. As each one is actually
+ * built it gets its own component slotted into the <SceneSection> body; until
+ * then the section stands in with its summary and what it is waiting on.
+ */
+---
+
+<BaseLayout title="Wasif Karim">
+  {scenes.map((scene) => <SceneSection scene={scene} />)}
+</BaseLayout>
+
+<script>
+  import { initMotion } from '../lib/motion';
+
+  // Boots GSAP + Lenis, or does nothing under prefers-reduced-motion.
+  initMotion();
+</script>

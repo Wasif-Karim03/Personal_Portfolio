@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const email = 'mdwasifkarim2003@gmail.com';
+---
+
+<BaseLayout title="Contact" description="Get in touch with Wasif Karim.">
+  <div class="sheet page">
+    <p class="label">FIG. 16</p>
+    <h1>Contact</h1>
+
+    <p class="note label">
+      Scene not built: the compose-window UI and a send endpoint are still to
+      come. Formspree keeps the site fully static; Resend would need the Vercel
+      adapter and one server route.
+    </p>
+
+    <p class="direct">
+      In the meantime, plainly: <a href={`mailto:${email}`}>{email}</a>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-3xl) var(--space-2xl);
+  }
+
+  h1 {
+    font-size: var(--step-5);
+    margin-block: var(--space-2xs) var(--space-s);
+  }
+
+  .note {
+    max-width: var(--measure);
+    margin-block: var(--space-m);
+    padding: var(--space-xs);
+    border: var(--rule) dashed var(--rule-colour);
+    background: var(--signal-12);
+    text-transform: none;
+  }
+
+  .direct {
+    font-size: var(--step-1);
+  }
+</style>

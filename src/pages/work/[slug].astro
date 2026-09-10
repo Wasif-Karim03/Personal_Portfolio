@@ -1,0 +1,92 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const { title, summary, year, role, stack, inProgress, draft } = project.data;
+---
+
+<BaseLayout title={title} description={summary}>
+  <article class="sheet page">
+    <p class="label">
+      {year} · {role}
+      {inProgress && <span class="robot-vision"> · In progress</span>}
+    </p>
+    <h1>{title}</h1>
+    <p class="lede">{summary}</p>
+
+    {
+      stack.length > 0 && (
+        <ul class="stack" aria-label="Stack">
+          {stack.map((item) => (
+            <li class="label">{item}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    {draft && <p class="draft label">Draft — not listed on the work index yet.</p>}
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <p class="back"><a href="/work">← All work</a></p>
+  </article>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-3xl) var(--space-2xl);
+  }
+
+  h1 {
+    font-size: var(--step-5);
+    margin-block: var(--space-2xs) var(--space-s);
+  }
+
+  .lede {
+    max-width: var(--measure);
+    font-size: var(--step-1);
+    color: var(--ink-60);
+  }
+
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-block: var(--space-m);
+    padding: 0;
+    list-style: none;
+  }
+
+  .stack li {
+    padding: var(--space-3xs) var(--space-2xs);
+    border: var(--rule) solid var(--rule-colour);
+  }
+
+  .draft {
+    max-width: var(--measure);
+    padding: var(--space-xs);
+    border: var(--rule) dashed var(--rule-colour);
+    background: var(--signal-12);
+    text-transform: none;
+  }
+
+  .prose {
+    margin-block-start: var(--space-l);
+  }
+
+  .back {
+    margin-block-start: var(--space-2xl);
+  }
+</style>

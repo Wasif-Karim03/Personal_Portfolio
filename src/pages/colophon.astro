@@ -1,0 +1,167 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { scenes, shippingAiShots, assertFaceRule } from '../data/scenes';
+
+/**
+ * How this site was made.
+ *
+ * The AI-shot list is generated from the scene registry, not maintained by hand,
+ * so a shipping AI shot cannot quietly miss its entry. assertFaceRule() fails the
+ * build if an AI shot depicting a person ships without Wasif's per-shot approval
+ * on record — see CLAUDE.md.
+ */
+assertFaceRule();
+
+const aiShots = shippingAiShots();
+const personShots = aiShots.filter((shot) => shot.depictsPerson);
+
+const sourceCounts = {
+  REAL: scenes.filter((s) => s.sources.includes('REAL')).length,
+  DATA: scenes.filter((s) => s.sources.includes('DATA')).length,
+  CODE: scenes.filter((s) => s.sources.includes('CODE')).length,
+  AI: scenes.filter((s) => s.sources.includes('AI')).length,
+};
+---
+
+<BaseLayout
+  title="How this site was made"
+  description="Colophon — where every image on wasifkarim.com comes from."
+>
+  <div class="sheet page">
+    <p class="label">Colophon</p>
+    <h1>How this site was made</h1>
+
+    <div class="prose">
+      <p class="lede">
+        One rule runs through this site: <strong>AI for atmosphere, real footage
+        for proof, robot data for identity.</strong> Every visual is tagged by where
+        it came from, and anything a machine generated is listed on this page.
+      </p>
+
+      <h2>Where the visuals come from</h2>
+      <dl class="sources">
+        <div>
+          <dt class="label">REAL — {sourceCounts.REAL} scenes</dt>
+          <dd>Filmed or photographed by me. My face, my hardware, my documents.</dd>
+        </div>
+        <div>
+          <dt class="label">DATA — {sourceCounts.DATA} scenes</dt>
+          <dd>
+            Output from my own robots and tools: YOLO detections, LiDAR point
+            clouds, Gaussian splats I captured myself.
+          </dd>
+        </div>
+        <div>
+          <dt class="label">CODE — {sourceCounts.CODE} scenes</dt>
+          <dd>Drawn live in the browser: counters, lines, maps, text.</dd>
+        </div>
+        <div>
+          <dt class="label robot-vision">AI — {sourceCounts.AI} scenes</dt>
+          <dd>
+            Generated, and only for things nobody could film: a flight I took in
+            2022, transitions, mood. Listed individually below.
+          </dd>
+        </div>
+      </dl>
+
+      <h2>AI-generated shots on this site</h2>
+      {
+        aiShots.length === 0 ? (
+          <p>
+            None yet. No AI-generated image currently ships on this site. When one
+            does, it will be listed here before it goes live.
+          </p>
+        ) : (
+          <ul class="shots">
+            {aiShots.map((shot) => (
+              <li>
+                <p class="label">
+                  {shot.id} · FIG. {shot.scene.fig}
+                  {shot.depictsPerson && (
+                    <span class="robot-vision"> · depicts a person</span>
+                  )}
+                </p>
+                <p>{shot.description}</p>
+                <p class="tool label">{shot.tool}</p>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      <h2>My face</h2>
+      <p>
+        The photographs and footage of me on this site are real. Where a scene from
+        my past needed me and no photograph existed, I appear from behind or in
+        silhouette rather than being generated.
+      </p>
+      {
+        personShots.length === 0 ? (
+          <p>
+            No AI-generated image of a person ships on this site. The hero, the
+            resume scene and every present-day shot are real footage, always.
+          </p>
+        ) : (
+          <p>
+            {personShots.length} AI-generated shot{personShots.length === 1 ? '' : 's'}{' '}
+            on this site {personShots.length === 1 ? 'depicts' : 'depict'} a person,
+            listed above and approved by me individually. The hero, the resume scene
+            and every present-day shot are real footage, always.
+          </p>
+        )
+      }
+
+      <h2>Built with</h2>
+      <p>
+        Astro, GSAP and Lenis for the scroll story, three.js for the LiDAR point
+        cloud, and Spark for the Gaussian splats. Typeset in a grotesk, a sans and
+        a monospace on an off-white sheet. Deployed on Vercel.
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-3xl) var(--space-2xl);
+  }
+
+  h1 {
+    font-size: var(--step-5);
+    margin-block: var(--space-2xs) var(--space-l);
+  }
+
+  .lede {
+    font-size: var(--step-1);
+  }
+
+  .sources {
+    margin: 0;
+  }
+
+  .sources > div {
+    padding-block: var(--space-s);
+    border-block-start: var(--rule) solid var(--rule-colour);
+  }
+
+  .sources dd {
+    margin: var(--space-3xs) 0 0;
+    color: var(--ink-60);
+  }
+
+  .shots {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .shots li {
+    padding-block: var(--space-s);
+    border-block-start: var(--rule) solid var(--rule-colour);
+  }
+
+  .tool {
+    color: var(--ink-30);
+    text-transform: none;
+  }
+</style>

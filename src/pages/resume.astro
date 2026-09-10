@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Resume" description="Resume — Wasif Karim.">
+  <div class="sheet page">
+    <p class="label">FIG. 15</p>
+    <h1>Resume</h1>
+    <p class="lede">
+      B.S. Astrophysics and B.A. Computer Science, Ohio Wesleyan University.
+      Currently AI Research Engineer at OpsiClear, Cleveland.
+    </p>
+
+    <p class="note label">
+      Scene not built: waiting on filming day shot C, and the PDF needs OpsiClear
+      added before it goes on the site.
+    </p>
+
+    <p><a class="download" href="/Resume_WasifKarim.pdf" download>Download PDF</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-3xl) var(--space-2xl);
+  }
+
+  h1 {
+    font-size: var(--step-5);
+    margin-block: var(--space-2xs) var(--space-s);
+  }
+
+  .lede {
+    max-width: var(--measure);
+    color: var(--ink-60);
+  }
+
+  .note {
+    max-width: var(--measure);
+    margin-block: var(--space-m);
+    padding: var(--space-xs);
+    border: var(--rule) dashed var(--rule-colour);
+    background: var(--signal-12);
+    text-transform: none;
+  }
+
+  .download {
+    display: inline-block;
+    padding: var(--space-2xs) var(--space-m);
+    background: var(--ink);
+    color: var(--paper);
+    text-decoration: none;
+  }
+
+  .download:hover {
+    background: var(--signal);
+    color: var(--paper);
+  }
+</style>
