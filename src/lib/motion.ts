@@ -57,7 +57,75 @@ export function initMotion(): boolean {
   gsap.ticker.add((time) => lenis?.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
 
+  // Handy when debugging scroll behaviour in the dev server. Never in a build.
+  if (import.meta.env.DEV) {
+    (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
+  }
+
+  initAnchors();
+
   return true;
+}
+
+/**
+ * Routes in-page anchor links through Lenis.
+ *
+ * A native hash jump bypasses Lenis: it lands instantly instead of smoothly,
+ * and if Lenis is mid-animation it overwrites the jump and the page snaps back.
+ * So #links, the skip link included, go through lenis.scrollTo instead.
+ *
+ * Lenis's own `anchors` option is not used: it does not prevent the native
+ * jump, ignores modifier keys, never moves keyboard focus, and fixes its offset
+ * at construction instead of measuring the nav.
+ */
+function initAnchors(): void {
+  /** Clears the fixed nav so the target is not hidden underneath it. */
+  const navOffset = () => {
+    const nav = document.querySelector('header');
+    return nav ? -(nav.getBoundingClientRect().height + 12) : -56;
+  };
+
+  document.addEventListener('click', (event) => {
+    if (event.defaultPrevented || event.button !== 0) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    const link = (event.target as Element | null)?.closest?.('a[href]');
+    if (!(link instanceof HTMLAnchorElement)) return;
+    if (link.target && link.target !== '_self') return;
+
+    // Same document, and actually pointing at a fragment.
+    const url = new URL(link.href, location.href);
+    if (url.origin !== location.origin || url.pathname !== location.pathname) return;
+    if (!url.hash || url.hash === '#') return;
+
+    const target = document.querySelector(url.hash);
+    if (!target) return;
+
+    event.preventDefault();
+    lenis?.scrollTo(target as HTMLElement, { offset: navOffset() });
+    history.pushState(null, '', url.hash);
+
+    // Keyboard focus has to follow the scroll, or the skip link moves the view
+    // without moving the user.
+    const focusTarget = target as HTMLElement;
+    if (!focusTarget.hasAttribute('tabindex')) {
+      focusTarget.setAttribute('tabindex', '-1');
+    }
+    focusTarget.focus({ preventScroll: true });
+  });
+
+  // A URL that arrives with a hash needs the same treatment.
+  if (location.hash) {
+    const target = document.querySelector(location.hash);
+    if (target) {
+      requestAnimationFrame(() => {
+        lenis?.scrollTo(target as HTMLElement, {
+          offset: navOffset(),
+          immediate: true,
+        });
+      });
+    }
+  }
 }
 
 /** The Lenis instance, or null under reduced motion. */
