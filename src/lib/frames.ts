@@ -228,9 +228,13 @@ export class ScrubRenderer {
     const track = this.detections;
     if (!track || track.frames.length === 0) return;
 
-    // The track has its own frame count; line the two up by position in the clip.
-    const position = this.sequence.count > 1 ? index / (this.sequence.count - 1) : 0;
-    const detection = track.frames[Math.round(position * (track.frames.length - 1))];
+    // The track may have its own frame count. Both are sampled evenly from the
+    // same clip, frame k sitting at k/count of its length, so scale by count.
+    const detectionIndex = Math.min(
+      Math.round((index * track.frames.length) / this.sequence.count),
+      track.frames.length - 1,
+    );
+    const detection = track.frames[detectionIndex];
     if (!detection) return;
 
     const [x, y, w, h, confidence] = detection;
