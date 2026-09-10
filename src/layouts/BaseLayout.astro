@@ -1,4 +1,7 @@
 ---
+import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource-variable/chivo-mono/wght.css';
+import archivoLatin from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
@@ -24,6 +27,8 @@ const fullTitle = title === 'Wasif Karim' ? title : `${title} — Wasif Karim`;
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* Headlines and body, Latin subset: preloaded so text doesn't reflow late. */}
+    <link rel="preload" href={archivoLatin} as="font" type="font/woff2" crossorigin />
     <meta name="theme-color" content="#F2EFE8" />
   </head>
   <body>

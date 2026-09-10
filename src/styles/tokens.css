@@ -16,13 +16,18 @@
   --signal-12: color-mix(in srgb, var(--signal) 12%, var(--paper));
 
   /*
-   * Type. Generic stacks for now — real faces get picked and self-hosted before
-   * launch. A tight grotesk for headlines, a clean sans for body, mono for
-   * labels, dates and coordinates.
+   * Type. Self-hosted, loaded in BaseLayout.
+   *
+   * Headlines and body share one variable Archivo file: condensed and heavy for
+   * headlines, in the narrow lettering of a drawing's title block, and normal
+   * width for body. Chivo Mono, from the same foundry, sets labels, dates and
+   * coordinates. Two font files for the whole site.
    */
-  --font-display: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-display: 'Archivo Variable', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Archivo Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Chivo Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* Archivo's width axis; 75% is its Condensed. */
+  --stretch-display: 75%;
 
   /* A fifth-based scale. */
   --step--1: clamp(0.79rem, 0.77rem + 0.1vw, 0.84rem);

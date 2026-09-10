@@ -55,9 +55,10 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
+  font-stretch: var(--stretch-display);
   font-weight: 700;
   line-height: 1.05;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
