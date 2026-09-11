@@ -1,0 +1,529 @@
+---
+/**
+ * The opening screen: Wasif's autonomous car, lit like a product film, then,
+ * as you scroll, an x-ray of what it runs.
+ *
+ * The picture is a Higgsfield still built from his three real photos of the car
+ * (docs/ai-log.md, MB-01a). The callouts sit on the real parts, and every label
+ * is from his resume: what the car sees, maps and moves with.
+ *
+ * With motion, a tall sticky track lets the scroll push the camera in and turn
+ * the car to x-ray; it follows the scroll and never drives it. With reduced
+ * motion, "Look inside" switches to the x-ray in one step. Either way the parts
+ * are also listed as text below.
+ */
+import { Picture } from 'astro:assets';
+import hero from '../../assets/machine/hero.png';
+
+// Anchor points as fractions of the picture; label offsets in px from the anchor.
+const parts = [
+  { x: 0.338, y: 0.395, dx: -210, dy: 70, name: 'LiDAR', role: 'Maps the room · Cartographer SLAM' },
+  { x: 0.405, y: 0.29, dx: -190, dy: -120, name: 'GNSS', role: 'Knows where it is · EKF sensor fusion' },
+  { x: 0.52, y: 0.43, dx: 30, dy: -190, name: 'Jetson Orin Nano', role: 'Sees · YOLOv8 on ROS 2 Humble' },
+  { x: 0.63, y: 0.615, dx: 150, dy: 120, name: 'Drive', role: 'Moves · Nav2 to ArduPilot over MAVLink' },
+];
+---
+
+<section class="machine" data-machine aria-labelledby="machine-title" style={`--ar: ${hero.width} / ${hero.height}`}>
+  <div class="machine__track" data-track>
+    <div class="machine__stage">
+      <div class="machine__frame" data-frame>
+        <Picture
+          src={hero}
+          formats={['avif', 'webp']}
+          widths={[960, 1600, 2400]}
+          sizes="100vw"
+          loading="eager"
+          fetchpriority="high"
+          alt="Wasif's autonomous RC car on a dark studio floor: black chassis, orange-rimmed wheels, a Jetson and a Raspberry Pi with cooling fans, a LiDAR and a GNSS module at the front."
+          class="machine__img"
+          data-img
+          data-w={hero.width}
+          data-h={hero.height}
+        />
+        <div class="machine__tint" data-tint aria-hidden="true"></div>
+        <div class="machine__scan" data-scan aria-hidden="true"></div>
+        {
+          parts.map((part, index) => (
+            <div class="part" data-part data-x={part.x} data-y={part.y} style={`--dx: ${part.dx}px; --dy: ${part.dy}px`} aria-hidden="true">
+              <span class="part__dot" data-dot>{index + 1}</span>
+              <svg class="part__leader" width="1" height="1" data-leader>
+                <line x1="0" y1="0" x2={part.dx} y2={part.dy} />
+              </svg>
+              <span class="part__label" data-label>
+                <b>{part.name}</b>
+                <span>{part.role}</span>
+              </span>
+            </div>
+          ))
+        }
+      </div>
+
+      <header class="machine__top">
+        <a class="machine__mark" href="/machine">Wasif Karim</a>
+        <nav class="machine__nav" aria-label="Main">
+          <a href="/work">Work</a>
+          <a href="#journey">Journey</a>
+          <a href="/contact">Contact</a>
+        </nav>
+      </header>
+
+      <div class="machine__intro" data-intro>
+        <p class="mono machine__kicker"><span class="live" aria-hidden="true"></span>Robotics software engineer · Cleveland, OH</p>
+        <h1 id="machine-title" class="machine__title">I build machines that <em>see, map and move.</em></h1>
+      </div>
+
+      <div class="machine__xray-head" data-xray-head>
+        <p class="machine__xray-title">Inside the machine</p>
+        <p class="mono machine__xray-sub">My autonomous car · 2025 · ROS 2 Humble · Jetson Orin Nano</p>
+      </div>
+
+      <button class="machine__look mono" type="button" data-look aria-controls="machine-parts">
+        <span data-look-label>Look inside</span> <span aria-hidden="true">↓</span>
+      </button>
+    </div>
+  </div>
+
+  <ol class="machine__parts" id="machine-parts">
+    {
+      parts.map((part) => (
+        <li>
+          <b>{part.name}</b>
+          <span>{part.role}</span>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .machine {
+    position: relative;
+  }
+
+  .machine__track {
+    position: relative;
+  }
+
+  /* Only a scrolling track when motion runs; otherwise a single screen. */
+  .machine.is-scroll .machine__track {
+    height: 280svh;
+  }
+
+  .machine__stage {
+    position: relative;
+    height: 100svh;
+    min-height: 34rem;
+    overflow: hidden;
+    background: var(--carbon);
+  }
+
+  .machine.is-scroll .machine__stage {
+    position: sticky;
+    top: 0;
+  }
+
+  .machine__frame {
+    position: absolute;
+    inset: 0;
+    transform-origin: 58% 52%;
+  }
+
+  .machine__frame :global(picture) {
+    display: contents;
+  }
+
+  .machine__frame :global(.machine__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% 50%;
+  }
+
+  /* Portrait screens: the car large, the empty studio at the sides cropped. */
+  @media (max-aspect-ratio: 6/5) {
+    .machine__frame :global(.machine__img) {
+      inset: auto;
+      left: 50%;
+      top: 36%;
+      width: 170%;
+      height: auto;
+      translate: -52% -50%;
+    }
+  }
+
+  /* Legibility for the corner type, without a visible box. */
+  .machine__stage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(to bottom, rgb(10 10 11 / 0.7), transparent 18%),
+      linear-gradient(to top, rgb(10 10 11 / 0.85), transparent 42%),
+      linear-gradient(to right, rgb(10 10 11 / 0.6), transparent 45%);
+  }
+
+  .machine__tint {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background: #7fa6d6;
+    mix-blend-mode: color;
+  }
+
+  .machine__scan {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1px;
+    opacity: 0;
+    background: var(--rim);
+    box-shadow: 0 0 18px 2px rgb(255 90 31 / 0.55);
+  }
+
+  .part {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .part__dot {
+    position: absolute;
+    left: -11px;
+    top: -11px;
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--bone);
+    border-radius: 50%;
+    background: rgb(10 10 11 / 0.6);
+    font: 500 10px/1 var(--mono);
+  }
+
+  .part__leader {
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: visible;
+  }
+
+  .part__leader line {
+    stroke: rgb(236 235 231 / 0.75);
+    stroke-width: 1;
+  }
+
+  .part__label {
+    position: absolute;
+    left: var(--dx);
+    top: var(--dy);
+    display: grid;
+    gap: 2px;
+    width: max-content;
+    max-width: 16rem;
+    padding: 0.5rem 0.7rem;
+    translate: -50% -50%;
+    border: 1px solid var(--line);
+    background: rgb(10 10 11 / 0.72);
+    backdrop-filter: blur(6px);
+  }
+
+  .part__label b {
+    font: 500 0.95rem/1.2 var(--sans);
+  }
+
+  .part__label span {
+    font: 400 0.7rem/1.4 var(--mono);
+    letter-spacing: 0.04em;
+    color: var(--steel);
+  }
+
+  .machine__top {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.4rem var(--gutter);
+  }
+
+  .machine__mark {
+    font: 500 0.95rem/1 var(--sans);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  .machine__nav {
+    display: flex;
+    gap: clamp(1rem, 2.4vw, 2rem);
+  }
+
+  .machine__nav a {
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--steel);
+    transition: color 200ms var(--ease);
+  }
+
+  .machine__nav a:hover {
+    color: var(--bone);
+  }
+
+  .machine__intro {
+    position: absolute;
+    left: var(--gutter);
+    bottom: clamp(2rem, 7svh, 4.5rem);
+    z-index: 3;
+    display: grid;
+    gap: 1rem;
+    max-width: min(46rem, calc(100% - 2 * var(--gutter)));
+  }
+
+  .machine__kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--steel);
+  }
+
+  /* The one live signal on the page: the robot is on. */
+  .live {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--rim);
+    box-shadow: 0 0 10px var(--rim);
+  }
+
+  .machine__title {
+    margin: 0;
+    font: 400 clamp(2.6rem, 1.4rem + 4.6vw, 5.6rem)/0.98 var(--serif);
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  .machine__title em {
+    color: var(--bone);
+    font-style: italic;
+  }
+
+  .machine__xray-head {
+    position: absolute;
+    left: var(--gutter);
+    bottom: clamp(2rem, 7svh, 4.5rem);
+    z-index: 3;
+    display: grid;
+    gap: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .machine__xray-title {
+    margin: 0;
+    font: italic 400 clamp(2rem, 1.2rem + 2.6vw, 3.6rem)/1 var(--serif);
+  }
+
+  .machine__xray-sub {
+    margin: 0;
+    color: var(--steel);
+  }
+
+  .machine__look {
+    position: absolute;
+    right: var(--gutter);
+    bottom: clamp(2rem, 7svh, 4.5rem);
+    z-index: 3;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--line);
+    background: rgb(10 10 11 / 0.5);
+    color: var(--bone);
+    cursor: pointer;
+  }
+
+  .machine__look:hover {
+    border-color: var(--steel);
+  }
+
+  /* The parts as text: always there for screen readers and without script,
+     shown on narrow screens, where labels on the picture would crowd it. */
+  .machine__parts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: part;
+    background: var(--line);
+    border-block: 1px solid var(--line);
+  }
+
+  .machine__parts li {
+    display: grid;
+    gap: 0.25rem;
+    padding: 1.25rem var(--gutter);
+    background: var(--carbon);
+    counter-increment: part;
+  }
+
+  .machine__parts li::before {
+    content: counter(part, decimal-leading-zero);
+    font: 400 0.7rem/1 var(--mono);
+    color: var(--rim);
+  }
+
+  .machine__parts b {
+    font: 500 1rem/1.3 var(--sans);
+  }
+
+  .machine__parts span {
+    font: 400 0.75rem/1.5 var(--mono);
+    color: var(--steel);
+  }
+
+  /* X-ray reached without motion: one step, no animation. */
+  .machine.is-xray .machine__tint {
+    opacity: 0.55;
+  }
+
+  .machine.is-xray .machine__frame :global(.machine__img) {
+    filter: grayscale(1) contrast(1.45) brightness(0.95);
+  }
+
+  .machine.is-xray .part,
+  .machine.is-xray .machine__xray-head {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .machine.is-xray .machine__intro {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  @media (max-width: 47.99rem) {
+    .machine__nav a:not(:first-child) {
+      display: none;
+    }
+
+    .part__label,
+    .part__leader {
+      display: none;
+    }
+
+    .machine__look {
+      display: none;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    /* Wide screens carry the labels on the picture; the list is for readers. */
+    .machine__parts {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+  }
+</style>
+
+<script>
+  import { gsap, ScrollTrigger, initMotion, getLenis } from '../../lib/motion';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-machine]')) {
+    const frame = root.querySelector<HTMLElement>('[data-frame]');
+    const img = root.querySelector<HTMLImageElement>('[data-img]');
+    const track = root.querySelector<HTMLElement>('[data-track]');
+    const look = root.querySelector<HTMLButtonElement>('[data-look]');
+    const lookLabel = root.querySelector<HTMLElement>('[data-look-label]');
+    const parts = [...root.querySelectorAll<HTMLElement>('[data-part]')];
+    if (!frame || !img || !track || !look || !lookLabel) continue;
+
+    // Put each part's dot on its spot in the picture, however the picture is
+    // fitted: cover on wide screens, contain on portrait ones.
+    const portrait = window.matchMedia('(max-aspect-ratio: 6/5)');
+    const place = () => {
+      const iw = Number(img.dataset.w);
+      const ih = Number(img.dataset.h);
+      const cw = frame.clientWidth;
+      const ch = frame.clientHeight;
+      let scale: number;
+      let ox: number;
+      let oy: number;
+      if (portrait.matches) {
+        // Matches the CSS: 170% wide, 52% of the picture on the centre line, centred 36% down.
+        scale = (cw * 1.7) / iw;
+        ox = cw * 0.5 - 0.52 * iw * scale;
+        oy = ch * 0.36 - 0.5 * ih * scale;
+      } else {
+        // object-fit: cover at object-position 60% 50%.
+        scale = Math.max(cw / iw, ch / ih);
+        ox = (cw - iw * scale) * 0.6;
+        oy = (ch - ih * scale) * 0.5;
+      }
+      for (const part of parts) {
+        part.style.left = `${ox + Number(part.dataset.x) * iw * scale}px`;
+        part.style.top = `${oy + Number(part.dataset.y) * ih * scale}px`;
+      }
+    };
+    place();
+    window.addEventListener('resize', place);
+    portrait.addEventListener('change', place);
+
+    if (initMotion()) {
+      root.classList.add('is-scroll');
+      ScrollTrigger.refresh();
+
+      const intro = root.querySelector('[data-intro]');
+      const head = root.querySelector('[data-xray-head]');
+      const tint = root.querySelector('[data-tint]');
+      const scan = root.querySelector('[data-scan]');
+
+      const timeline = gsap.timeline({
+        scrollTrigger: { trigger: track, start: 'top top', end: 'bottom bottom', scrub: 0.6 },
+      });
+      timeline
+        .fromTo(frame, { scale: 1 }, { scale: 1.07, duration: 2, ease: 'none' }, 0)
+        .to(intro, { autoAlpha: 0, y: -30, duration: 0.45 }, 0.35)
+        .to(look, { autoAlpha: 0, duration: 0.3 }, 0.35)
+        .to(img, { filter: 'grayscale(1) contrast(1.45) brightness(0.95)', duration: 0.5 }, 0.55)
+        .to(tint, { opacity: 0.55, duration: 0.5 }, 0.55)
+        // One pass of the scanner, top to bottom, as the x-ray comes on.
+        .fromTo(scan, { top: '0%', opacity: 1 }, { top: '100%', duration: 0.7, ease: 'none' }, 0.6)
+        .to(scan, { opacity: 0, duration: 0.1 }, 1.3)
+        .to(head, { autoAlpha: 1, duration: 0.35 }, 1.0);
+
+      parts.forEach((part, index) => {
+        const at = 1.05 + index * 0.18;
+        timeline
+          .set(part, { opacity: 1 }, at)
+          .fromTo(part.querySelector('[data-dot]'), { scale: 0 }, { scale: 1, duration: 0.12 }, at)
+          .fromTo(part.querySelector('[data-leader] line'), { drawSVG: '0%' }, { drawSVG: '100%', duration: 0.18 }, at + 0.05)
+          .fromTo(part.querySelector('[data-label]'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.14 }, at + 0.16);
+      });
+
+      // "Look inside" takes the scroll to the x-ray instead of the reader scrolling there.
+      look.addEventListener('click', () => {
+        const end = track.offsetTop + track.offsetHeight - window.innerHeight;
+        const lenis = getLenis();
+        if (lenis) lenis.scrollTo(end, { duration: 1.6 });
+        else window.scrollTo({ top: end, behavior: 'smooth' });
+      });
+    } else {
+      // Reduced motion: the x-ray is a switch, not a scroll.
+      look.addEventListener('click', () => {
+        const on = root.classList.toggle('is-xray');
+        lookLabel.textContent = on ? 'Back to the car' : 'Look inside';
+      });
+    }
+  }
+</script>

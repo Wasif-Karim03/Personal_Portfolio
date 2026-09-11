@@ -1,0 +1,108 @@
+---
+/**
+ * The first chapters of the journey, as a teaser for the prototype: each one
+ * wide film frame, a date, one line. Both frames are Higgsfield stills
+ * (docs/ai-log.md): the traveller in chapter 1 is seen from behind, so no face
+ * is generated, and chapter 2 is the real University Hall, built from a crop of
+ * Wasif's own photo of it.
+ */
+import { Picture } from 'astro:assets';
+import departure from '../../assets/machine/departure.png';
+import arrival from '../../assets/machine/arrival.png';
+
+const chapters = [
+  {
+    id: 'journey',
+    image: departure,
+    alt: "Night at Dhaka's airport: a lone traveller, seen from behind, looks out at a jet through tall glass.",
+    meta: 'Chapter 01 · 10 Aug 2022 · DAC → Delaware, OH',
+    lead: 'It started with a flight',
+    turn: 'to Ohio.',
+  },
+  {
+    id: 'ohio-wesleyan',
+    image: arrival,
+    alt: "Ohio Wesleyan's University Hall at dusk: a sandstone building with a pointed clock tower, lit windows and lamp posts on the lawn.",
+    meta: 'Chapter 02 · 2022–2026 · Ohio Wesleyan University',
+    lead: 'Astrophysics and code,',
+    turn: 'four years.',
+  },
+];
+---
+
+{
+  chapters.map((chapter, index) => (
+    <section class="chapter" id={chapter.id} aria-labelledby={`chapter-${index + 1}`}>
+      <Picture src={chapter.image} formats={['avif', 'webp']} widths={[960, 1600, 2400]} sizes="100vw" alt={chapter.alt} class="chapter__img" />
+      <div class="chapter__text">
+        <p class="mono chapter__meta">{chapter.meta}</p>
+        <h2 id={`chapter-${index + 1}`} class="chapter__title">
+          {chapter.lead} <em>{chapter.turn}</em>
+        </h2>
+      </div>
+    </section>
+  ))
+}
+
+<p class="proto mono">Prototype · the opening screen and the first two chapters · not the live site</p>
+
+<style>
+  .chapter {
+    position: relative;
+    height: 100svh;
+    min-height: 32rem;
+    overflow: hidden;
+  }
+
+  .chapter :global(picture) {
+    display: contents;
+  }
+
+  .chapter :global(.chapter__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .chapter::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(10 10 11 / 0.85), transparent 50%);
+  }
+
+  .chapter__text {
+    position: absolute;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: clamp(2rem, 8svh, 5rem);
+    z-index: 1;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .chapter__meta {
+    margin: 0;
+    color: var(--steel);
+  }
+
+  .chapter__title {
+    margin: 0;
+    max-width: 18ch;
+    font: 400 clamp(2.4rem, 1.4rem + 3.6vw, 4.8rem)/1 var(--serif);
+    letter-spacing: -0.01em;
+  }
+
+  .chapter__title em {
+    font-style: italic;
+  }
+
+  .proto {
+    margin: 0;
+    padding: 2.5rem var(--gutter);
+    color: var(--steel);
+    border-block-start: 1px solid var(--line);
+  }
+</style>

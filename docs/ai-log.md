@@ -64,3 +64,9 @@ Shared look in every prompt: cinematic film still, ARRI Alexa 35 look, deep blac
 | MB-08 Now, Cleveland | Nano Banana Pro, 2k, 16:9, car refs | The car on a lakefront pier at blue hour, skyline soft behind | 2 | `assets/raw/ai/machine/MB-08.png` |
 
 Mood board: 16 credits.
+| MB-01a Hero, one antenna | Nano Banana Pro, 2k, 16:9, car refs | MB-01 again, "exactly ONE tall black antenna", three-quarter side view, room around the car. **Picked as the hero.** | 2 | `assets/raw/ai/machine/MB-01a.png` (ships as `src/assets/machine/hero.png`) |
+| MB-01b Hero, side profile | Nano Banana Pro, 2k, 16:9, car refs | Side profile variant; still drew two rear antennas | 2 | `assets/raw/ai/machine/MB-01b.png` |
+| MB-06a Arrival, University Hall at dusk | Nano Banana Pro, 2k, 16:9, building ref | The real University Hall, from a crop of Wasif's graduation-day photo showing only the building (no people), at dusk | 2 | `assets/raw/ai/machine/MB-06a.png` |
+| MB-06b Arrival, University Hall at golden hour | Nano Banana Pro, 2k, 16:9, building ref | Same reference, golden hour | 2 | `assets/raw/ai/machine/MB-06b.png` |
+
+Revisions: 8 credits. MB-05 (Departure) also ships in the prototype as `src/assets/machine/departure.png`.

@@ -1,0 +1,25 @@
+---
+/**
+ * The Machine: the redesign's opening, as a prototype for Wasif to judge
+ * before the rest is built. Not linked from the live site, and noindex.
+ */
+import MachineLayout from '../layouts/MachineLayout.astro';
+import HeroXray from '../components/machine/HeroXray.astro';
+import JourneyTeaser from '../components/machine/JourneyTeaser.astro';
+---
+
+<MachineLayout
+  title="Wasif Karim — Robotics software engineer"
+  description="Wasif Karim builds machines that see, map and move: autonomous vehicles, perception and on-device AI."
+>
+  <main>
+    <HeroXray />
+    <JourneyTeaser />
+  </main>
+</MachineLayout>
+
+<script>
+  import { initMotion } from '../lib/motion';
+
+  initMotion();
+</script>

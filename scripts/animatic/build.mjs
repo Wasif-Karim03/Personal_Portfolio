@@ -260,7 +260,7 @@ browser.close();
 let chain = '';
 let offset = 0;
 let last = '[0:v]';
-files.forEach((f, i) => {
+files.forEach((_, i) => {
   if (i === 0) return;
   offset += files[i - 1].dur - FADE;
   const label = i === files.length - 1 ? '[out]' : `[x${i}]`;

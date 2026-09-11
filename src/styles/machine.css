@@ -1,0 +1,71 @@
+/*
+ * The Machine: design tokens for the redesign.
+ *
+ * A dark studio world taken from the hero shot: carbon and graphite, bone-white
+ * type, and one accent, the orange of the car's own wheel rims, spent only on
+ * what the robot senses (the scan line, a live dot).
+ */
+:root {
+  --carbon: #0a0a0b;
+  --graphite: #141518;
+  --line: #2a2c31;
+  --bone: #ecebe7;
+  --steel: #9a9da4;
+  --rim: #ff5a1f;
+
+  --sans: 'Geist Variable', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'Geist Mono Variable', ui-monospace, Menlo, monospace;
+  --serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+
+  --gutter: clamp(1rem, 3vw, 2.5rem);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--carbon);
+}
+
+body {
+  margin: 0;
+  background: var(--carbon);
+  color: var(--bone);
+  font: 400 16px/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 1.5px solid var(--bone);
+  outline-offset: 4px;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+[hidden] {
+  display: none !important;
+}
