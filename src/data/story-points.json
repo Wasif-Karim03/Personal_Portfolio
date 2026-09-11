@@ -19,7 +19,14 @@
       0.5395
     ]
   },
-  "picture": {
-    "aspect": 1.7778
-  }
+  "pictures": [
+    {
+      "key": "hall",
+      "aspect": 1.7778
+    },
+    {
+      "key": "machine",
+      "aspect": 1.7778
+    }
+  ]
 }

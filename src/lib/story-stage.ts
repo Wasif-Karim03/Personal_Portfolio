@@ -13,7 +13,7 @@ const data = pointsJson as unknown as StoryPoints;
 
 let scene: StoryScene | null = null;
 let opening: Promise<StoryScene | null> | null = null;
-const beats: Phases = { enter: 0, scatter: 0, assemble: 0, flight: 0, morph: 0, fade: 0 };
+const beats: Phases = { enter: 0, scatter: 0, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0 };
 
 export function stageCanvas(): HTMLCanvasElement | null {
   return document.querySelector<HTMLCanvasElement>('[data-stage-dots]');
