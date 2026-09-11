@@ -13,12 +13,12 @@
 
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SplitText } from 'gsap/SplitText';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
-import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import Lenis from 'lenis';
 
-export { gsap, ScrollTrigger, SplitText, DrawSVGPlugin, MotionPathPlugin };
+// Only the plugins a scene uses: every one is parsed on every visit. SplitText
+// and MotionPath are free to add back when a scene needs them.
+export { gsap, ScrollTrigger, DrawSVGPlugin };
 
 /** True when the visitor asked for less motion. */
 export function prefersReducedMotion(): boolean {
@@ -42,7 +42,7 @@ export function initMotion(): boolean {
 
   if (prefersReducedMotion()) return false;
 
-  gsap.registerPlugin(ScrollTrigger, SplitText, DrawSVGPlugin, MotionPathPlugin);
+  gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
   lenis = new Lenis({
     // Smoothing only. No wheel multiplier games, no snapping.
