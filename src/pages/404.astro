@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Not found" description="There's nothing at this address." noindex>
+  <div class="sheet page">
+    <p class="label">FIG. 404</p>
+    <h1>Not on this sheet</h1>
+    <p class="lede">
+      There's nothing at this address. It may have moved, or it was never drawn.
+    </p>
+    <ul class="links">
+      <li><a href="/">Start the story from the top</a></li>
+      <li><a href="/work">Go straight to the work</a></li>
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-3xl) var(--space-2xl);
+  }
+
+  h1 {
+    font-size: var(--step-5);
+    margin-block: var(--space-2xs) var(--space-s);
+  }
+
+  .lede {
+    max-width: var(--measure);
+    font-size: var(--step-1);
+    color: var(--ink-60);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m);
+    margin-block-start: var(--space-l);
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+</style>

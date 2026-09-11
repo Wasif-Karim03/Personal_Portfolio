@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wasifkarim.com/sitemap-index.xml

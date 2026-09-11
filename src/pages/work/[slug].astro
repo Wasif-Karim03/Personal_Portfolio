@@ -3,7 +3,9 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
-  const projects = await getCollection('projects');
+  // Drafts are built in development only, so an unfinished case study is
+  // never published or indexed.
+  const projects = await getCollection('projects', ({ data }) => import.meta.env.DEV || !data.draft);
   return projects.map((project) => ({
     params: { slug: project.id },
     props: { project },
@@ -34,7 +36,7 @@ const { title, summary, year, role, stack, inProgress, draft } = project.data;
       )
     }
 
-    {draft && <p class="draft label">Draft — not listed on the work index yet.</p>}
+    {draft && <p class="draft label">Draft, shown in development only. It isn't published.</p>}
 
     <div class="prose">
       <Content />

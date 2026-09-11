@@ -9,14 +9,19 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title: string;
   description?: string;
+  /** Keeps the page out of search results, e.g. the 404. */
+  noindex?: boolean;
 }
 
 const {
   title,
   description = 'Wasif Karim — AI Research Engineer and roboticist in Cleveland, Ohio.',
+  noindex = false,
 } = Astro.props;
 
 const fullTitle = title === 'Wasif Karim' ? title : `${title} — Wasif Karim`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const socialImage = new URL('/og.png', Astro.site);
 ---
 
 <!doctype html>
@@ -26,7 +31,21 @@ const fullTitle = title === 'Wasif Karim' ? title : `${title} — Wasif Karim`;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Wasif Karim" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Wasif Karim, set on a drafting sheet inside an orange detection box." />
+    <meta name="twitter:card" content="summary_large_image" />
     {/* Headlines and body, Latin subset: preloaded so text doesn't reflow late. */}
     <link rel="preload" href={archivoLatin} as="font" type="font/woff2" crossorigin />
     <meta name="theme-color" content="#F2EFE8" />

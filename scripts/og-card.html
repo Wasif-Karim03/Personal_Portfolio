@@ -1,0 +1,119 @@
+<!doctype html>
+<!--
+  Source for public/og.png, the image shown when a link to the site is shared.
+  Rendered at 1200×630 by scripts/make-icons.sh. Fonts come straight from
+  node_modules, so this needs no server.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../node_modules/@fontsource-variable/archivo/wdth.css" />
+    <link rel="stylesheet" href="../node_modules/@fontsource-variable/chivo-mono/wght.css" />
+    <style>
+      :root {
+        --paper: #f2efe8;
+        --ink: #141414;
+        --signal: #ff4f00;
+        --mono: 'Chivo Mono Variable', ui-monospace, Menlo, monospace;
+      }
+
+      html,
+      body {
+        margin: 0;
+      }
+
+      body {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background-color: var(--paper);
+        /* The drawing sheet's grid. */
+        background-image:
+          linear-gradient(rgb(20 20 20 / 0.07) 1px, transparent 1px),
+          linear-gradient(90deg, rgb(20 20 20 / 0.07) 1px, transparent 1px);
+        background-size: 60px 60px;
+        color: var(--ink);
+        font-family: 'Archivo Variable', 'Arial Narrow', sans-serif;
+      }
+
+      .fig,
+      .role,
+      .url {
+        position: absolute;
+        font-family: var(--mono);
+        font-size: 22px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .fig {
+        top: 60px;
+        right: 72px;
+        color: var(--signal);
+      }
+
+      .name {
+        position: absolute;
+        top: 150px;
+        left: 72px;
+        margin: 0;
+        font-size: 176px;
+        font-weight: 700;
+        font-stretch: 75%;
+        line-height: 0.88;
+        letter-spacing: -0.01em;
+      }
+
+      .box {
+        position: absolute;
+        border: 4px solid var(--signal);
+      }
+
+      .tag {
+        position: absolute;
+        bottom: 100%;
+        left: -4px;
+        padding: 4px 10px;
+        background: var(--signal);
+        color: var(--paper);
+        font-family: var(--mono);
+        font-size: 22px;
+        white-space: nowrap;
+      }
+
+      .role {
+        bottom: 64px;
+        left: 72px;
+        color: rgb(20 20 20 / 0.6);
+      }
+
+      .url {
+        right: 72px;
+        bottom: 64px;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="fig">FIG. 00</p>
+    <div class="box" id="box"><span class="tag">person 0.96</span></div>
+    <h1 class="name" id="name">Wasif<br />Karim</h1>
+    <p class="role">AI research engineer &amp; roboticist · Cleveland, OH</p>
+    <p class="url">wasifkarim.com</p>
+
+    <script>
+      // Fit the detection box around the name once the real font has set it.
+      document.fonts.ready.then(() => {
+        const name = document.getElementById('name').getBoundingClientRect();
+        const box = document.getElementById('box');
+        const pad = 20;
+        Object.assign(box.style, {
+          left: `${name.left - pad}px`,
+          top: `${name.top - pad}px`,
+          width: `${name.width + pad * 2}px`,
+          height: `${name.height + pad * 2}px`,
+        });
+      });
+    </script>
+  </body>
+</html>
