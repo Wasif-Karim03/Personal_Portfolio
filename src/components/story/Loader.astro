@@ -32,15 +32,16 @@ const years = [2022, 2023, 2024, 2025, 2026];
   :global(html.js-motion) .loader { display: grid; }
 
   .loader__years {
-    height: 1em;
+    height: 1.1em;
     overflow: hidden;
-    font: 800 clamp(4rem, 12vw, 9rem)/1 var(--display);
+    clip-path: inset(0);
+    font: 800 clamp(4rem, 12vw, 9rem)/1.1 var(--display);
     letter-spacing: 0.01em;
     font-variant-numeric: tabular-nums;
   }
 
   .loader__reel { display: grid; }
-  .loader__reel span { display: block; height: 1em; }
+  .loader__reel span { display: block; height: 1.1em; }
 
   .loader__caption { margin: 0; color: var(--silver); }
 </style>

@@ -5,8 +5,11 @@
  * name, then Wasif cut from the photo with its matte, so the name passes behind
  * his head. Nothing here is generated; the cut-out comes from the photo itself.
  *
- * With motion, the name rises in once the page is ready, and on scroll it
- * drifts at a different depth from him before the scene darkens into the story.
+ * The city behind him is graded darker and softly out of focus, as a portrait
+ * lens would render it, so the name reads cleanly and he stands forward.
+ *
+ * With motion, the name rises in letter by letter once the page is ready, and on
+ * scroll it drifts at a different depth from him before the scene darkens.
  */
 import { Picture } from 'astro:assets';
 import now from '../../assets/story/now.jpg';
@@ -18,15 +21,16 @@ import cutout from '../../assets/story/now-cutout.png';
     <div class="hero__scene" data-hero-scene>
       <Picture src={now} formats={['avif', 'webp']} widths={[900, 1400, 1800]} sizes="100vw" loading="eager" fetchpriority="high" alt="" class="hero__layer" />
       <h1 class="hero__name" id="hero-name" data-hero-name>
-        <span class="hero__word"><span data-rise>Wasif</span></span>
-        <span class="hero__word"><span data-rise>Karim</span></span>
+        <span class="hero__word" data-word>Wasif</span>
+        <span class="hero__word" data-word>Karim</span>
       </h1>
       <Picture src={cutout} formats={['avif', 'webp']} widths={[900, 1400, 1800]} sizes="100vw" loading="eager" alt="Wasif Karim smiling in a denim jacket on a rooftop in New York, black and white." class="hero__layer hero__cut" />
     </div>
 
     <header class="hero__top" data-fade>
-      <p class="mono">Portfolio · 2026</p>
+      <p class="mono hero__status"><span class="hero__dot" aria-hidden="true"></span>Open to robotics roles · 2026</p>
       <nav class="hero__nav" aria-label="Main">
+        <span class="mono hero__clock" data-clock title="Local time in Cleveland">Cleveland</span>
         <a href="/work">Work</a>
         <a href="/contact">Contact</a>
       </nav>
@@ -34,12 +38,23 @@ import cutout from '../../assets/story/now-cutout.png';
 
     <div class="hero__foot" data-fade>
       <p class="mono hero__role">Robotics software engineer<br />Cleveland, Ohio</p>
-      <a class="mono hero__cue" href="#prelude">The story, 2022 → now <span aria-hidden="true">↓</span></a>
+      <a class="mono hero__cue" href="#prelude"><span class="hero__cue-line" aria-hidden="true"></span>The story, 2022 → now</a>
     </div>
 
     <div class="hero__dim" data-hero-dim aria-hidden="true"></div>
   </div>
 </section>
+
+<script>
+  // Wasif's local time, a small true detail in the corner.
+  const clock = document.querySelector<HTMLElement>('[data-clock]');
+  if (clock) {
+    const format = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' });
+    const tick = () => { clock.textContent = `Cleveland ${format.format(new Date())}`; };
+    tick();
+    setInterval(tick, 30_000);
+  }
+</script>
 
 <style>
   .hero { position: relative; }
@@ -85,10 +100,10 @@ import cutout from '../../assets/story/now-cutout.png';
     text-transform: uppercase;
     white-space: nowrap;
     color: var(--paper);
+    text-shadow: 0 0.02em 0.5em rgb(0 0 0 / 0.28);
   }
 
-  .hero__word { display: block; overflow: hidden; padding-block: 0.02em; }
-  .hero__word > span { display: block; }
+  .hero__word { display: block; }
 
   /* Portrait: the whole of him, the name stacked in the sky above. */
   @media (max-aspect-ratio: 4/5) {
@@ -116,13 +131,23 @@ import cutout from '../../assets/story/now-cutout.png';
 
   .hero__top { top: 1.5rem; align-items: center; }
   .hero__top p { margin: 0; color: var(--silver); }
-  .hero__nav { display: flex; gap: 1.6rem; font-size: 0.92rem; }
+  .hero__status { display: flex; align-items: center; gap: 0.6rem; color: var(--paper) !important; }
+  .hero__dot { width: 6px; height: 6px; border-radius: 50%; background: #7ee2a8; box-shadow: 0 0 0 3px rgb(126 226 168 / 0.18); }
+  .hero__nav { display: flex; align-items: center; gap: 1.6rem; font-size: 0.92rem; }
+  .hero__clock { color: var(--silver); font-variant-numeric: tabular-nums; }
+  @media (max-width: 47.99rem) { .hero__clock { display: none; } }
   .hero__nav a { color: var(--silver); transition: color 250ms var(--ease-out); }
   .hero__nav a:hover { color: var(--paper); }
 
   .hero__foot { bottom: 1.6rem; }
   .hero__role { margin: 0; color: var(--paper); line-height: 1.7; }
-  .hero__cue { color: var(--silver); transition: color 250ms var(--ease-out); }
+  .hero__cue { display: flex; align-items: center; gap: 0.8rem; color: var(--silver); transition: color 250ms var(--ease-out); }
+
+  /* A short line that keeps travelling down: the one thing moving at rest. */
+  .hero__cue-line { position: relative; width: 1px; height: 2.2rem; overflow: hidden; background: rgb(243 242 238 / 0.2); }
+  .hero__cue-line::after { content: ''; position: absolute; inset: 0; background: var(--paper); translate: 0 -100%; animation: cue 2.2s var(--ease-out) infinite; }
+  @keyframes cue { 0% { translate: 0 -100%; } 55%, 100% { translate: 0 100%; } }
+  @media (prefers-reduced-motion: reduce) { .hero__cue-line::after { animation: none; translate: 0 0; } }
   .hero__cue:hover { color: var(--paper); }
 
   /* Keeps the corner type legible over the photo. */

@@ -67,8 +67,12 @@ import departure from '../assets/machine/departure.png';
     });
     const minimum = new Promise((r) => setTimeout(r, 1600));
 
-    gsap.to(reel, { yPercent: -80, duration: 1.5, ease: 'power3.inOut' });
-    gsap.set('[data-rise]', { yPercent: 105 });
+    // Exactly four rows of 1.1em, so the reel stops square on 2026.
+    gsap.to(reel, { y: '-4.4em', duration: 1.5, ease: 'power3.inOut' });
+    const letters = [...document.querySelectorAll('[data-word]')].flatMap(
+      (word) => SplitText.create(word, { type: 'chars', mask: 'chars' }).chars,
+    );
+    gsap.set(letters, { yPercent: 110 });
     gsap.set('[data-fade]', { autoAlpha: 0 });
     gsap.set('[data-hero-scene]', { scale: 1.08 });
 
@@ -76,7 +80,7 @@ import departure from '../assets/machine/departure.png';
       gsap.timeline()
         .to(loader, { yPercent: -100, duration: 1.1, ease: 'power4.inOut' })
         .to('[data-hero-scene]', { scale: 1, duration: 2.2, ease: 'power3.out' }, 0.3)
-        .to('[data-rise]', { yPercent: 0, duration: 1.3, ease: 'power4.out', stagger: 0.08 }, 0.55)
+        .to(letters, { yPercent: 0, duration: 1.2, ease: 'power4.out', stagger: 0.035 }, 0.5)
         .to('[data-fade]', { autoAlpha: 1, duration: 0.9, ease: 'power2.out' }, 1.0)
         .add(() => loader?.remove());
     });
