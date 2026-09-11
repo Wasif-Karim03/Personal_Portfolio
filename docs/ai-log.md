@@ -45,3 +45,22 @@ every still prompt:
 | AI-3_v3 | Nano Banana Pro, 2k, 16:9 | Same as AI-3_v1 | 2 | `assets/raw/ai/AI-3_v3.png` |
 
 Phase 1 (stills): 18 credits. Contact sheet: `docs/preview/stills-sheet.png`.
+
+## The Machine mood board, 2026-09-12
+
+Art-direction test for the chosen concept (the autonomous car as hero, the journey around it). Internal only; nothing ships until approved. Car frames use Wasif's three real photos of the car (uploaded to Higgsfield) as image references.
+
+Shared look in every prompt: cinematic film still, ARRI Alexa 35 look, deep blacks, restrained muted colour with the car's orange rims as the only warm accent, fine film grain, photoreal, no text, no logos.
+
+| Shot | Model | Prompt (short) | Credits | Output |
+|---|---|---|---|---|
+| MB-01 Hero | Nano Banana Pro, 2k, 16:9, car refs | The car alone on dark polished concrete, black studio, soft top light, orange rim light on the tyres | 2 | `assets/raw/ai/machine/MB-01.png` |
+| MB-02 The brain | Nano Banana Pro, 2k, 16:9, car refs | Top-down macro of the Jetson, Pi and wiring, hard raking light | 2 | `assets/raw/ai/machine/MB-02.png` |
+| MB-03 The eyes | Nano Banana Pro, 2k, 16:9, car refs | LiDAR and GNSS close-up, faint red scan line in haze | 2 | `assets/raw/ai/machine/MB-03.png` |
+| MB-04 Autonomy | Nano Banana Pro, 2k, 16:9, car refs | The car driving itself through an empty night parking garage, low tracking shot | 2 | `assets/raw/ai/machine/MB-04.png` |
+| MB-05 Departure, 2022 | Nano Banana Pro, 2k, 16:9 | Dhaka airport at night, a lone traveller from behind facing a lit jet, no face | 2 | `assets/raw/ai/machine/MB-05.png` |
+| MB-06 Arrival | Nano Banana Pro, 2k, 16:9 | Central Ohio college town at dusk, sandstone and brick halls, no people | 2 | `assets/raw/ai/machine/MB-06.png` |
+| MB-07 Build night | Nano Banana Pro, 2k, 16:9, car ref | 2 a.m. lab bench, the car half-assembled, soldering smoke, hands only | 2 | `assets/raw/ai/machine/MB-07.png` |
+| MB-08 Now, Cleveland | Nano Banana Pro, 2k, 16:9, car refs | The car on a lakefront pier at blue hour, skyline soft behind | 2 | `assets/raw/ai/machine/MB-08.png` |
+
+Mood board: 16 credits.
