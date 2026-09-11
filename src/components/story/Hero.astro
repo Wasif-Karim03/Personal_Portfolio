@@ -1,19 +1,16 @@
 ---
 /**
- * Wasif, now: a real photo of him (New York, May 2026) in black and white, with
- * his name set huge behind him. Three layers share one frame: the photo, the
- * name, then Wasif cut from the photo with its matte, so the name passes behind
- * his head. Nothing here is generated; the cut-out comes from the photo itself.
+ * Wasif, now: the opening frame, and the first shape the story's dots hold.
  *
- * The city behind him is graded darker and softly out of focus, as a portrait
- * lens would render it, so the name reads cleanly and he stands forward.
+ * With motion, the picture and the dots are drawn on the fixed stage
+ * (src/components/story/Stage.astro), because the dots carry on past this
+ * section: his name breaks apart here and gathers into the globe below, on the
+ * same canvas. This section is the scroll that drives that, plus the type in
+ * the corners. The heading stays in the page for screen readers, and is what
+ * shows when the dots cannot be drawn.
  *
- * The name is drawn as gaussian dots on its own canvas between the two picture
- * layers (src/lib/name-dots.ts), so it still passes behind his head. The dots
- * settle into the letters when the page opens, and as the opening scrolls away
- * they lift toward the globe that gathers next, carrying the story's dots from
- * one scene into the other. The heading itself stays in the page for screen
- * readers, and is shown instead of the dots where WebGL is missing.
+ * Without motion there is no stage, so the still lives here: the graded
+ * photograph, him cut from it with its own matte, and his name set in type.
  */
 import { Picture } from 'astro:assets';
 import now from '../../assets/story/now.jpg';
@@ -21,16 +18,16 @@ import cutout from '../../assets/story/now-cutout.png';
 ---
 
 <section class="hero" data-hero aria-labelledby="hero-name">
-  <div class="hero__pin" data-hero-pin>
-    <div class="hero__scene" data-hero-scene>
-      <Picture src={now} formats={['avif', 'webp']} widths={[900, 1400, 1800]} sizes="100vw" loading="eager" fetchpriority="high" alt="" class="hero__layer" />
-      <canvas class="hero__dots" data-hero-dots aria-hidden="true"></canvas>
-      <h1 class="hero__name" id="hero-name" data-hero-name>
-        <span class="hero__word">Wasif</span>
-        <span class="hero__word">Karim</span>
-      </h1>
-      <Picture src={cutout} formats={['avif', 'webp']} widths={[900, 1400, 1800]} sizes="100vw" loading="eager" alt="Wasif Karim smiling in a denim jacket on a rooftop in New York, black and white." class="hero__layer hero__cut" />
+  <div class="hero__pin">
+    <div class="hero__still">
+      <Picture src={now} formats={['avif', 'webp']} widths={[900, 1400, 1800]} sizes="100vw" alt="" class="hero__layer" />
+      <Picture src={cutout} formats={['avif', 'webp']} widths={[900, 1400, 1800]} sizes="100vw" alt="Wasif Karim smiling in a denim jacket on a rooftop in New York, black and white." class="hero__layer hero__cut" />
     </div>
+
+    <h1 class="hero__name" id="hero-name">
+      <span class="hero__word">Wasif</span>
+      <span class="hero__word">Karim</span>
+    </h1>
 
     <header class="hero__top" data-fade>
       <p class="mono hero__status"><span class="hero__dot" aria-hidden="true"></span>Open to robotics roles · 2026</p>
@@ -43,68 +40,31 @@ import cutout from '../../assets/story/now-cutout.png';
 
     <div class="hero__foot" data-fade>
       <p class="mono hero__role">Robotics software engineer<br />Cleveland, Ohio</p>
-      <a class="mono hero__cue" href="#prelude"><span class="hero__cue-line" aria-hidden="true"></span>The story, 2022 → now</a>
+      <a class="mono hero__cue" href="#flight"><span class="hero__cue-line" aria-hidden="true"></span>The story, 2022 → now</a>
     </div>
-
-    <div class="hero__dim" data-hero-dim aria-hidden="true"></div>
   </div>
 </section>
 
 <script>
   import { ScrollTrigger, initMotion } from '../../lib/motion';
-  import type { NameDots } from '../../lib/name-dots';
+  import { openStage, setStage } from '../../lib/story-stage';
 
-  // The name as dots, and their flight out toward the globe.
   const hero = document.querySelector<HTMLElement>('[data-hero]');
-  const dotsCanvas = hero?.querySelector<HTMLCanvasElement>('[data-hero-dots]');
-  const webgl = () => {
-    try { return Boolean(document.createElement('canvas').getContext('webgl2')); } catch { return false; }
-  };
 
-  if (hero && dotsCanvas && webgl() && initMotion()) {
-    let dots: NameDots | null = null;
-    let leaving = 0;
-    let settled = false;
-
-    const start = async () => {
-      try {
-        const face = "'Big Shoulders Display Variable', 'Arial Narrow', sans-serif";
-        // The sampled letterforms are only his if the display face has arrived.
-        await document.fonts.load(`850 100px ${face}`).catch(() => {});
-        const [{ createNameDots }] = await Promise.all([import('../../lib/name-dots'), document.fonts.ready]);
-        const portrait = window.matchMedia('(max-aspect-ratio: 4/5)').matches;
-        const light = window.matchMedia('(max-width: 48rem)').matches;
-        dots = createNameDots(
-          dotsCanvas,
-          { lines: portrait ? ['Wasif', 'Karim'] : ['Wasif Karim'], weight: 850, family: face },
-          light ? 40000 : 110000,
-        );
-        if (!dots) return;
-        hero.classList.add('is-dots');
-        dots.setScroll(leaving);
-        if (settled) dots.intro();
-        window.addEventListener('resize', () => dots?.resize());
-      } catch (error) {
-        console.warn('name dots unavailable', error);
-      }
-    };
-
-    document.addEventListener('story:reveal', () => {
-      settled = true;
-      dots?.intro();
-    }, { once: true });
-
+  if (hero && initMotion()) {
+    // The name breaks up over the first part of the scroll, so the dots are
+    // already travelling when the globe below starts to gather them.
     ScrollTrigger.create({
       trigger: hero,
       start: 'top top',
       end: 'bottom bottom',
-      onUpdate: (self) => {
-        leaving = self.progress;
-        dots?.setScroll(leaving);
-      },
+      onUpdate: (self) => setStage({ scatter: Math.min(self.progress / 0.72, 1) }),
     });
 
-    start();
+    openStage().then((scene) => {
+      // Only stand the heading down once the dots are actually drawing it.
+      if (scene?.named) document.documentElement.classList.add('js-dots');
+    });
   }
 </script>
 
@@ -132,13 +92,14 @@ import cutout from '../../assets/story/now-cutout.png';
     background: var(--night);
   }
 
-  :global(html.js-motion) .hero__pin { position: sticky; top: 0; }
+  /* With motion the stage behind the page holds the picture and the dots. */
+  :global(html.js-motion) .hero__pin { position: sticky; top: 0; background: transparent; }
+  :global(html.js-motion) .hero__still { display: none; }
 
-  .hero__scene { position: absolute; inset: 0; }
+  .hero__still { position: absolute; inset: 0; }
+  .hero__still :global(picture) { display: contents; }
 
-  .hero__scene :global(picture) { display: contents; }
-
-  .hero__scene :global(.hero__layer) {
+  .hero__still :global(.hero__layer) {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -147,25 +108,7 @@ import cutout from '../../assets/story/now-cutout.png';
     object-position: 50% 72%;
   }
 
-  .hero__scene :global(.hero__cut) { z-index: 2; }
-
-  .hero__dots {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-  }
-
-  /* Once the dots draw the name, the heading stays only for screen readers. */
-  .hero.is-dots .hero__name {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
+  .hero__still :global(.hero__cut) { z-index: 2; }
 
   .hero__name {
     position: absolute;
@@ -186,9 +129,19 @@ import cutout from '../../assets/story/now-cutout.png';
 
   .hero__word { display: block; }
 
+  /* Once the dots draw the name, the heading stays only for screen readers. */
+  :global(html.js-dots) .hero__name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
   /* Portrait: the whole of him, the name stacked in the sky above. */
   @media (max-aspect-ratio: 4/5) {
-    .hero__scene :global(.hero__layer) { object-position: 50% 100%; }
+    .hero__still :global(.hero__layer) { object-position: 50% 100%; }
     .hero__name {
       flex-direction: column;
       gap: 0;
@@ -231,7 +184,7 @@ import cutout from '../../assets/story/now-cutout.png';
   @media (prefers-reduced-motion: reduce) { .hero__cue-line::after { animation: none; translate: 0 0; } }
   .hero__cue:hover { color: var(--paper); }
 
-  /* Keeps the corner type legible over the photo. */
+  /* Keeps the corner type legible over the picture. */
   .hero__pin::after {
     content: '';
     position: absolute;
@@ -241,14 +194,5 @@ import cutout from '../../assets/story/now-cutout.png';
     background:
       linear-gradient(to bottom, rgb(11 12 14 / 0.55), transparent 16%),
       linear-gradient(to top, rgb(11 12 14 / 0.7), transparent 26%);
-  }
-
-  .hero__dim {
-    position: absolute;
-    inset: 0;
-    z-index: 4;
-    background: var(--night);
-    opacity: 0;
-    pointer-events: none;
   }
 </style>

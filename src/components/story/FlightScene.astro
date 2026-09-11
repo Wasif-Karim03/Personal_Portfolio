@@ -7,7 +7,9 @@
  * under it; on landing the dots stream into Ohio Wesleyan's University Hall as
  * dot-art, the real photo develops out of them, and chapter 01 begins.
  *
- * The dots are drawn by src/lib/story-scene.ts from scripts/make-story-points.mjs.
+ * The dots are the ones his name was written in: they arrive here already
+ * scattered and gather into the globe, on the fixed stage this scene shares
+ * with the hero (src/lib/story-stage.ts, src/lib/story-scene.ts).
  * The photo is a Higgsfield still built from Wasif's own photo of the hall
  * (docs/ai-log.md, MB-06a). Without WebGL or script, or with reduced motion,
  * the scene is laid out still: the globe with the whole route, then the photo
@@ -71,7 +73,9 @@ const config = JSON.stringify({
     background: var(--night);
   }
 
-  :global(html.js-motion) .fs__pin { position: sticky; top: 0; height: 100svh; min-height: 36rem; }
+  /* With motion the dots are on the fixed stage behind the page, so the pin
+     must not paint over it. */
+  :global(html.js-motion) .fs__pin { position: sticky; top: 0; height: 100svh; min-height: 36rem; background: transparent; }
 
   .fs__canvas { display: block; width: 100%; height: 80svh; }
   :global(html.js-motion) .fs__canvas { position: absolute; inset: 0; height: 100%; }
@@ -165,6 +169,7 @@ const config = JSON.stringify({
   import pointsJson from '../../data/story-points.json';
   import type { StoryPoints, StoryScene } from '../../lib/story-scene';
   import { gsap, ScrollTrigger, initMotion } from '../../lib/motion';
+  import { openStage, setStage } from '../../lib/story-stage';
   import { SplitText } from 'gsap/SplitText';
   import { formatCoordinates, kilometres } from '../../lib/geo-format';
 
@@ -204,12 +209,12 @@ const config = JSON.stringify({
     let scene: StoryScene | undefined;
     let progress = 0;
 
-    // The story's beats, as fractions of this scene's scroll: gather, fly,
-    // stream into the hall, hold it as dots, then let the photo develop.
+    // The story's beats, as fractions of this scene's scroll: gather the
+    // travelling dots, fly, stream into the hall, hold it, let the photo develop.
     const phases = (p: number) => ({
-      assemble: smooth(span(p, 0.0, 0.1)),
-      flight: span(p, 0.12, 0.56),
-      morph: span(p, 0.6, 0.76),
+      assemble: smooth(span(p, 0.0, 0.14)),
+      flight: span(p, 0.18, 0.58),
+      morph: span(p, 0.62, 0.77),
       fade: span(p, 0.86, 0.95),
     });
 
@@ -228,28 +233,30 @@ const config = JSON.stringify({
       chapter.style.opacity = String(title);
       chapter.style.transform = `translateY(${(1 - title) * 24}px)`;
       document.querySelector('[data-rail-year="2022"]')?.classList.toggle('is-current', p > 0.86);
-      scene?.set(beat);
+      // Once this scene has scroll of its own the name is certainly gone — say
+      // so, so the dots are right however the page was arrived at.
+      setStage(p > 0.001 ? { enter: 1, scatter: 1, ...beat } : beat);
     };
 
     if (motion) {
+      // The dots live on the shared stage; this canvas is only for the still.
+      canvas.hidden = true;
+      openStage();
       ScrollTrigger.create({ trigger: root, start: 'top top', end: 'bottom bottom', onUpdate: (self) => apply(self.progress) });
       gsap.registerPlugin(SplitText);
       const lines = SplitText.create(root.querySelector('[data-lines]'), { type: 'lines', mask: 'lines' }).lines;
       gsap.from(lines, { yPercent: 110, duration: 1.2, ease: 'power4.out', stagger: 0.09, scrollTrigger: { trigger: root, start: 'top 55%' } });
       apply(0);
-    }
-
-    if (canDraw) {
+    } else if (canDraw) {
+      // Still, without motion: the globe on its own canvas, the whole flight on it.
       const io = new IntersectionObserver(async ([entry]) => {
         if (!entry.isIntersecting) return;
         io.disconnect();
         try {
           const { createStoryScene } = await import('../../lib/story-scene');
           const variant = matchMedia('(max-width: 48rem)').matches ? 'mobile' : 'desktop';
-          const background = getComputedStyle(document.documentElement).getPropertyValue('--night').trim() || '#0b0c0e';
-          scene = await createStoryScene(canvas, data, variant, { plane, from: cityFrom, to: cityTo }, background);
-          // Still, without motion: the globe with the whole flight on it.
-          scene.set(motion ? phases(progress) : { assemble: 1, flight: 1, morph: 0, fade: 0 });
+          scene = await createStoryScene(canvas, data, variant, { plane, from: cityFrom, to: cityTo });
+          scene.set({ enter: 1, scatter: 1, assemble: 1, flight: 1, morph: 0, fade: 0 });
           window.addEventListener('resize', () => scene?.resize());
         } catch (error) {
           console.warn('flight scene unavailable', error);

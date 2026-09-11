@@ -6,6 +6,7 @@
  */
 import StoryLayout from '../layouts/StoryLayout.astro';
 import Loader from '../components/story/Loader.astro';
+import Stage from '../components/story/Stage.astro';
 import Hero from '../components/story/Hero.astro';
 import FlightScene from '../components/story/FlightScene.astro';
 import YearRail from '../components/story/YearRail.astro';
@@ -16,6 +17,7 @@ import YearRail from '../components/story/YearRail.astro';
     if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('js-motion');
   </script>
   <Loader />
+  <Stage />
   <YearRail />
   <main>
     <Hero />
@@ -30,6 +32,7 @@ import YearRail from '../components/story/YearRail.astro';
 
 <script>
   import { gsap, ScrollTrigger, initMotion } from '../lib/motion';
+  import { enterStage } from '../lib/story-stage';
 
   const motion = initMotion();
   const loader = document.querySelector<HTMLElement>('[data-loader]');
@@ -39,7 +42,7 @@ import YearRail from '../components/story/YearRail.astro';
   } else {
     // 1. Loader: the years roll to now, then lift away.
     const reel = document.querySelector('[data-reel]');
-    const photo = document.querySelector<HTMLImageElement>('.hero__layer');
+    const photo = document.querySelector<HTMLImageElement>('.stage__img');
     const ready = new Promise<void>((resolve) => {
       const done = () => resolve();
       if (!photo || photo.complete) done();
@@ -53,25 +56,22 @@ import YearRail from '../components/story/YearRail.astro';
     const rows = Number((reel as HTMLElement | null)?.dataset.rows ?? 1);
     gsap.to(reel, { y: `-${((rows - 1) * 1.1).toFixed(1)}em`, duration: 2.2, ease: 'expo.inOut' });
     gsap.set('[data-fade]', { autoAlpha: 0 });
-    gsap.set('[data-hero-scene]', { scale: 1.08 });
+    gsap.set('[data-stage-scene]', { scale: 1.08 });
 
     Promise.all([ready, minimum]).then(() => {
       gsap.timeline()
         .to(loader, { yPercent: -100, duration: 1.1, ease: 'power4.inOut' })
-        .to('[data-hero-scene]', { scale: 1, duration: 2.2, ease: 'power3.out' }, 0.3)
+        .to('[data-stage-scene]', { scale: 1, duration: 2.2, ease: 'power3.out' }, 0.3)
         .to('[data-fade]', { autoAlpha: 1, duration: 0.9, ease: 'power2.out' }, 1.0)
-        .add(() => {
-          loader?.remove();
-          // The name's dots settle now (src/components/story/Hero.astro).
-          document.dispatchEvent(new CustomEvent('story:reveal'));
-        }, 0.45);
+        // His name is written in dots now (src/lib/story-stage.ts).
+        .add(() => { loader?.remove(); enterStage(); }, 0.45);
     });
 
-    // 2. Hero: the scene settles back as it darkens; the name's dots leave on
-    //    their own (Hero.astro), flying toward where the globe gathers.
+    // 2. Hero: the picture settles back and clears, leaving the dots of his
+    //    name travelling on alone toward the globe (Hero.astro, story-stage.ts).
     gsap.timeline({ scrollTrigger: { trigger: '[data-hero]', start: 'top top', end: 'bottom bottom', scrub: 0.8 } })
-      .to('[data-hero-scene]', { scale: 1.06, duration: 1, ease: 'none' }, 0)
-      .to('[data-hero-dim]', { opacity: 1, duration: 0.45, ease: 'none' }, 0.55);
+      .to('[data-stage-scene]', { scale: 1.06, duration: 1, ease: 'none' }, 0)
+      .to('[data-stage-scene]', { autoAlpha: 0, duration: 0.5, ease: 'power2.in' }, 0.28);
 
     // 5. The year rail: on once the story begins, the current year lit.
     const rail = document.querySelector('[data-rail]');

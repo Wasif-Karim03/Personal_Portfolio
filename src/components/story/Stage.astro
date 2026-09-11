@@ -1,0 +1,68 @@
+---
+/**
+ * The stage: the fixed surface the whole opening plays on.
+ *
+ * Three layers in one frame — the graded photograph of him, the dots, and him
+ * cut from that photograph with its matte, so the dots pass behind his head.
+ * It is fixed rather than living inside the hero because the dots carry on
+ * past it: the name breaks up here and gathers into the globe in the scene
+ * below, on this same canvas. Nothing here is generated; the cut-out comes
+ * from the photo itself.
+ */
+import { Picture } from 'astro:assets';
+import now from '../../assets/story/now.jpg';
+import cutout from '../../assets/story/now-cutout.png';
+---
+
+<div class="stage" data-stage>
+  <div class="stage__layer" data-stage-scene>
+    <Picture src={now} formats={['avif', 'webp']} widths={[900, 1400, 1800]} sizes="100vw" loading="eager" fetchpriority="high" alt="" class="stage__img" />
+  </div>
+
+  <canvas class="stage__dots" data-stage-dots aria-hidden="true"></canvas>
+
+  <div class="stage__layer stage__cut" data-stage-scene>
+    <Picture src={cutout} formats={['avif', 'webp']} widths={[900, 1400, 1800]} sizes="100vw" loading="eager" alt="Wasif Karim smiling in a denim jacket on a rooftop in New York, black and white." class="stage__img" />
+  </div>
+</div>
+
+<style>
+  .stage {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: var(--night);
+  }
+
+  /* Without motion the opening is laid out still, and the stage stays out of it. */
+  .stage { display: none; }
+  :global(html.js-motion) .stage { display: block; }
+
+  .stage__layer { position: absolute; inset: 0; }
+  .stage__cut { z-index: 2; }
+
+  .stage :global(picture) { display: contents; }
+
+  .stage :global(.stage__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 72%;
+  }
+
+  .stage__dots {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Portrait: the whole of him, the name stacked in the sky above. */
+  @media (max-aspect-ratio: 4/5) {
+    .stage :global(.stage__img) { object-position: 50% 100%; }
+  }
+</style>

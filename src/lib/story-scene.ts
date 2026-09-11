@@ -1,23 +1,31 @@
 /**
- * The flight scene: one set of gaussian dots that gathers into a globe, carries
- * the 2022 flight from Dhaka to Ohio, then streams into Ohio Wesleyan's
- * University Hall as dot-art, which the photo on the page develops out of.
+ * The story's dots: one set of gaussian points that holds every shape the
+ * opening needs, in order.
  *
- * Points come from scripts/make-story-points.mjs; each knows its place on the
- * globe and its place in the picture, and the shader moves it between them.
- * Imported dynamically as the scene comes near. Renders only when the scroll or
- * the window changes.
+ *   his name  →  scattered  →  the globe  →  the flight  →  University Hall
+ *
+ * They are the same points throughout. That is the whole point of the scene:
+ * the name does not fade out and a globe fade in, the letters break apart and
+ * those dots travel up and gather into the Earth, which later streams into the
+ * hall as dot-art that the photo on the page develops out of.
+ *
+ * Globe places, picture places, route order and luminance come from
+ * scripts/make-story-points.mjs. The name is sampled here, at runtime, from its
+ * own letterforms, because where it sits depends on the size of the window.
+ * Renders only when the scroll or the window changes.
  */
 import {
-  AdditiveBlending,
+  AddEquation,
   BackSide,
   BufferAttribute,
   BufferGeometry,
+  CustomBlending,
   Group,
   MathUtils,
   Matrix3,
   Matrix4,
   Mesh,
+  OneFactor,
   PerspectiveCamera,
   Points,
   Quaternion,
@@ -37,8 +45,19 @@ export interface StoryPoints {
   picture: { aspect: number };
 }
 
+/** How the name is set, when the scene opens with one. */
+export interface NameSetting {
+  lines: string[];
+  weight: number;
+  family: string;
+}
+
 /** Where the scene is, each 0 to 1. */
 export interface Phases {
+  /** The name arriving, dot by dot, left to right. */
+  enter: number;
+  /** The name breaking up and drifting off, in that same order. */
+  scatter: number;
   assemble: number;
   flight: number;
   morph: number;
@@ -54,6 +73,8 @@ export interface Overlays {
 export interface StoryScene {
   set(phases: Phases): void;
   resize(): void;
+  /** False when the name could not be drawn, so the page keeps its heading. */
+  readonly named: boolean;
 }
 
 const FOV = 30;
@@ -65,10 +86,14 @@ const vertexShader = /* glsl */ `
   attribute vec2 aUV;
   attribute float aLight;
   attribute float aSeed;
+  attribute vec2 aName;
+  attribute float aSweep;
   uniform mat3 uRot;
   uniform float uGlobeScale;
   uniform vec3 uGlobeOffset;
   uniform vec2 uCover;
+  uniform float uEnter;
+  uniform float uScatter;
   uniform float uAssemble;
   uniform float uReveal;
   uniform float uMorph;
@@ -83,21 +108,30 @@ const vertexShader = /* glsl */ `
     return fract(sin(vec3(s * 127.1, s * 311.7, s * 74.7)) * 43758.5453) * 2.0 - 1.0;
   }
 
+  float ramp(float t) { return t * t * (3.0 - 2.0 * t); }
+
   void main() {
+    vec3 h = hash3(aSeed * 13.1);
+
+    // 1. His name, on the plane of the screen. Each dot rises into its letter,
+    //    left to right, so the name is written rather than switched on.
+    vec3 named = vec3(aName, 0.0);
+    float te = ramp(clamp(uEnter * 1.7 - aSweep * 0.7, 0.0, 1.0));
+    vec3 p = mix(named + vec3(h.x * 0.18, -0.45 - abs(h.y) * 0.5, 0.0), named, te);
+
+    // 2. The letters break, in the same sweep, and drift up and back into the dark.
+    float tb = ramp(clamp(uScatter * 1.7 - aSweep * 0.6, 0.0, 1.0));
+    p = mix(p, named + vec3(0.35 + h.x * 0.8, 1.1 + h.y * 0.7, -0.8 + h.z * 1.1), tb);
+
+    // 3. The same dots gather into the globe, each arriving at its own moment.
     vec3 onGlobe = uRot * position;
     vec3 g = onGlobe * uGlobeScale + uGlobeOffset;
+    float ta = ramp(clamp(uAssemble * 1.5 - aSeed * 0.5, 0.0, 1.0));
+    p = mix(p, g, ta);
 
-    // Gathering: each dot arrives from somewhere in the dark at its own moment.
-    // The dust falls in from above, where the name's dots went.
-    vec3 dust = normalize(hash3(aSeed * 13.1) + 0.0001) * (2.2 + 2.4 * fract(aSeed * 7.3)) + vec3(0.35, 0.9, -1.5);
-    float ta = clamp(uAssemble * 1.5 - aSeed * 0.5, 0.0, 1.0);
-    ta = ta * ta * (3.0 - 2.0 * ta);
-    vec3 p = mix(dust, g, ta);
-
-    // Streaming into the picture, with a little swirl on the way.
+    // 4. And stream on into the picture, with a little swirl on the way.
     vec3 target = vec3((aUV.x - 0.5) * uCover.x, (0.5 - aUV.y) * uCover.y, 0.0);
-    float tm = clamp(uMorph * 1.6 - fract(aSeed * 3.7) * 0.6, 0.0, 1.0);
-    tm = tm * tm * (3.0 - 2.0 * tm);
+    float tm = ramp(clamp(uMorph * 1.6 - fract(aSeed * 3.7) * 0.6, 0.0, 1.0));
     p = mix(p, target, tm) + hash3(aSeed * 5.3) * 0.28 * sin(3.14159 * tm);
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
@@ -108,15 +142,18 @@ const vertexShader = /* glsl */ `
     float depth = mix(smoothstep(-0.25, 0.55, normalize(onGlobe).z), 1.0, tm);
     float drawn = (!route || aOrder <= 0.0) ? 1.0 : clamp((uReveal - aOrder) * 60.0 + 1.0, 0.0, 1.0);
     drawn = mix(drawn, 1.0, tm);
+    // Depth and the flight's reveal only mean anything once the dots are a globe.
+    float globeMod = mix(1.0, depth * drawn, ta);
 
     // Land a little under full white, so overlapping dots glow instead of blowing out.
+    vec3 nameTone = vec3(0.95, 0.94, 0.92);
     vec3 globeTone = route ? uRouteTone : vec3(0.8, 0.8, 0.78) * (0.7 + 0.3 * fract(aSeed * 11.0));
     vec3 pictureTone = vec3(pow(aLight, 0.8)) * 0.78;
-    vColor = mix(globeTone, pictureTone, tm);
+    vColor = mix(mix(nameTone, globeTone, ta), pictureTone, tm);
 
-    float size = mix(route ? 1.25 : 1.0, 1.55, tm);
+    float size = mix(mix(1.4, route ? 1.25 : 1.0, ta), 1.55, tm);
     gl_PointSize = max(uBase * size * uScale / -mv.z, 1.0);
-    vAlpha = ta * depth * drawn * (1.0 - uFade);
+    vAlpha = te * globeMod * (1.0 - uFade);
   }
 `;
 
@@ -128,7 +165,9 @@ const fragmentShader = /* glsl */ `
     vec2 c = gl_PointCoord - 0.5;
     float a = exp(-dot(c, c) * 16.0) * vAlpha;
     if (a < 0.01) discard;
-    gl_FragColor = vec4(vColor * a, 1.0);
+    // Premultiplied: colour and coverage both add, so the dots build up out of
+    // the picture behind them instead of masking it.
+    gl_FragColor = vec4(vColor * a, a);
   }
 `;
 
@@ -149,8 +188,8 @@ const rimFragment = /* glsl */ `
   varying vec3 vNormal;
   varying vec3 vView;
   void main() {
-    float f = pow(1.0 - abs(dot(vNormal, vView)), 3.2);
-    gl_FragColor = vec4(vec3(0.62, 0.68, 0.78) * f * uStrength, 1.0);
+    float f = pow(1.0 - abs(dot(vNormal, vView)), 3.2) * uStrength;
+    gl_FragColor = vec4(vec3(0.62, 0.68, 0.78) * f, f);
   }
 `;
 
@@ -159,7 +198,7 @@ export async function createStoryScene(
   data: StoryPoints,
   variant: 'desktop' | 'mobile',
   overlays: Overlays,
-  background: string,
+  name?: NameSetting,
 ): Promise<StoryScene> {
   const count = data.counts[variant];
   const response = await fetch(data.files[variant]);
@@ -191,6 +230,8 @@ export async function createStoryScene(
     light[i] = lights[i] / 255;
     seed[i] = Math.random();
   }
+  const nameXY = new Float32Array(count * 2);
+  const sweep = new Float32Array(count);
 
   const geometry = new BufferGeometry();
   geometry.setAttribute('position', new BufferAttribute(position, 3));
@@ -199,12 +240,17 @@ export async function createStoryScene(
   geometry.setAttribute('aOrder', new BufferAttribute(order, 1));
   geometry.setAttribute('aLight', new BufferAttribute(light, 1));
   geometry.setAttribute('aSeed', new BufferAttribute(seed, 1));
+  geometry.setAttribute('aName', new BufferAttribute(nameXY, 2));
+  geometry.setAttribute('aSweep', new BufferAttribute(sweep, 1));
 
   const uniforms = {
     uRot: { value: new Matrix3() },
     uGlobeScale: { value: 0.8 },
     uGlobeOffset: { value: new Vector3() },
     uCover: { value: [3.6, 2.3] as [number, number] },
+    // Without a name the dots simply start out in the dark, already scattered.
+    uEnter: { value: name ? 0 : 1 },
+    uScatter: { value: name ? 0 : 1 },
     uAssemble: { value: 0 },
     uReveal: { value: 0 },
     uMorph: { value: 0 },
@@ -214,16 +260,29 @@ export async function createStoryScene(
     // The flight's tone: a soft champagne, warm against the white Earth without shouting.
     uRouteTone: { value: new Vector3(0.93, 0.8, 0.62) },
   };
+  // Everything on this canvas glows: it adds light to whatever is behind it,
+  // carrying its own coverage, so the canvas can stay clear.
+  const glow = {
+    transparent: true,
+    depthWrite: false,
+    blending: CustomBlending,
+    blendEquation: AddEquation,
+    blendSrc: OneFactor,
+    blendDst: OneFactor,
+    blendEquationAlpha: AddEquation,
+    blendSrcAlpha: OneFactor,
+    blendDstAlpha: OneFactor,
+  };
   const dots = new Points(
     geometry,
-    new ShaderMaterial({ uniforms, vertexShader, fragmentShader, transparent: true, depthWrite: false, depthTest: false, blending: AdditiveBlending }),
+    new ShaderMaterial({ uniforms, vertexShader, fragmentShader, depthTest: false, ...glow }),
   );
   dots.frustumCulled = false;
 
   const rimUniforms = { uStrength: { value: 0 } };
   const rim = new Mesh(
     new SphereGeometry(1.08, 64, 48),
-    new ShaderMaterial({ uniforms: rimUniforms, vertexShader: rimVertex, fragmentShader: rimFragment, transparent: true, depthWrite: false, blending: AdditiveBlending, side: BackSide }),
+    new ShaderMaterial({ uniforms: rimUniforms, vertexShader: rimVertex, fragmentShader: rimFragment, side: BackSide, ...glow }),
   );
   const rimGroup = new Group();
   rimGroup.add(rim);
@@ -232,8 +291,10 @@ export async function createStoryScene(
   scene.add(rimGroup, dots);
   const camera = new PerspectiveCamera(FOV, 1, 0.1, 60);
   camera.position.set(0, 0, DISTANCE);
-  const renderer = new WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
-  renderer.setClearColor(background, 1);
+  // Clear, not black: his photograph is behind this canvas during the name,
+  // and the page's own night is behind it after that.
+  const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: false, premultipliedAlpha: true, powerPreference: 'high-performance' });
+  renderer.setClearColor(0x000000, 0);
 
   const a = new Vector3(...data.route.from).normalize();
   const b = new Vector3(...data.route.to).normalize();
@@ -249,9 +310,71 @@ export async function createStoryScene(
 
   let width = 0;
   let height = 0;
+  let visW = 0;
+  let visH = 0;
   let globeScale = 0.8;
+  let namedOk = false;
   const globeOffset = new Vector3();
-  let phases: Phases = { assemble: 0, flight: 0, morph: 0, fade: 0 };
+  let phases: Phases = { enter: name ? 0 : 1, scatter: name ? 0 : 1, assemble: 0, flight: 0, morph: 0, fade: 0 };
+
+  /**
+   * Sets the name into an offscreen canvas and spreads the dots evenly over its
+   * letterforms, walking the lit pixels with a fractional step so the coverage
+   * reaches the foot of the letters however many dots there are.
+   */
+  const layoutName = () => {
+    if (!name) return;
+    namedOk = false;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const mask = document.createElement('canvas');
+    mask.width = Math.round(width * dpr);
+    mask.height = Math.round(height * dpr);
+    const ctx = mask.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+
+    const words = name.lines.map((line) => line.toUpperCase());
+    const two = words.length > 1;
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.005em';
+
+    // Set it as large as the page would, then pull back until the name fits.
+    let size = two ? Math.min(width * 0.33, height * 0.22) : Math.min(width * 0.17, height * 0.34);
+    const widest = () => {
+      ctx.font = `${name.weight} ${size}px ${name.family}`;
+      return Math.max(...words.map((word) => ctx.measureText(word).width));
+    };
+    const room = width * 0.9;
+    if (widest() > room) size *= room / widest();
+    ctx.font = `${name.weight} ${size}px ${name.family}`;
+
+    // The block's foot sits at 52% of the height, as the heading does.
+    const foot = height * 0.52;
+    words.forEach((word, i) => {
+      ctx.fillText(word, width / 2, foot - (words.length - 1 - i) * size * 0.82);
+    });
+
+    const { data: pixels } = ctx.getImageData(0, 0, mask.width, mask.height);
+    const hits: number[] = [];
+    for (let i = 0; i < mask.width * mask.height; i++) if (pixels[i * 4 + 3] > 120) hits.push(i);
+    if (hits.length === 0) return;
+
+    const step = hits.length / count;
+    for (let i = 0; i < count; i++) {
+      const hit = hits[Math.min(hits.length - 1, Math.floor(i * step))];
+      const x = ((hit % mask.width) + Math.random()) / dpr;
+      const y = (Math.floor(hit / mask.width) + Math.random()) / dpr;
+      // Screen pixels to the world, on the plane the camera looks straight at.
+      nameXY[i * 2] = (x / width - 0.5) * visW;
+      nameXY[i * 2 + 1] = (0.5 - y / height) * visH;
+      sweep[i] = x / width;
+    }
+    geometry.attributes.aName.needsUpdate = true;
+    geometry.attributes.aSweep.needsUpdate = true;
+    namedOk = true;
+  };
 
   const slerp = (t: number, out: Vector3) => {
     const s = Math.sin(arc);
@@ -274,12 +397,14 @@ export async function createStoryScene(
   const cityTo = { x: 0, y: 0, z: 0 };
 
   const render = () => {
-    const { assemble, flight, morph, fade } = phases;
+    const { enter, scatter, assemble, flight, morph, fade } = phases;
     slerp(flight, heading);
     // The globe turns under the plane, like a camera following it.
     turn.setFromUnitVectors(heading, hold);
     rot3.setFromMatrix4(rot4.makeRotationFromQuaternion(turn));
     uniforms.uRot.value.copy(rot3);
+    uniforms.uEnter.value = enter;
+    uniforms.uScatter.value = scatter;
     uniforms.uAssemble.value = assemble;
     uniforms.uReveal.value = flight;
     uniforms.uMorph.value = morph;
@@ -316,8 +441,8 @@ export async function createStoryScene(
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     const tan = Math.tan(MathUtils.degToRad(FOV / 2));
-    const visH = 2 * DISTANCE * tan;
-    const visW = visH * camera.aspect;
+    visH = 2 * DISTANCE * tan;
+    visW = visH * camera.aspect;
     const wide = width >= 960;
     // Wide: the globe stands in the right half. Narrow: in the upper part, above the words.
     globeScale = wide ? Math.min(0.76, visW * 0.2) : Math.min(0.46, visW * 0.4);
@@ -329,6 +454,7 @@ export async function createStoryScene(
     const aspect = data.picture.aspect;
     uniforms.uCover.value = visW / visH > aspect ? [visW, visW / aspect] : [visH * aspect, visH];
     uniforms.uScale.value = (height * renderer.getPixelRatio()) / (2 * tan);
+    layoutName();
     render();
   };
 
@@ -340,5 +466,8 @@ export async function createStoryScene(
       render();
     },
     resize,
+    get named() {
+      return namedOk;
+    },
   };
 }
