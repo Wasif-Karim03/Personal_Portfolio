@@ -23,7 +23,6 @@ const sceneCount = (n: number) => `${n} scene${n === 1 ? '' : 's'}`;
 
 const sourceCounts = {
   REAL: scenes.filter((s) => s.sources.includes('REAL')).length,
-  CC: scenes.filter((s) => s.sources.includes('CC')).length,
   DATA: scenes.filter((s) => s.sources.includes('DATA')).length,
   CODE: scenes.filter((s) => s.sources.includes('CODE')).length,
   AI: scenes.filter((s) => s.sources.includes('AI')).length,
@@ -40,40 +39,34 @@ const sourceCounts = {
 
     <div class="prose">
       <p class="lede">
-        One rule runs through this site: <strong>AI for atmosphere, real footage
-        for proof, robot data for identity.</strong> Every visual is tagged by where
-        it came from, and anything a machine generated is listed on this page.
+        Every picture on this site is a <strong>point cloud</strong>. The portraits
+        are built from real photographs of me; everything else is drawn from
+        geometry in code. No photo or video is shown as it was taken, and no image
+        here is AI-generated.
       </p>
 
       <h2>Where the visuals come from</h2>
       <dl class="sources">
         <div>
           <dt class="label">REAL — {sceneCount(sourceCounts.REAL)}</dt>
-          <dd>Filmed or photographed by me. My face, my hardware, my documents.</dd>
-        </div>
-        <div>
-          <dt class="label">CC — {sceneCount(sourceCounts.CC)}</dt>
-          <dd>
-            Photographed by someone else and used under a Creative Commons
-            licence. Credited on the photo and listed below.
-          </dd>
+          <dd>Photographs of me, turned into point clouds. The photos themselves never ship.</dd>
         </div>
         <div>
           <dt class="label">DATA — {sceneCount(sourceCounts.DATA)}</dt>
           <dd>
-            Output from my own robots and tools: YOLO detections, LiDAR point
-            clouds, Gaussian splats I captured myself.
+            Output from models and robots: the depth, cut-out and person detection
+            behind each portrait, and LiDAR point clouds.
           </dd>
         </div>
         <div>
           <dt class="label">CODE — {sceneCount(sourceCounts.CODE)}</dt>
-          <dd>Drawn live in the browser: counters, lines, maps, text.</dd>
+          <dd>Drawn live in the browser: every other cloud, and the counters, lines and text.</dd>
         </div>
         <div>
           <dt class="label robot-vision">AI — {sceneCount(sourceCounts.AI)}</dt>
           <dd>
-            Generated, for what I have no footage of: a flight I took in 2022,
-            transitions, mood. Marked on the image and listed individually below.
+            Generated images or video. None ship on this site now; any that do are
+            marked on the image and listed below.
           </dd>
         </div>
       </dl>
@@ -125,9 +118,10 @@ const sourceCounts = {
 
       <h2>My face</h2>
       <p>
-        The photographs and footage of me on this site are real. Where a scene from
-        my past needed me and no photograph existed, I appear from behind or in
-        silhouette rather than being generated.
+        The portraits of me are built from real photographs, point by point:
+        depth estimated, the background cut away, each point the colour of the
+        pixel it came from. The orange box round them is a person detector's own
+        output on that photo, with its confidence.
       </p>
       {
         personShots.length === 0 ? (
@@ -147,10 +141,12 @@ const sourceCounts = {
 
       <h2>Built with</h2>
       <p>
-        Astro, with GSAP and Lenis for the scroll story and a canvas for the
-        scrubbed footage. The globe is Natural Earth data, projected with d3-geo
-        when the site is built, and the point cloud is drawn with three.js. Typeset in Archivo, condensed for headings, and
-        Chivo Mono for labels.
+        Astro, with GSAP and Lenis for the scroll story. Every picture is one
+        three.js point cloud that changes shape as you scroll. The portraits'
+        depth, cut-out and detection come from Depth Anything V2, MODNet and DETR,
+        run on my own machine with Transformers.js. The globe is Natural Earth
+        data, placed with d3-geo when the site is built. Typeset in Archivo,
+        condensed for headings, and Chivo Mono for labels.
       </p>
     </div>
   </div>

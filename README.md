@@ -37,27 +37,29 @@ Raw source photos and footage are **not** in this repo — they run to hundreds 
 megabytes. `assets/raw/` is gitignored; originals live outside git, and only
 optimized web-sized derivatives get committed.
 
-### Scrub sequences
+### The story's point cloud
 
-Scroll-scrubbed scenes (FIG. 01 now, FIG. 02 and 15 later) read frame sets made
-by `scripts/extract-frames.sh`. Swapping in real footage is one command:
+Every picture in the story is one point cloud that changes shape scene by
+scene (`src/components/CloudStage.astro`, `src/lib/cloud-stage.ts`). Each scene
+names its shape in `src/data/scenes.ts`. Most shapes are built in the browser
+from simple geometry and text (`src/lib/cloud-shapes.ts`); two kinds come from
+files, built by `scripts/make-clouds.mjs`:
 
-```sh
-scripts/extract-frames.sh ~/footage/hero-take3.mov hero \
-  --alt "Wasif Karim turning toward the camera"
-```
+- **Portraits**, from a real photo. The photo never ships: a local tool
+  estimates depth, cuts the person from the background and runs a person
+  detector, all on this machine, and the cloud is built from those maps.
 
-That writes the frames to `public/sequences/<name>/` and a manifest to
-`src/data/sequences/<name>.json`, and the build fails if the two ever disagree.
-Frames are JPEG: they decode fastest, which is what scrubbing needs.
+  ```sh
+  cd scripts/portrait && npm install && cd ../..    # once; pulls in onnxruntime
+  node scripts/portrait/make-maps.mjs assets/raw/real/face/DSC01197.jpg graduation
+  node scripts/make-clouds.mjs
+  ```
 
-Until filming day, the hero runs on abstract placeholder frames from
-`scripts/make-hero-placeholder.sh`, labelled as such on the page. The orange
-detection box reads `src/data/sequences/hero.detections.json`, one normalized
-`[x, y, w, h, confidence]` box (or `null`) per frame, which a YOLO pass over the
-real clip will replace.
+  The maps land in `assets/raw/derived/<name>/`, out of git like the photos.
+  The detection box on a portrait is the detector's own box and confidence.
+- **The globe**, from Natural Earth land, with the 2022 route in orange.
 
-### Point clouds
+### The LiDAR fly-through
 
 FIG. 14 flies through a point cloud from the car's LiDAR. Swapping in the real
 scan is one command, from a PLY exported out of the rosbag:

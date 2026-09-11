@@ -28,24 +28,26 @@ Your face comes from real footage and photos in `assets/raw/real/face/`. AI-gene
 
 ## The scenes
 
+**Visual direction (September 2026):** every picture is one point cloud, Gaussian-splat style, that changes shape from scene to scene as you scroll. The portraits are built from real photos; the rest is geometry drawn in code. No photo or video is shown as it was taken. The filming-day shot list and the Higgsfield plan below are kept for reference but are no longer the plan.
+
 | # | Chapter | What happens on scroll | Source | Technique |
 |---|---|---|---|---|
 | 00 | Boot | A few lines of a boot log type out while assets load, then clear. | CODE | Text animation, doubles as the loading screen |
-| 01 | Now · Cleveland, 2026 | You turn toward the camera as the page scrolls. An orange detection box tracks you, labeled `person 0.96`. Your name and one line appear. Metadata: AI Research Engineer, OpsiClear · Cleveland, OH. | REAL + DATA | Scroll-scrubbed image sequence; YOLO run on your own clip |
-| 02 | Rewind | A timecode spins from 2026 back to 2022. The hero clip plays in reverse and frames from later chapters flicker past. | CODE | Counter plus reversed sequence |
-| 03 | Accepted · 2022 | The acceptance letter redrawn as a line drawing (no logo, no signature), with drawing-style callouts: Ohio Wesleyan University, CS + Astrophysics, Schubert Scholarship. A photo of the real letter can replace it. | CODE | Letter drawn in SVG, animated annotation lines |
-| 04 | The flight · 10 AUG 2022 | You at an airport window, seen from behind. Cut to a globe where an orange line draws from Bangladesh to Ohio as you scroll, with coordinates ticking. The line lands on Delaware, OH. | AI + CODE | Higgsfield shot plus SVG route drawn on scroll |
-| 05 | Ohio Wesleyan · 2022–26 | Campus photos from Wikimedia Commons, credited on the photo and in the colophon. A short line of coursework. | CC | Parallax photo stack, kept subtle |
-| 06 | Robotics Club | Real club photos. Counters roll up from 0 to 267 members and from $0 to $68K raised. Label: Founding President. | REAL + CODE | Counters on scroll |
+| 01 | Now · Cleveland, 2026 | You, as a point cloud built from a real photo, gather out of nothing as the page opens. An orange detection box holds you, labelled with the detector's own confidence. Your name and one line. Metadata: AI Research Engineer, OpsiClear · Cleveland, OH. | REAL + DATA | Point cloud from a photo: depth, matting and detection run locally |
+| 02 | Rewind | The cloud winds into a spiral while a timecode spins from the present back to 2022. | CODE | Point-cloud spiral, timecode on scroll |
+| 03 | Accepted · 2022 | The acceptance letter as a cloud of points (no logo, no signature), the lines that matter in orange: Ohio Wesleyan University, CS + Astrophysics, Schubert Scholarship. | CODE | Point cloud drawn from the letter's layout |
+| 04 | The flight · 10 AUG 2022 | The cloud becomes the globe. An orange route draws from Bangladesh to Ohio as you scroll, with coordinates ticking, landing on Delaware, OH. | CODE | Point-cloud globe from Natural Earth, route revealed on scroll |
+| 05 | Ohio Wesleyan · 2022–26 | The cloud builds OWU's student observatory. The degree and a short line of coursework. | CODE | Point cloud from simple geometry |
+| 06 | Robotics Club | A rover in points, LiDAR on its mast. Counters roll up from 0 to 267 members and from $0 to $68K raised. Label: Founding President. | CODE | Point-cloud rover, counters on scroll |
 | 07 | Summer 2023 · Leland | Software Development Intern at Leland, a software company: the first summer in the US and the first software job, shown as the initial commit in a git log. | CODE | Git log entry typed out |
 | 08 | Summer 2024 · Hilton | Software Engineering Intern. An API request animates through a small diagram: app → endpoint → PostgreSQL. 6 REST endpoints, Tableau dashboard, CI/CD. | CODE | Animated diagram, no internal screens |
 | 09 | Summer 2025 · Airbnb | Software Engineering Intern. A generic message box where an AI draft types itself out, then a host edits it. 10 production PRs behind feature flags, Java/Kotlin microservices. | CODE | Generic mock UI, not Airbnb's real interface |
 | 10 | Parallel tracks | A git-branch graph shows work that ran alongside school: OWU dev internship, Bytewright. | CODE | SVG branch lines drawn on scroll |
-| 11 | Graduation · May 2026 | A real photo. B.S. Astrophysics, B.A. Computer Science, GPA 3.82, Honors. | REAL | A quiet, held moment |
-| 12 | think[box] · 2026 | Real footage: the volumetric printer curing a part in one rotation, and Poetry Camera printing a poem. | REAL | Short looping clips |
-| 13 | OpsiClear · Now | The timecode catches up to the present and the rewind loop closes. A Gaussian splat you captured yourself resolves out of points. | DATA | Spark splat viewer |
+| 11 | Graduation · May 2026 | A point-cloud portrait from the graduation photo. B.S. Astrophysics, B.A. Computer Science, GPA 3.82, Honors. | REAL + DATA | Point cloud from a photo, a quiet, held moment |
+| 12 | think[box] · 2026 | The volumetric printer in points: a part cures inside the turning vial as you scroll. And Poetry Camera. | CODE | Point cloud, the part revealed on scroll |
+| 13 | OpsiClear · Now | The timecode catches up to the present, and the cloud returns to the opening portrait: the rewind loop closes. | REAL + DATA | The opening point cloud again |
 | 14 | Work | Transition: the page flies through a point cloud from your car's LiDAR and lands on the project index. | DATA | three.js points |
-| 15 | Resume | Real video of you holding the resume toward the camera. The paper becomes the download button. | REAL | Scrubbed clip plus PDF link |
+| 15 | Resume | The resume as a sheet of points, the download mark in orange, and the link to the PDF. | CODE | Point cloud drawn from the page layout, plus PDF link |
 | 16 | Contact | An email-compose window: To: Wasif, with subject and body fields. It really sends. Your plain email address and links are shown below. | CODE | Formspree or Resend |
 
 ### Project index (scene 14)

@@ -2,13 +2,12 @@
 /**
  * FIG. 08 — Summer 2024 · Hilton.
  *
- * A request travels app → endpoint → PostgreSQL and the response comes back.
+ * The point cloud draws the shape of the system ("api" in
+ * src/lib/cloud-shapes.ts): an app, an endpoint, a PostgreSQL database, and the
+ * request between them in orange.
  *
- * No internal screens or logos, per the rule in CLAUDE.md: this is a diagram of
- * a shape of system, drawn from scratch, not a picture of Hilton's software.
- *
- * The diagram is complete and readable as static SVG. Motion only adds the
- * travelling packet and draws the connectors in.
+ * No internal screens or logos, per the rule in CLAUDE.md: a shape of system
+ * drawn from scratch, not a picture of Hilton's software.
  */
 
 const facts = [
@@ -18,43 +17,13 @@ const facts = [
 ];
 ---
 
-<div class="hilton" data-scene-hilton>
+<div class="hilton">
   <p class="hilton__role label">Software Engineering Intern · Summer 2024</p>
 
-  <svg
-    class="hilton__diagram"
-    viewBox="0 0 760 220"
-    fill="none"
-    role="img"
-    aria-label="A request travels from the app to a REST endpoint to a PostgreSQL database, and the response returns."
-  >
-    <!-- Connectors. Drawn in on scroll. -->
-    <path class="wire" data-wire d="M170 84 H300" />
-    <path class="wire" data-wire d="M460 84 H590" />
-    <path class="wire wire--return" data-wire d="M590 136 H170" />
-
-    <!-- App -->
-    <rect class="node" x="30" y="52" width="140" height="64" />
-    <text class="node__label" x="100" y="80">App</text>
-    <text class="node__sub" x="100" y="98">client</text>
-
-    <!-- Endpoint -->
-    <rect class="node" x="300" y="52" width="160" height="64" />
-    <text class="node__label" x="380" y="80">/api/…</text>
-    <text class="node__sub" x="380" y="98">6 endpoints</text>
-
-    <!-- Database -->
-    <rect class="node" x="590" y="52" width="140" height="64" />
-    <text class="node__label" x="660" y="80">PostgreSQL</text>
-    <text class="node__sub" x="660" y="98">store</text>
-
-    <!-- Direction labels -->
-    <text class="wire__label" x="235" y="72">request</text>
-    <text class="wire__label wire__label--return" x="380" y="156">response</text>
-
-    <!-- The packet. Parked at the app until the scene comes into view. -->
-    <circle class="packet" data-packet cx="170" cy="84" r="5" />
-  </svg>
+  <p class="hilton__path">
+    App <span aria-hidden="true">→</span><span class="sr-only">to</span> /api/…
+    <span aria-hidden="true">→</span><span class="sr-only">to</span> PostgreSQL
+  </p>
 
   <dl class="facts">
     {
@@ -79,52 +48,9 @@ const facts = [
     color: var(--ink-60);
   }
 
-  .hilton__diagram {
-    width: 100%;
-    max-width: 48rem;
-    height: auto;
-  }
-
-  .node {
-    fill: none;
-    stroke: var(--ink);
-    stroke-width: 1.5;
-  }
-
-  .node__label {
-    fill: var(--ink);
+  .hilton__path {
     font-family: var(--font-mono);
-    font-size: 15px;
-    text-anchor: middle;
-  }
-
-  .node__sub {
-    fill: var(--ink-60);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    text-anchor: middle;
-  }
-
-  .wire {
-    stroke: var(--ink-30);
-    stroke-width: 1.5;
-  }
-
-  .wire--return {
-    stroke-dasharray: 4 4;
-  }
-
-  .wire__label {
-    fill: var(--ink-60);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    text-anchor: middle;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  .packet {
-    fill: var(--signal);
+    font-size: var(--step-1);
   }
 
   .facts {
@@ -145,53 +71,3 @@ const facts = [
     margin: var(--space-3xs) 0 0;
   }
 </style>
-
-<script>
-  import { gsap, ScrollTrigger, scene } from '../../lib/motion';
-
-  const root = document.querySelector('[data-scene-hilton]');
-  if (root) {
-    scene(root, () => {
-      const packet = root.querySelector('[data-packet]');
-      const wires = root.querySelectorAll('[data-wire]');
-      if (!packet) return;
-
-      // The request/response loop. Repeats while the scene is on screen, and
-      // ScrollTrigger pauses it the moment it is not.
-      const trip = gsap
-        .timeline({ repeat: -1, repeatDelay: 0.9, paused: true })
-        // App → endpoint.
-        .fromTo(
-          packet,
-          { attr: { cx: 170, cy: 84 }, opacity: 1 },
-          { attr: { cx: 300 }, duration: 0.55, ease: 'power1.inOut' },
-        )
-        // Held at the endpoint: the work happens here.
-        .to(packet, { attr: { cx: 460 }, duration: 0.3, ease: 'none' }, '+=0.25')
-        // Endpoint → database.
-        .to(packet, { attr: { cx: 590 }, duration: 0.5, ease: 'power1.inOut' })
-        // Drop to the return wire and travel back.
-        .to(packet, { attr: { cy: 136 }, duration: 0.25, ease: 'power2.inOut' }, '+=0.2')
-        .to(packet, { attr: { cx: 170 }, duration: 0.9, ease: 'power1.inOut' })
-        .to(packet, { opacity: 0, duration: 0.2 });
-
-      ScrollTrigger.create({
-        trigger: root,
-        start: 'top 75%',
-        end: 'bottom 25%',
-        onEnter: () => {
-          gsap.from(wires, {
-            drawSVG: 0,
-            duration: 0.7,
-            stagger: 0.12,
-            ease: 'power2.out',
-          });
-          trip.play();
-        },
-        onLeave: () => trip.pause(),
-        onEnterBack: () => trip.play(),
-        onLeaveBack: () => trip.pause(),
-      });
-    });
-  }
-</script>

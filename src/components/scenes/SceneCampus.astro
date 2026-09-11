@@ -2,12 +2,10 @@
 /**
  * FIG. 05 — Ohio Wesleyan · 2022–26.
  *
- * Three campus photos in a loose, overlapping stack that drifts apart a little
- * as it scrolls, kept subtle, over the degree and one line of coursework.
- * Coursework is from the resume.
+ * The point cloud builds the university's student observatory ("observatory"
+ * in src/lib/cloud-shapes.ts), for the astrophysics half of the degree. This is
+ * the degree and one line of coursework, both from the resume.
  */
-import MediaFrame from '../MediaFrame.astro';
-
 const courses = [
   'Data Structures & Algorithms',
   'Databases',
@@ -17,59 +15,18 @@ const courses = [
   'NLP',
   'Numerical Methods',
 ];
-
-// How far each photo drifts, relative to the others: nearer ones move more.
-const stack = [
-  { id: 'campus-1', depth: 0.4, sizes: '(min-width: 60rem) 60vw, 100vw' },
-  { id: 'campus-2', depth: 1, sizes: '(min-width: 60rem) 35vw, 60vw' },
-  { id: 'campus-3', depth: 0.7, sizes: '(min-width: 60rem) 35vw, 70vw' },
-];
 ---
 
-<div class="campus" data-scene-campus>
-  <div class="campus__stack">
-    {
-      stack.map(({ id, depth, sizes }, index) => (
-        <div class={`campus__item campus__item--${index + 1}`} data-depth={depth}>
-          <MediaFrame id={id} sizes={sizes} />
-        </div>
-      ))
-    }
-  </div>
-
+<div class="campus">
   <p class="campus__degree">B.S. Astrophysics · B.A. Computer Science</p>
   <p class="campus__courses label">{courses.join(' · ')}</p>
+  <p class="campus__drawn label">In points: the Ohio Wesleyan student observatory</p>
 </div>
 
 <style>
   .campus {
     display: grid;
     gap: var(--space-m);
-  }
-
-  .campus__stack {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: var(--space-s);
-    padding-block-end: var(--space-l);
-  }
-
-  .campus__item--1 {
-    grid-column: 1 / 13;
-    grid-row: 1;
-  }
-
-  .campus__item--2 {
-    grid-column: 6 / 13;
-    grid-row: 2;
-    margin-block-start: -12%;
-    z-index: 1;
-  }
-
-  .campus__item--3 {
-    grid-column: 1 / 8;
-    grid-row: 3;
-    margin-block-start: -10%;
   }
 
   .campus__degree {
@@ -84,42 +41,7 @@ const stack = [
     line-height: 1.8;
   }
 
-  @media (min-width: 60rem) {
-    .campus__item--1 {
-      grid-column: 1 / 9;
-    }
-
-    .campus__item--2 {
-      grid-column: 8 / 13;
-      grid-row: 1;
-      margin-block-start: 22%;
-    }
-
-    .campus__item--3 {
-      grid-column: 3 / 8;
-      grid-row: 2;
-      margin-block-start: -8%;
-    }
+  .campus__drawn {
+    color: var(--ink-60);
   }
 </style>
-
-<script>
-  import { gsap, scene } from '../../lib/motion';
-
-  for (const root of document.querySelectorAll<HTMLElement>('[data-scene-campus]')) {
-    scene(root, () => {
-      for (const item of root.querySelectorAll<HTMLElement>('[data-depth]')) {
-        const depth = Number(item.dataset.depth);
-        gsap.fromTo(
-          item,
-          { yPercent: depth * 6 },
-          {
-            yPercent: depth * -6,
-            ease: 'none',
-            scrollTrigger: { trigger: root, start: 'top bottom', end: 'bottom top', scrub: true },
-          },
-        );
-      }
-    });
-  }
-</script>

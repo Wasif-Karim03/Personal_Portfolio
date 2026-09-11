@@ -2,11 +2,10 @@
 /**
  * FIG. 11 — Graduation · May 2026.
  *
- * A quiet, held moment: one real photo, and the degree set out as a drawing's
- * title block. Deliberately no motion. Every line is from the resume.
+ * A quiet, held moment: the point cloud holds a portrait built from the
+ * graduation photo, and the degree is set out as a drawing's title block.
+ * Deliberately no motion here. Every line is from the resume.
  */
-import MediaFrame from '../MediaFrame.astro';
-
 const rows: Array<[label: string, value: string]> = [
   ['Institution', 'Ohio Wesleyan University'],
   ['Degree', 'B.S. Astrophysics'],
@@ -17,32 +16,23 @@ const rows: Array<[label: string, value: string]> = [
 ];
 ---
 
-<div class="graduation">
-  <MediaFrame id="graduation" sizes="(min-width: 60rem) 40vw, 100vw" />
-
-  <dl class="titleblock">
-    {
-      rows.map(([label, value]) => (
-        <div class="titleblock__row">
-          <dt class="label">{label}</dt>
-          <dd>{value}</dd>
-        </div>
-      ))
-    }
-  </dl>
-</div>
+<dl class="titleblock">
+  {
+    rows.map(([label, value]) => (
+      <div class="titleblock__row">
+        <dt class="label">{label}</dt>
+        <dd>{value}</dd>
+      </div>
+    ))
+  }
+</dl>
 
 <style>
-  .graduation {
-    display: grid;
-    gap: var(--space-l);
-    align-items: end;
-    max-width: 60rem;
-  }
-
   .titleblock {
+    max-width: 30rem;
     margin: 0;
     border: 1.5px solid var(--ink);
+    background: var(--paper);
   }
 
   .titleblock__row {
@@ -63,11 +53,5 @@ const rows: Array<[label: string, value: string]> = [
     font-stretch: var(--stretch-display);
     font-weight: 700;
     font-size: var(--step-1);
-  }
-
-  @media (min-width: 60rem) {
-    .graduation {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
-    }
   }
 </style>

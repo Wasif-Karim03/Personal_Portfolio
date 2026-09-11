@@ -1,0 +1,36 @@
+---
+/**
+ * FIG. 01 — Now.
+ *
+ * The page opens on Wasif as a point cloud (CloudStage.astro), built from a real
+ * photo of him, with a detector's box around him. This is the text beside it:
+ * the name, one line, and where he is now. Every line is from the resume.
+ */
+---
+
+<div class="now">
+  <h1 class="now__name">Wasif Karim</h1>
+  <p class="now__line">Software engineer building production services, AI features and robots.</p>
+  <p class="now__meta label">AI Research Engineer · OpsiClear · Cleveland, OH</p>
+</div>
+
+<style>
+  .now {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .now__name {
+    font-size: clamp(3.5rem, 2rem + 7vw, 7.5rem);
+    line-height: 0.9;
+  }
+
+  .now__line {
+    max-width: 30ch;
+    font-size: var(--step-1);
+  }
+
+  .now__meta {
+    color: var(--ink-60);
+  }
+</style>

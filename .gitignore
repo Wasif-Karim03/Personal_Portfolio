@@ -30,3 +30,7 @@ assets/raw/
 
 # vercel
 .vercel/
+
+# local-only ML for portrait clouds (see scripts/portrait/make-maps.mjs)
+scripts/portrait/node_modules/
+scripts/portrait/package-lock.json

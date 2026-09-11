@@ -1,0 +1,9 @@
+{
+  "name": "portrait-maps",
+  "private": true,
+  "description": "Local-only ML for turning a real photo into a point-cloud portrait. Kept out of the site's dependencies: it pulls in onnxruntime.",
+  "type": "module",
+  "dependencies": {
+    "@huggingface/transformers": "4.2.0"
+  }
+}

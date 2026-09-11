@@ -1,0 +1,46 @@
+{
+  "counts": {
+    "desktop": 36000,
+    "mobile": 14000
+  },
+  "shapes": {
+    "portrait-now": {
+      "files": {
+        "desktop": "/clouds/portrait-now-desktop.bin",
+        "mobile": "/clouds/portrait-now-mobile.bin"
+      },
+      "detection": {
+        "label": "person",
+        "score": 0.999,
+        "box": [
+          -0.9385,
+          0.9763,
+          0.9574,
+          -0.9321
+        ]
+      }
+    },
+    "portrait-graduation": {
+      "files": {
+        "desktop": "/clouds/portrait-graduation-desktop.bin",
+        "mobile": "/clouds/portrait-graduation-mobile.bin"
+      },
+      "detection": {
+        "label": "person",
+        "score": 0.996,
+        "box": [
+          -0.4658,
+          0.9515,
+          0.5135,
+          -0.9407
+        ]
+      }
+    },
+    "globe": {
+      "files": {
+        "desktop": "/clouds/globe-desktop.bin",
+        "mobile": "/clouds/globe-mobile.bin"
+      }
+    }
+  }
+}

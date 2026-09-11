@@ -5,14 +5,13 @@
  * Two counters roll up with the scroll, 0 to 267 members and $0 to $68K raised,
  * beside the title that matters most here: founding president.
  *
- * The photos have to be real club photos. They are media slots club-1 to
- * club-3 (src/data/media.ts), drawn as labelled empty frames until added.
+ * The point cloud draws a club rover beside them ("rover" in
+ * src/lib/cloud-shapes.ts), LiDAR on its mast.
  *
  * Without script, or under reduced motion, the counters show their final
  * values. Script winds them back to zero and lets the scroll carry them up;
  * screen readers always get the final values.
  */
-import MediaFrame from '../MediaFrame.astro';
 
 type Kind = 'count' | 'thousands';
 
@@ -43,10 +42,6 @@ const format = (value: number, kind: Kind) => (kind === 'thousands' ? `$${value}
       ))
     }
   </dl>
-
-  <div class="photos">
-    {['club-1', 'club-2', 'club-3'].map((id) => <MediaFrame id={id} sizes="(min-width: 60rem) 30vw, 100vw" />)}
-  </div>
 </div>
 
 <style>
@@ -82,12 +77,6 @@ const format = (value: number, kind: Kind) => (kind === 'thousands' ? `$${value}
     font-size: clamp(4rem, 3rem + 6vw, 8rem);
     line-height: 0.9;
     font-variant-numeric: tabular-nums;
-  }
-
-  .photos {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
-    gap: var(--space-s);
   }
 </style>
 

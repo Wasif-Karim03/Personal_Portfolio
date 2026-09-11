@@ -1,0 +1,248 @@
+---
+/**
+ * The point cloud behind the story: one fixed canvas whose points become each
+ * scene's picture in turn. Every scene section names its shape in
+ * `data-cloud`; as a section rises into view, the cloud turns into its shape.
+ *
+ * Wide screens: the cloud stands behind the page, to the right of the text.
+ * Narrow screens split: the cloud holds the top of the screen on paper, and the
+ * story scrolls up beneath it, so text never runs over points.
+ *
+ * It follows the scroll and never drives it. With reduced motion it changes
+ * shape in one step, without the drift or the entrance. Without WebGL or
+ * script it isn't there at all, and the text stands on its own.
+ *
+ * On a portrait, a detection box is drawn round the person: the box and the
+ * confidence a detector (DETR) gave for the source photo.
+ */
+---
+
+<div class="cloud-stage" data-cloud-stage aria-hidden="true">
+  <canvas class="cloud-stage__canvas" data-cloud-canvas></canvas>
+  <div class="cloud-stage__detect" data-cloud-detect hidden>
+    <span class="cloud-stage__tag" data-cloud-tag></span>
+  </div>
+</div>
+
+<style>
+  /* Inside <main>, under its text: -1 paints above the paper, below the story. */
+  .cloud-stage {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 900ms var(--ease-out);
+  }
+
+  .cloud-stage.is-ready {
+    opacity: 1;
+  }
+
+  /* Cleared, for a scene with its own canvas. */
+  .cloud-stage.is-ready.is-empty {
+    opacity: 0;
+  }
+
+  @media (max-width: 59.99rem) {
+    .cloud-stage {
+      inset: 0 0 auto;
+      height: 46svh;
+      z-index: 2;
+      background: var(--paper);
+      border-block-end: var(--rule) solid var(--rule-colour);
+    }
+  }
+
+  .cloud-stage__canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .cloud-stage__detect {
+    position: absolute;
+    border: 2px solid var(--signal);
+  }
+
+  /* Ink on orange: paper on orange is only 2.9:1. */
+  .cloud-stage__tag {
+    position: absolute;
+    bottom: 100%;
+    left: -2px;
+    padding: 0.1rem 0.4rem;
+    background: var(--signal);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  /* The story sits above the cloud. */
+  :global(main),
+  :global(body > footer) {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cloud-stage {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import manifestJson from '../data/clouds.json';
+  import type { Cloud, CloudManifest, Variant } from '../lib/cloud-shapes';
+  import { sceneProgress, scrollLines } from '../lib/scene-progress';
+
+  // JSON imports type boxes as number[]; the build script writes four.
+  const manifest = manifestJson as unknown as CloudManifest;
+  const root = document.querySelector<HTMLElement>('[data-cloud-stage]');
+  const canvas = root?.querySelector<HTMLCanvasElement>('[data-cloud-canvas]');
+  const detect = root?.querySelector<HTMLElement>('[data-cloud-detect]');
+  const tag = root?.querySelector<HTMLElement>('[data-cloud-tag]');
+
+  const webglAvailable = () => {
+    try {
+      return Boolean(document.createElement('canvas').getContext('webgl2'));
+    } catch {
+      return false;
+    }
+  };
+
+  const clamp = (value: number) => Math.min(Math.max(value, 0), 1);
+
+  async function start(root: HTMLElement, canvas: HTMLCanvasElement, detect: HTMLElement, tag: HTMLElement) {
+    const sections = [...document.querySelectorAll<HTMLElement>('[data-cloud]')].map((el) => ({
+      el,
+      shape: el.dataset.cloud ?? 'none',
+    }));
+    if (sections.length === 0) return;
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const light =
+      matchMedia('(max-width: 48rem)').matches ||
+      (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+    const variant: Variant = light ? 'mobile' : 'desktop';
+
+    const [{ createCloudStage }, { loadShape }] = await Promise.all([
+      import('../lib/cloud-stage'),
+      import('../lib/cloud-shapes'),
+    ]);
+    const stage = createCloudStage(canvas, manifest.counts[variant]);
+
+    const loaded = new Map<string, Cloud>();
+    const loading = new Set<string>();
+    let queued = false;
+    const schedule = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(update);
+    };
+    const want = (name: string) => {
+      if (loaded.has(name) || loading.has(name)) return;
+      loading.add(name);
+      loadShape(name, variant, manifest)
+        .then((cloud) => loaded.set(name, cloud))
+        .catch((error) => console.warn(`cloud "${name}" unavailable`, error))
+        .finally(() => {
+          loading.delete(name);
+          schedule();
+        });
+    };
+
+    // The first shape gathers out of nothing once, when the page opens.
+    let entrance = reduced ? 1 : 0;
+    let entranceStarted = 0;
+    const runEntrance = (now: number) => {
+      entrance = clamp((now - entranceStarted) / 1800);
+      update();
+      if (entrance < 1) requestAnimationFrame(runEntrance);
+    };
+
+    let settled: Cloud | undefined;
+
+    function update() {
+      queued = false;
+      const { settle, enter } = scrollLines();
+      const rects = sections.map(({ el }) => el.getBoundingClientRect());
+
+      // The last section to reach the upper third is the current one; the next
+      // is on its way in while its top travels up the screen.
+      let current = 0;
+      rects.forEach((rect, i) => {
+        if (rect.top <= settle) current = i;
+      });
+      let next = current;
+      let mix = 0;
+      const after = rects[current + 1];
+      if (after && after.top < enter) {
+        next = current + 1;
+        mix = clamp((enter - after.top) / (enter - settle));
+      }
+      if (reduced) mix = mix < 0.5 ? 0 : 1;
+
+      const progress = (i: number) => (reduced ? 1 : sceneProgress(rects[i]));
+
+      for (const i of [current - 1, current, next, next + 1]) if (sections[i]) want(sections[i].shape);
+      want('none');
+
+      let a = sections[current].shape;
+      let b = sections[next].shape;
+      let m = mix;
+      if (current === 0 && next === 0 && entrance < 1) {
+        a = 'none';
+        m = entrance;
+      }
+      const cloudA = loaded.get(a);
+      const cloudB = loaded.get(b);
+      if (!cloudA || !cloudB) return;
+
+      if (entrance < 1 && entranceStarted === 0 && a === 'none') {
+        entranceStarted = performance.now();
+        requestAnimationFrame(runEntrance);
+      }
+      root.classList.add('is-ready');
+      settled = m < 0.02 ? cloudA : m > 0.98 ? cloudB : undefined;
+      root.classList.toggle('is-empty', settled?.opacity === 0);
+      stage.show(cloudA, cloudB, m, progress(current), progress(next));
+    }
+
+    // The detection box rides on the portrait while it is whole.
+    stage.onRender(() => {
+      const detection = settled?.detection;
+      if (!detection || entrance < 1) {
+        detect.hidden = true;
+        return;
+      }
+      const box = stage.projectBox(detection.box);
+      detect.hidden = false;
+      detect.style.left = `${box.left}px`;
+      detect.style.top = `${box.top}px`;
+      detect.style.width = `${box.width}px`;
+      detect.style.height = `${box.height}px`;
+      tag.textContent = `${detection.label} ${detection.score.toFixed(2)}`;
+    });
+
+    stage.setDrift(!reduced);
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', () => {
+      stage.resize();
+      schedule();
+    });
+    schedule();
+  }
+
+  if (root && canvas && detect && tag && webglAvailable()) {
+    // After the page itself has loaded, so the cloud never delays the story.
+    const go = () => {
+      const run = () => start(root, canvas, detect, tag).catch((error) => console.warn('cloud stage unavailable', error));
+      if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 1500 });
+      else setTimeout(run, 200);
+    };
+    if (document.readyState === 'complete') go();
+    else window.addEventListener('load', go, { once: true });
+  }
+</script>

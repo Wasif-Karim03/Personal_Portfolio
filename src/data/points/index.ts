@@ -4,8 +4,7 @@
  * scripts/make-lidar-placeholder.mjs, or scripts/ply-to-points.mjs for a real
  * scan, writes each manifest into this folder and the points into
  * public/points/. This module fails the build if a manifest is malformed or its
- * files don't hold the number of points it claims, the same guard the frame
- * sequences have.
+ * files don't hold the number of points it claims.
  *
  * Build-time only: it reads the filesystem, so client code must import the type
  * from src/lib/point-flight.ts, never from here.

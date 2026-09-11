@@ -7,6 +7,10 @@ interface Props {
 
 const { scene } = Astro.props;
 
+// Scenes with a picture leave it room: see CloudStage.astro. The work scene's
+// 'none' clears the stage for its own canvas, so it keeps the full width.
+const hasCloud = Boolean(scene.cloud && scene.cloud !== 'none');
+
 // Keep each middle dot on the line with the word before it, so a wrapped title
 // never starts a line with "·". A nowrap span does it with ordinary spaces: a
 // no-break space set visibly wider in the title face, and Chrome ignored a word
@@ -19,9 +23,10 @@ const titleParts = scene.title.split(' · ').map((part, index, all) => {
 ---
 
 <section
-  class="scene"
+  class:list={['scene', hasCloud && 'scene--cloud']}
   id={`fig-${scene.fig}`}
   data-scene={scene.slug}
+  data-cloud={scene.cloud}
   aria-labelledby={`fig-${scene.fig}-title`}
 >
   <header class="scene__head">
@@ -32,6 +37,8 @@ const titleParts = scene.title.split(' · ').map((part, index, all) => {
   </header>
 
   <h2 class="scene__title" id={`fig-${scene.fig}-title`}>{titleParts.map(({ lead, keep }, index) => <>{lead}{keep && <span class="scene__keep">{keep}</span>}{index < titleParts.length - 1 && ' '}</>)}</h2>
+
+  {scene.cloudAlt && <p class="sr-only">{scene.cloudAlt}</p>}
 
   <div class="scene__body">
     <slot>
@@ -99,6 +106,21 @@ const titleParts = scene.title.split(' · ').map((part, index, all) => {
   .scene__summary {
     max-width: var(--measure);
     color: var(--ink-60);
+  }
+
+  /* Wide screens: the text keeps to the left half, the cloud stands in the right.
+     Narrow: the cloud panel covers the top of the screen (CloudStage.astro), so
+     the opening scene starts below it; later scenes scroll up beneath it. */
+  @media (min-width: 60rem) {
+    .scene--cloud {
+      padding-inline-end: 50%;
+    }
+  }
+
+  @media (max-width: 59.99rem) {
+    .scene--cloud:first-of-type {
+      padding-block-start: calc(46svh + var(--space-l));
+    }
   }
 
   .scene__blocked {
