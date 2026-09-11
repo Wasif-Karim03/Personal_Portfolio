@@ -1,0 +1,476 @@
+<title>Wasif Karim Direction Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,300..900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Hanken+Grotesk:wght@400;500;600;700&family=Martian+Mono:wdth,wght@87.5,300..500&family=Newsreader:ital,opsz,wght@1,6..72,300..500&family=Unbounded:wght@300..700&display=swap">
+<style>
+  :root {
+    --ground: #f5f6f8;
+    --surface: #ffffff;
+    --ink: #111318;
+    --ink-2: #4f5563;
+    --line: #d9dce3;
+    --accent: #4a52c9;
+    --mark: #eef0fb;
+    --sans: 'Hanken Grotesk', 'Helvetica Neue', Arial, sans-serif;
+    --mono: 'Martian Mono', ui-monospace, Menlo, monospace;
+    --serif: 'Bodoni Moda', Didot, 'Bodoni 72', Georgia, serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0d0f14;
+      --surface: #151821;
+      --ink: #e7e9ef;
+      --ink-2: #a3a9b8;
+      --line: #2a2f3b;
+      --accent: #a9b4ff;
+      --mark: #1c2030;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0d0f14;
+    --surface: #151821;
+    --ink: #e7e9ef;
+    --ink-2: #a3a9b8;
+    --line: #2a2f3b;
+    --accent: #a9b4ff;
+    --mark: #1c2030;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding-inline: clamp(16px, 4vw, 48px);
+    padding-block: 0 72px;
+    background: var(--ground);
+    color: var(--ink);
+    font: 400 16.5px/1.6 var(--sans);
+  }
+  .wrap { max-width: 1120px; margin-inline: auto; }
+  a { color: var(--accent); text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .label { font: 400 11.5px/1.5 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+  p { margin: 0; max-width: 66ch; }
+
+  header.top {
+    display: grid;
+    gap: 18px;
+    padding-block: 64px 40px;
+    border-block-end: 1px solid var(--line);
+  }
+  header.top h1 { font: 500 clamp(2.4rem, 1.4rem + 4vw, 4.4rem)/1.02 var(--serif); letter-spacing: -.01em; }
+  header.top h1 em { font-style: italic; font-weight: 400; }
+  .lede { font-size: 1.12rem; color: var(--ink-2); max-width: 60ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+
+  section { display: grid; gap: 28px; padding-block: 56px; border-block-end: 1px solid var(--line); }
+  section > header { display: grid; gap: 10px; }
+  section h2 { font: 600 clamp(1.5rem, 1.2rem + 1.2vw, 2.1rem)/1.15 var(--sans); letter-spacing: -.01em; }
+
+  /* Diagnosis */
+  .current { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 32px; align-items: start; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip { display: grid; gap: 6px; width: 132px; }
+  .chip i { display: block; height: 56px; border-radius: 4px; border: 1px solid var(--line); }
+  .chip span { font: 400 11px/1.4 var(--mono); color: var(--ink-2); }
+  .tells { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+  .tells li { display: grid; gap: 2px; padding-inline-start: 16px; border-inline-start: 2px solid var(--line); }
+  .tells b { font-weight: 600; }
+
+  /* Findings */
+  .findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .finding { display: grid; align-content: start; gap: 8px; padding: 22px; background: var(--surface); }
+  .finding h3 { font: 600 1.05rem/1.3 var(--sans); }
+  .finding p { color: var(--ink-2); font-size: .96rem; }
+  .finding .label a { color: inherit; }
+
+  /* Splats vs points */
+  .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; }
+  .compare > div { display: grid; gap: 10px; align-content: start; padding: 22px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+  .compare h3 { font: 600 1.05rem/1.3 var(--sans); }
+  .compare ul { margin: 0; padding-inline-start: 18px; color: var(--ink-2); display: grid; gap: 6px; font-size: .96rem; }
+  .capture { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+  .capture li { display: grid; gap: 4px; padding: 14px 16px; background: var(--mark); border-radius: 6px; }
+  .capture b { font-weight: 600; }
+  .capture span { color: var(--ink-2); font-size: .93rem; }
+
+  /* Directions */
+  .direction { display: grid; gap: 22px; padding-block: 8px 24px; }
+  .direction + .direction { border-block-start: 1px dashed var(--line); padding-block-start: 36px; }
+  .direction > header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+  .direction h3 { font: 600 1.6rem/1.2 var(--sans); }
+  .direction .pick { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 6px 9px; border-radius: 99px; background: var(--accent); color: var(--ground); }
+  .mock { position: relative; aspect-ratio: 16 / 9; max-width: 100%; overflow: hidden; border-radius: 6px; isolation: isolate; }
+  .mock canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .mock .ui { position: absolute; inset: 0; padding: clamp(14px, 3.4%, 40px); display: grid; pointer-events: none; }
+  .mock .illus { position: absolute; right: 12px; bottom: 10px; font: 400 9.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; opacity: .55; }
+  .spec { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 24px 32px; }
+  .spec > div { display: grid; gap: 10px; align-content: start; }
+  .swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .swatches div { display: grid; gap: 5px; }
+  .swatches i { height: 44px; border-radius: 4px; border: 1px solid var(--line); }
+  .swatches span { font: 400 9.5px/1.35 var(--mono); color: var(--ink-2); word-break: break-word; }
+  .typeset { display: grid; gap: 8px; }
+  .typeset .t { font-size: .92rem; color: var(--ink-2); }
+  .spec p { font-size: .96rem; color: var(--ink-2); }
+
+  /* A — Night Capture */
+  .m-a { background: radial-gradient(120% 90% at 70% 40%, #151827 0%, #0a0b10 60%); color: #d9dce6; }
+  .m-a .ui { grid-template-rows: auto 1fr auto; }
+  .m-a .name { align-self: end; font: 400 clamp(1.8rem, 6.2vw, 5.2rem)/.95 'Bodoni Moda', Didot, serif; letter-spacing: -.015em; }
+  .m-a .name em { font-style: italic; }
+  .m-a .row { display: flex; justify-content: space-between; gap: 12px; font: 300 clamp(8px, 1.05vw, 11px)/1.5 'Martian Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: #7d8294; }
+  .m-a .line { display: inline-block; height: 1px; width: 38%; margin-block: .6em; background: linear-gradient(90deg, #a9c8ff, #d4b8ff); }
+
+  /* B — White Room */
+  .m-b { background: linear-gradient(#f6f7f9 62%, #e7e9ee); color: #111317; }
+  .m-b .ui { grid-template-rows: auto 1fr auto; }
+  .m-b .name { font: 500 clamp(1.3rem, 4.4vw, 3.6rem)/1 'Unbounded', sans-serif; letter-spacing: -.02em; max-width: 60%; }
+  .m-b .row { display: flex; justify-content: space-between; gap: 12px; font: 400 clamp(8px, 1.05vw, 11px)/1.5 'Martian Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: #5b616e; }
+  .m-b .row:last-child { align-self: end; }
+
+  /* C — Radiance */
+  .m-c { background: radial-gradient(90% 80% at 50% 30%, #1c2233, #0e1220 70%); color: #fff1d6; }
+  .m-c .ui { grid-template-rows: auto 1fr auto; justify-items: center; text-align: center; }
+  .m-c .title { font: 800 clamp(1.4rem, 5.6vw, 4.6rem)/.9 'Anybody', sans-serif; font-stretch: 150%; letter-spacing: .02em; text-transform: uppercase; }
+  .m-c .sub { align-self: end; max-width: 34em; font: italic 300 clamp(.8rem, 1.7vw, 1.2rem)/1.4 'Newsreader', Georgia, serif; color: #fff1d6; text-shadow: 0 1px 12px #0e1220; }
+  .m-c .row { font: 300 clamp(8px, 1vw, 10.5px)/1.5 'Martian Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #9aa3b8; }
+
+  /* Recommendation & asks */
+  .rec { display: grid; gap: 14px; padding: 28px; border-radius: 8px; background: var(--mark); }
+  .rec p { color: var(--ink); }
+  .asks { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; counter-reset: ask; }
+  .asks li { display: grid; grid-template-columns: 2rem 1fr; gap: 12px; align-items: baseline; }
+  .asks li::before { counter-increment: ask; content: counter(ask); font: 500 12px/1 var(--mono); color: var(--accent); }
+  .keep { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 20px; }
+  .keep ul { margin: 0; padding-inline-start: 18px; display: grid; gap: 6px; color: var(--ink-2); }
+  .keep h3 { font: 600 1rem/1.3 var(--sans); margin-block-end: 8px; }
+  .sources { display: grid; gap: 6px; margin: 0; padding-inline-start: 18px; font-size: .92rem; color: var(--ink-2); }
+
+  @media (max-width: 560px) {
+    .swatches { grid-template-columns: repeat(3, 1fr); }
+    .m-a .row span:last-child, .m-b .row span:last-child { display: none; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="label">wasifkarim.com · design research · 11 Sep 2026 · nothing built yet</p>
+    <h1>From a drafting sheet to a <em>captured</em> world</h1>
+    <p class="lede">Why the current site reads as machine-made, what the best 3D sites of 2025–26 do instead, what real Gaussian splatting would take, and three directions to choose from.</p>
+    <div class="meta"><span class="label">Decision needed: one direction</span><span class="label">Then: one hero prototype</span></div>
+  </header>
+
+  <section>
+    <header>
+      <p class="label">Diagnosis</p>
+      <h2>The site wears the most common AI look there is</h2>
+    </header>
+    <div class="current">
+      <div style="display:grid;gap:14px">
+        <div class="chips">
+          <div class="chip"><i style="background:#f2efe8"></i><span>#F2EFE8 paper</span></div>
+          <div class="chip"><i style="background:#141414"></i><span>#141414 ink</span></div>
+          <div class="chip"><i style="background:#ff4f00"></i><span>#FF4F00 signal</span></div>
+        </div>
+        <p style="color:var(--ink-2);font-size:.96rem">The current tokens. Warm cream, near-black, one hot accent: the exact cluster generated sites fall into.</p>
+      </div>
+      <ul class="tells">
+        <li><b>Cream paper and one orange</b><span>Reads as "tasteful template", not as a person. Nothing about it says robotics, space or 3D.</span></li>
+        <li><b>Drafting-sheet devices everywhere</b><span>"FIG. 04", [REAL]/[CODE] tags, hairline rules and condensed labels on all sixteen scenes. Clever once; wallpaper by the third.</span></li>
+        <li><b>One layout, sixteen times</b><span>Text left, picture right, every chapter. The story has no pacing: no quiet beat, no full-bleed moment, no climax.</span></li>
+        <li><b>Stipple, not splats</b><span>The clouds are flat dots on paper: no light, no depth of field, no glow. Real Gaussian splats look photographic and luminous; these look like clip art.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <p class="label">What the best 3D sites do now</p>
+      <h2>Restraint, one committed voice, and film-like pacing</h2>
+    </header>
+    <div class="findings">
+      <div class="finding"><p class="label">Iventions · Minh Pham</p><h3>3D for atmosphere, not spectacle</h3><p>Each project lit like a spotlit installation; the 3D never overwhelms the work it frames.</p></div>
+      <div class="finding"><p class="label">Terminal Industries · Site of the Month</p><h3>Premium immersion is restrained</h3><p>"It suggests, it reveals." Micro-motion and wireframe reveals instead of constant effects.</p></div>
+      <div class="finding"><p class="label">Lando Norris · OFF+BRAND · Site of the Year 2025</p><h3>A personal site as a brand universe</h3><p>One committed visual voice, a 3D helmet that tracks your reading, cinematic scroll sequences.</p></div>
+      <div class="finding"><p class="label">Igloo Inc · Active Theory · Lusion</p><h3>Scenes, not pages</h3><p>Sequenced like film: the camera drifts between worlds, transitions feel like camera moves.</p></div>
+      <div class="finding"><p class="label">Obys · Mat Voyce</p><h3>Type can be the main character</h3><p>Letters that stretch, split and recombine on scroll, tuned never to block reading.</p></div>
+      <div class="finding"><p class="label">Reported for Q1 2026</p><h3>Immersive is now the norm at the top</h3><p>Immersive 3D sites are reported to win about 61% of Awwwards Sites of the Day, up from 23% in 2024. The bar is craft, not novelty.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <p class="label">The technology</p>
+      <h2>Real Gaussian splats, not points drawn from a photo</h2>
+      <p style="color:var(--ink-2)">What's on the site now is a 2.5D trick: a photo, a depth guess and dots. A real splat is a 3D capture you can walk around, made from a short phone video.</p>
+    </header>
+    <div class="compare">
+      <div><p class="label">Now</p><h3>Depth-map point clouds</h3><ul><li>One photo per portrait, flat from the side</li><li>Uniform dots, no lighting or translucency</li><li>36K points; cheap, but reads as stipple</li><li>Good as a loading state: coarse points first</li></ul></div>
+      <div><p class="label">Proposed</p><h3>Captured 3DGS, rendered with Spark 2.0</h3><ul><li>Open-source three.js renderer from World Labs</li><li>Streams huge splats with level of detail; loads a coarse version first, then refines</li><li>Shader effects on splats: dissolve, reveal, relight, clip</li><li>Web budget: about 15–30 MB on phones, compressed (SPZ, .RAD)</li></ul></div>
+    </div>
+    <div style="display:grid;gap:12px">
+      <p class="label">What you would capture (phone + Scaniverse or Polycam, free, about 2 minutes each)</p>
+      <ul class="capture">
+        <li><b>You, seated, still</b><span>Slow orbit, even light. The hero: a real 3D you, not an AI one.</span></li>
+        <li><b>The autonomous car</b><span>On a table, full orbit. Pairs with the LiDAR chapter.</span></li>
+        <li><b>Your workbench</b><span>Jetson, wiring, tools. The "maker" chapter.</span></li>
+        <li><b>The volumetric printer</b><span>Or Poetry Camera. The think[box] chapter.</span></li>
+        <li><b>A corner of OWU</b><span>A doorway or the observatory. The college chapter.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <p class="label">Three directions</p>
+      <h2>Pick the world the splats live in</h2>
+      <p style="color:var(--ink-2)">Each preview is an illustrative splat bust drawn live in this page, not a capture. It shows the treatment, not the likeness.</p>
+    </header>
+
+    <article class="direction">
+      <header><h3>A · Night Capture</h3><span class="pick">Recommended</span></header>
+      <div class="mock m-a"><canvas data-splat="a" aria-label="Illustrative splat bust glowing on a blue-black ground" role="img"></canvas>
+        <div class="ui">
+          <div class="row"><span>Wasif Karim</span><span>Cleveland · 41.50°N 81.69°W</span></div>
+          <div class="name">Wasif<br><em>Karim</em><br><span class="line"></span></div>
+          <div class="row"><span>Robotics · on-device AI</span><span>scroll ↓</span></div>
+        </div><span class="illus">illustrative</span></div>
+      <div class="spec">
+        <div><p class="label">Palette</p>
+          <div class="swatches">
+            <div><i style="background:#0a0b10"></i><span>Obsidian #0A0B10</span></div>
+            <div><i style="background:#15171f"></i><span>Carbon #15171F</span></div>
+            <div><i style="background:#7d8294"></i><span>Pewter #7D8294</span></div>
+            <div><i style="background:#d9dce6"></i><span>Moonlight #D9DCE6</span></div>
+            <div><i style="background:linear-gradient(90deg,#a9c8ff,#d4b8ff)"></i><span>Thin-film #A9C8FF→#D4B8FF</span></div>
+          </div>
+          <p>Blue-black, not pure black. The only colour is the capture itself; a thin-film iridescence marks one thing at a time.</p>
+        </div>
+        <div class="typeset"><p class="label">Type</p>
+          <p style="font:400 2.1rem/1 'Bodoni Moda',serif">Couture <em>serif</em></p>
+          <p class="t">Bodoni Moda for the few big words, Hanken Grotesk for reading, Martian Mono for coordinates and data. A lab notebook written by a fashion house.</p>
+        </div>
+        <div><p class="label">Layout and motion</p>
+          <p>A dark room where each chapter is a lit splat. Glow and depth of field, the camera drifting slowly; text is sparse and large. It changes with the scroll and never takes it over.</p>
+          <p class="label">Feels like: a gallery at night · Iventions, Lusion</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="direction">
+      <header><h3>B · White Room</h3></header>
+      <div class="mock m-b"><canvas data-splat="b" aria-label="Illustrative splat bust standing on a white studio floor" role="img"></canvas>
+        <div class="ui">
+          <div class="row"><span>WK / 2026</span><span>Specimen 01 · portrait</span></div>
+          <div class="name">WASIF KARIM</div>
+          <div class="row"><span>Software · robots · AI</span><span>Rotate to inspect</span></div>
+        </div><span class="illus">illustrative</span></div>
+      <div class="spec">
+        <div><p class="label">Palette</p>
+          <div class="swatches">
+            <div><i style="background:#f6f7f9"></i><span>Cyclorama #F6F7F9</span></div>
+            <div><i style="background:#e7e9ee"></i><span>Floor #E7E9EE</span></div>
+            <div><i style="background:#c9cdd6"></i><span>Shadow #C9CDD6</span></div>
+            <div><i style="background:#5b616e"></i><span>Slate #5B616E</span></div>
+            <div><i style="background:#111317"></i><span>Graphite #111317</span></div>
+          </div>
+          <p>A cool studio white with no accent colour at all. The captured objects are the only colour on the page.</p>
+        </div>
+        <div class="typeset"><p class="label">Type</p>
+          <p style="font:500 1.7rem/1 'Unbounded',sans-serif">WIDE GEOMETRY</p>
+          <p class="t">Unbounded for titles, Hanken Grotesk for reading, Martian Mono for specimen labels. A product launch crossed with a museum catalogue.</p>
+        </div>
+        <div><p class="label">Layout and motion</p>
+          <p>Each capture stands on a soft floor like a product in a white cyclorama, and can be turned by hand. Very calm and very precise. The risk: without great captures it can feel empty.</p>
+          <p class="label">Feels like: a product reveal · Cartier by Immersive Garden</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="direction">
+      <header><h3>C · Radiance</h3></header>
+      <div class="mock m-c"><canvas data-splat="c" aria-label="Illustrative splat bust in warm light over a ring of LiDAR-coloured points" role="img"></canvas>
+        <div class="ui">
+          <div class="row">Chapter 04 · The flight</div>
+          <div class="title">Departure</div>
+          <p class="sub">Dhaka, 10 August 2022. A one-way ticket and a scholarship letter.</p>
+        </div><span class="illus">illustrative</span></div>
+      <div class="spec">
+        <div><p class="label">Palette</p>
+          <div class="swatches">
+            <div><i style="background:#0e1220"></i><span>Dusk #0E1220</span></div>
+            <div><i style="background:#1c2233"></i><span>Haze #1C2233</span></div>
+            <div><i style="background:#9aa3b8"></i><span>Mist #9AA3B8</span></div>
+            <div><i style="background:#fff1d6"></i><span>Halogen #FFF1D6</span></div>
+            <div><i style="background:linear-gradient(90deg,#30123b,#28bceb,#a4fc3c,#fb7e21,#7a0403)"></i><span>LiDAR ramp (data only)</span></div>
+          </div>
+          <p>Night-drive blues and warm halogen. Data layers use the LiDAR intensity ramp your robots already output: colour that means something.</p>
+        </div>
+        <div class="typeset"><p class="label">Type</p>
+          <p style="font:800 1.6rem/1 'Anybody',sans-serif;font-stretch:150%;text-transform:uppercase">Title card</p>
+          <p class="t">Anybody, whose width stretches on scroll like a title sequence; Newsreader italic for film subtitles; Martian Mono for data.</p>
+        </div>
+        <div><p class="label">Layout and motion</p>
+          <p>Full-bleed captured places you fly through, chapter by chapter, with subtitles instead of paragraphs. The most cinematic; it needs the most captures and the most performance care.</p>
+          <p class="label">Feels like: a short film · Igloo Inc, Active Theory</p>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <header>
+      <p class="label">Recommendation</p>
+      <h2>Night Capture, with two Radiance chapters</h2>
+    </header>
+    <div class="rec">
+      <p>Build on <b>A · Night Capture</b>: dark, luminous and restrained, so real splats glow the way they are meant to, and the type does the talking. Borrow two full-bleed moments from C: the flight, and the LiDAR fly-through into the work. Use the LiDAR intensity ramp as the only data colour. That's the one detail no other portfolio can have.</p>
+      <p>Keep the current point clouds as the loading state: coarse points that resolve into the full splat. That's the storyboard's own "resolves out of points" idea, made literal.</p>
+    </div>
+    <div class="keep">
+      <div><h3>Keep</h3><ul><li>The story, its order, every fact</li><li>Scroll never taken over; reduced motion respected</li><li>Real captures only for your face; no AI likeness</li><li>Performance budget: fast first paint, 3D after</li></ul></div>
+      <div><h3>Drop</h3><ul><li>Cream paper, the orange, the drafting-sheet frame</li><li>"FIG." eyebrows and [REAL]/[CODE] tags in the page (sourcing moves to the colophon)</li><li>The same text-left, picture-right layout sixteen times</li><li>Flat stipple as the final look</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <header>
+      <p class="label">What I need from you</p>
+      <h2>Three answers, then one prototype</h2>
+    </header>
+    <ol class="asks">
+      <li><span><b>Which direction:</b> A, B, C, or the recommended mix.</span></li>
+      <li><span><b>Will you capture splats?</b> Your portrait first; the car and bench if you can. Two minutes each on your phone.</span></li>
+      <li><span><b>Two or three sites you love</b>, from anywhere. They'll calibrate taste faster than anything I can write.</span></li>
+    </ol>
+    <p style="color:var(--ink-2)">Then I build only the hero, in the chosen direction, for you to judge before anything else changes.</p>
+  </section>
+
+  <section style="border:0">
+    <header><p class="label">Sources</p></header>
+    <ul class="sources">
+      <li><a href="https://www.hontran.dev/blog/best-award-winning-websites-2026">10 Best Award-Winning Websites of 2026 (judged by a juror)</a></li>
+      <li><a href="https://metabole.studio/en/blog/immersive-website-examples">Immersive Website Examples 2026, Metabole</a></li>
+      <li><a href="https://digitalstrategyforce.com/journal/why-are-immersive-experiences-dominating-the-2026-awwwards/">Why are immersive experiences dominating the 2026 Awwwards?</a></li>
+      <li><a href="https://www.psychoactive.co.nz/content-hub/best-webgl-interactive-3d-agencies">The best WebGL and interactive 3D agencies in 2026</a></li>
+      <li><a href="https://www.webgpu.com/showcase/igloo-inc-procedural-crystals/">Igloo Inc: procedural crystals and shader-driven UI</a></li>
+      <li><a href="https://www.worldlabs.ai/blog/spark-2.0">Spark 2.0: streaming 3DGS worlds on the web, World Labs</a> · <a href="https://sparkjs.dev/">sparkjs.dev</a></li>
+      <li><a href="https://www.utsubo.com/blog/gaussian-splatting-guide">3D Gaussian splatting: services, use cases and web viewers (2026)</a></li>
+    </ul>
+  </section>
+</div>
+
+<script>
+  (() => {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const looks = {
+      a: { colors: ['#cfd6ff', '#a9c8ff', '#d4b8ff', '#ffffff', '#8aa0d8'], alpha: 0.2, glow: true, size: 1, x: 0.68 },
+      b: { colors: ['#2b2f38', '#4a505c', '#8a8f99', '#c7a58f', '#e0c3ad'], alpha: 0.55, glow: false, size: 0.9, x: 0.72, floor: true },
+      c: { colors: ['#ffe9c7', '#f6c68b', '#c98f5a', '#7d8aa8', '#e9eefc'], alpha: 0.22, glow: true, size: 1, x: 0.5, ring: true },
+    };
+    const turbo = ['#30123b', '#4145ab', '#28bceb', '#32f298', '#a4fc3c', '#fbb938', '#fb7e21', '#d23105', '#7a0403'];
+
+    // One soft gaussian dot per colour, drawn once and stamped many times.
+    const sprite = (hex) => {
+      const c = document.createElement('canvas');
+      c.width = c.height = 48;
+      const g = c.getContext('2d');
+      const r = g.createRadialGradient(24, 24, 0, 24, 24, 24);
+      r.addColorStop(0, hex);
+      r.addColorStop(0.22, hex + 'cc');
+      r.addColorStop(0.5, hex + '33');
+      r.addColorStop(1, hex + '00');
+      g.fillStyle = r;
+      g.fillRect(0, 0, 48, 48);
+      return c;
+    };
+
+    // An illustrative bust: head, neck and shoulders, as soft blobs.
+    const bust = (n, seed) => {
+      let s = seed;
+      const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+      const pts = [];
+      for (let i = 0; i < n; i++) {
+        const k = rnd();
+        let x, y, z;
+        if (k < 0.45) {
+          const u = rnd() * 2 - 1, a = rnd() * Math.PI * 2, rr = 0.3 * (0.85 + 0.15 * rnd());
+          x = Math.sqrt(1 - u * u) * Math.cos(a) * rr * 0.86; y = 0.52 + u * rr * 1.08; z = Math.sqrt(1 - u * u) * Math.sin(a) * rr;
+        } else if (k < 0.53) {
+          const a = rnd() * Math.PI * 2; x = Math.cos(a) * 0.12; z = Math.sin(a) * 0.12; y = 0.1 + rnd() * 0.16;
+        } else {
+          const a = rnd() * Math.PI, u = rnd();
+          x = Math.cos(a) * 0.78 * (0.55 + 0.45 * u); y = -0.02 - Math.sin(a * 0.5 + 0.2) * 0.1 - u * 0.62; z = (rnd() - 0.5) * 0.5 * (1 - u * 0.3);
+        }
+        pts.push({ x, y, z, c: Math.floor(rnd() * 5), s: 0.6 + rnd() * 0.9 });
+      }
+      return pts;
+    };
+
+    for (const canvas of document.querySelectorAll('canvas[data-splat]')) {
+      const look = looks[canvas.dataset.splat];
+      const ctx = canvas.getContext('2d');
+      const sprites = look.colors.map(sprite);
+      const ringSprites = turbo.map(sprite);
+      const pts = bust(2800, canvas.dataset.splat.charCodeAt(0) * 97);
+      let w = 0, h = 0, angle = 0.6, running = false, last = 0;
+
+      const size = () => {
+        const dpr = Math.min(devicePixelRatio || 1, 2);
+        w = canvas.clientWidth; h = canvas.clientHeight;
+        canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      };
+
+      const draw = () => {
+        ctx.clearRect(0, 0, w, h);
+        const cx = w * look.x, cy = h * 0.54, scale = h * 0.46;
+        const cos = Math.cos(angle), sin = Math.sin(angle);
+        if (look.floor) {
+          const g = ctx.createRadialGradient(cx, h * 0.93, 0, cx, h * 0.93, w * 0.22);
+          g.addColorStop(0, 'rgba(17,19,23,.18)'); g.addColorStop(1, 'rgba(17,19,23,0)');
+          ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+        }
+        ctx.globalCompositeOperation = look.glow ? 'lighter' : 'source-over';
+        if (look.ring) {
+          for (let i = 0; i < 260; i++) {
+            const a = (i / 260) * Math.PI * 2 + angle * 0.4;
+            const px = cx + Math.cos(a) * w * 0.3, py = h * 0.86 + Math.sin(a) * h * 0.05;
+            ctx.globalAlpha = 0.5;
+            const sp = ringSprites[Math.floor(((Math.cos(a) + 1) / 2) * (turbo.length - 1))];
+            ctx.drawImage(sp, px - 5, py - 5, 10, 10);
+          }
+        }
+        const view = pts.map((p) => ({ p, x: p.x * cos - p.z * sin, z: p.x * sin + p.z * cos }));
+        view.sort((a, b) => a.z - b.z);
+        for (const v of view) {
+          const persp = 2.6 / (2.6 - v.z);
+          const px = cx + v.x * scale * persp, py = cy - v.p.y * scale * persp;
+          const r = h * 0.014 * v.p.s * look.size * persp;
+          ctx.globalAlpha = look.alpha * (0.55 + 0.45 * (v.z + 0.5));
+          ctx.drawImage(sprites[v.p.c], px - r, py - r, r * 2, r * 2);
+        }
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      };
+
+      const tick = (t) => {
+        if (!running) return;
+        angle += Math.min((t - last) / 1000, 0.05) * 0.35;
+        last = t;
+        draw();
+        requestAnimationFrame(tick);
+      };
+
+      size(); draw();
+      addEventListener('resize', () => { size(); draw(); });
+      if (!reduce) {
+        new IntersectionObserver(([entry]) => {
+          running = entry.isIntersecting;
+          if (running) { last = performance.now(); requestAnimationFrame(tick); }
+        }).observe(canvas);
+      }
+    }
+  })();
+</script>
