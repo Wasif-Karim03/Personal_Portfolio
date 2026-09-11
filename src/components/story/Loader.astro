@@ -1,16 +1,18 @@
 ---
 /**
- * The opening beat: the years of the story roll from 2022 to 2026 while the
- * page loads, then lift away to reveal Wasif now. It only runs with motion; it
- * never holds the page longer than the photo takes to arrive (1.6 s at least,
- * 3 s at most).
+ * The opening beat: the years roll from 2004, the year Wasif was born, to 2026,
+ * slowing as they reach now, then lift away to reveal him. It only runs with
+ * motion, and never holds the page past the photo's arrival (2.4 s at least,
+ * 3.2 s at most).
  */
-const years = [2022, 2023, 2024, 2025, 2026];
+const first = 2004;
+const last = 2026;
+const years = Array.from({ length: last - first + 1 }, (_, i) => first + i);
 ---
 
 <div class="loader" data-loader aria-hidden="true">
   <div class="loader__years">
-    <div class="loader__reel" data-reel>
+    <div class="loader__reel" data-reel data-rows={years.length}>
       {years.map((year) => <span>{year}</span>)}
     </div>
   </div>

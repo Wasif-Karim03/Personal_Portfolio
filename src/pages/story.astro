@@ -63,12 +63,14 @@ import departure from '../assets/machine/departure.png';
       const done = () => resolve();
       if (!photo || photo.complete) done();
       else { photo.addEventListener('load', done, { once: true }); photo.addEventListener('error', done, { once: true }); }
-      setTimeout(done, 3000);
+      setTimeout(done, 3200);
     });
-    const minimum = new Promise((r) => setTimeout(r, 1600));
+    const minimum = new Promise((r) => setTimeout(r, 2400));
 
-    // Exactly four rows of 1.1em, so the reel stops square on 2026.
-    gsap.to(reel, { y: '-4.4em', duration: 1.5, ease: 'power3.inOut' });
+    // Rows are 1.1em, so moving (rows - 1) of them stops the reel square on 2026.
+    // It rushes through the years and slows as it reaches now.
+    const rows = Number((reel as HTMLElement | null)?.dataset.rows ?? 1);
+    gsap.to(reel, { y: `-${((rows - 1) * 1.1).toFixed(1)}em`, duration: 2.2, ease: 'expo.inOut' });
     const letters = [...document.querySelectorAll('[data-word]')].flatMap(
       (word) => SplitText.create(word, { type: 'chars', mask: 'chars' }).chars,
     );
