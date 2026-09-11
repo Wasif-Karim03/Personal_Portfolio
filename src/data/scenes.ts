@@ -193,7 +193,8 @@ export const scenes: Scene[] = [
       'A git-branch graph shows work that ran alongside school: OWU dev internship, HackPrinceton 2nd place (OnlySwap, 245+ users), Bytewright.',
     sources: ['CODE'],
     technique: 'SVG branch lines drawn on scroll',
-    status: 'ready',
+    status: 'blocked-on-decision',
+    blockedOn: 'The HackPrinceton date, so OnlySwap can take its place on the graph.',
   },
   {
     fig: '11',

@@ -1,0 +1,254 @@
+---
+/**
+ * FIG. 10 — Parallel tracks.
+ *
+ * Work that ran alongside school, drawn as a git branch graph. main is Ohio
+ * Wesleyan; the part-time internship and Bytewright branch off it. The
+ * internship merges back at graduation, and Bytewright is still open.
+ *
+ * Rows are evenly spaced, as in `git log --graph`: the graph shows order, not
+ * time to scale. Every date and figure comes from the resume. HackPrinceton
+ * (OnlySwap) joins the graph once its date is confirmed.
+ *
+ * Without script, or under reduced motion, the graph is drawn in full. Script
+ * draws the lines in with the scroll, which it follows and never drives.
+ */
+
+type Lane = 'main' | 'intern' | 'studio';
+
+interface Row {
+  when: string;
+  lane: Lane;
+  /** Branch name, shown where the branch starts. */
+  ref?: string;
+  title: string;
+  detail?: string;
+  /** Merge commits get a double ring, as in a git graph. */
+  merge?: boolean;
+}
+
+const rows: Row[] = [
+  {
+    when: '2022.08',
+    lane: 'main',
+    ref: 'main',
+    title: 'Started at Ohio Wesleyan',
+    detail: 'B.S. Astrophysics, B.A. Computer Science.',
+  },
+  {
+    when: '2024.08',
+    lane: 'intern',
+    ref: 'owu-dev-internship',
+    title: 'Software development intern, part-time',
+    detail: 'Data and reporting tools for 30+ people across 6 departments; rebuilt the alumni website.',
+  },
+  {
+    when: '2026.03',
+    lane: 'studio',
+    ref: 'bytewright',
+    title: 'Co-founded Bytewright',
+    detail: 'CTO of a 5-person software studio. 5 client projects delivered.',
+  },
+  {
+    when: '2026.05',
+    lane: 'main',
+    title: 'Graduated',
+    detail: 'The internship merges back in with the degree.',
+    merge: true,
+  },
+  { when: 'now', lane: 'studio', title: 'Bytewright, still open' },
+];
+
+// Geometry in tenths of a rem, so the SVG and the rows share one scale: a row
+// is 100 units tall because --row is 10rem, and the graph is 50 wide for 5rem.
+const ROW = 100;
+const WIDTH = 50;
+const HEIGHT = rows.length * ROW;
+const LANE_X: Record<Lane, number> = { main: 10, intern: 25, studio: 40 };
+const centre = (row: number) => row * ROW + ROW / 2;
+
+/** Leaves main just below the previous row and reaches `lane` at `row`. */
+function forkTo(lane: Lane, row: number): string {
+  const end = centre(row);
+  const start = end - ROW * 0.7;
+  const mid = (start + end) / 2;
+  return `M${LANE_X.main} ${start}C${LANE_X.main} ${mid} ${LANE_X[lane]} ${mid} ${LANE_X[lane]} ${end}`;
+}
+
+/** Runs down `lane` and curves back into main at `row`. */
+function mergeAt(lane: Lane, row: number): string {
+  const end = centre(row);
+  const start = end - ROW * 0.7;
+  const mid = (start + end) / 2;
+  return `V${start}C${LANE_X[lane]} ${mid} ${LANE_X.main} ${mid} ${LANE_X.main} ${end}`;
+}
+
+// `from` and `to` are the rows each line starts and finishes drawing across.
+const lines = [
+  { lane: 'main', d: `M${LANE_X.main} ${centre(0)}V${centre(3)}`, from: 0, to: 3 },
+  { lane: 'intern', d: forkTo('intern', 1) + mergeAt('intern', 3), from: 0.3, to: 3 },
+  { lane: 'studio', d: `${forkTo('studio', 2)}V${HEIGHT}`, from: 1.3, to: rows.length },
+];
+---
+
+<div class="tracks" data-scene-tracks>
+  <svg
+    class="tracks__graph"
+    viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+    style={`height: calc(var(--row) * ${rows.length})`}
+    aria-hidden="true"
+  >
+    {
+      lines.map(({ lane, d, from, to }) => (
+        <path class={`line line--${lane}`} d={d} data-line data-from={from} data-to={to} />
+      ))
+    }
+    {
+      rows.map((row, index) => (
+        <g class:list={['commit', row.merge && 'commit--merge']} data-commit={index}>
+          {row.merge && <circle cx={LANE_X[row.lane]} cy={centre(index)} r="6.5" />}
+          <circle cx={LANE_X[row.lane]} cy={centre(index)} r="4" />
+        </g>
+      ))
+    }
+  </svg>
+
+  <ol class="tracks__rows">
+    {
+      rows.map((row) => (
+        <li class="row" data-row>
+          <p class="row__when label">
+            {row.when}
+            {row.ref && <span class="row__ref">{row.ref}</span>}
+          </p>
+          <p class="row__title">{row.title}</p>
+          {row.detail && <p class="row__detail">{row.detail}</p>}
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<style>
+  .tracks {
+    /* Rows can't grow to fit, or they'd drift off their commits, so row copy has
+       to fit this height at 320px wide. At 9rem the longest title overflowed. */
+    --row: 10rem;
+    display: flex;
+    gap: var(--space-s);
+    max-width: 44rem;
+  }
+
+  .tracks__graph {
+    flex: none;
+    width: 5rem;
+    overflow: visible;
+  }
+
+  .line {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+  }
+
+  .line--intern,
+  .line--studio {
+    stroke: var(--ink-60);
+  }
+
+  .commit circle {
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 1.5;
+  }
+
+  .commit--merge circle:first-child {
+    fill: none;
+    stroke-width: 1;
+  }
+
+  .tracks__rows {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Fixed height, so each row lines up with its commit on the graph. */
+  .row {
+    height: var(--row);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-3xs);
+  }
+
+  .row__when {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2xs);
+  }
+
+  .row__ref {
+    padding: 0 var(--space-3xs);
+    border: var(--rule) solid var(--rule-colour);
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+
+  .row__title {
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-display);
+    font-weight: 700;
+    font-size: var(--step-1);
+    line-height: 1.1;
+  }
+
+  .row__detail {
+    max-width: 38ch;
+    font-size: var(--step--1);
+    line-height: 1.4;
+    color: var(--ink-60);
+  }
+</style>
+
+<script>
+  import { gsap, scene } from '../../lib/motion';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-scene-tracks]')) {
+    scene(root, () => {
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: root,
+          start: 'top 75%',
+          end: 'bottom 60%',
+          scrub: true,
+        },
+      });
+
+      // Positions are in rows, so each line draws while its rows scroll past.
+      for (const line of root.querySelectorAll<SVGPathElement>('[data-line]')) {
+        const from = Number(line.dataset.from);
+        const to = Number(line.dataset.to);
+        timeline.fromTo(
+          line,
+          { drawSVG: '0%' },
+          { drawSVG: '100%', duration: to - from, ease: 'none' },
+          from,
+        );
+      }
+
+      root.querySelectorAll<HTMLElement>('[data-row]').forEach((row, index) => {
+        const commit = root.querySelector(`[data-commit="${index}"]`);
+        const at = Math.max(index - 0.2, 0);
+        timeline.fromTo(row, { opacity: 0.2 }, { opacity: 1, duration: 0.4, ease: 'none' }, at);
+        if (commit) {
+          timeline.fromTo(commit, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: 'none' }, at + 0.1);
+        }
+      });
+    });
+  }
+</script>
