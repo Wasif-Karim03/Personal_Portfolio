@@ -1,0 +1,46 @@
+---
+/**
+ * The opening beat: the years of the story roll from 2022 to 2026 while the
+ * page loads, then lift away to reveal Wasif now. It only runs with motion; it
+ * never holds the page longer than the photo takes to arrive (1.6 s at least,
+ * 3 s at most).
+ */
+const years = [2022, 2023, 2024, 2025, 2026];
+---
+
+<div class="loader" data-loader aria-hidden="true">
+  <div class="loader__years">
+    <div class="loader__reel" data-reel>
+      {years.map((year) => <span>{year}</span>)}
+    </div>
+  </div>
+  <p class="mono loader__caption">Wasif Karim · the story so far</p>
+</div>
+
+<style>
+  .loader {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    place-content: center;
+    justify-items: center;
+    gap: 1.2rem;
+    background: var(--night);
+  }
+
+  :global(html.js-motion) .loader { display: grid; }
+
+  .loader__years {
+    height: 1em;
+    overflow: hidden;
+    font: 800 clamp(4rem, 12vw, 9rem)/1 var(--display);
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .loader__reel { display: grid; }
+  .loader__reel span { display: block; height: 1em; }
+
+  .loader__caption { margin: 0; color: var(--silver); }
+</style>

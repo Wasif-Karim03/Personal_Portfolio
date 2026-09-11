@@ -1,0 +1,59 @@
+/*
+ * The Story: tokens for the redesign.
+ *
+ * The site reads as one film. It opens in black and white on Wasif now, then
+ * the story starts at night in 2022 and moves forward year by year. Type does
+ * the heavy lifting: Big Shoulders Display for his name and the years (a face
+ * drawn for Chicago signage, where he's photographed), Instrument Serif for
+ * the story's lines, Geist for reading, Geist Mono for dates and places.
+ */
+:root {
+  --night: #0b0c0e;
+  --ink: #16181c;
+  --line: rgb(243 242 238 / 0.14);
+  --paper: #f3f2ee;
+  --silver: #a7abb3;
+  --dim: #6f737b;
+
+  --display: 'Big Shoulders Display Variable', 'Arial Narrow', Impact, sans-serif;
+  --serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+  --sans: 'Geist Variable', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'Geist Mono Variable', ui-monospace, Menlo, monospace;
+
+  --gutter: clamp(1.1rem, 3.2vw, 2.75rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { background: var(--night); }
+
+body {
+  margin: 0;
+  background: var(--night);
+  color: var(--paper);
+  font: 400 16px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: inherit; text-decoration: none; }
+a:focus-visible, button:focus-visible { outline: 1px solid var(--paper); outline-offset: 5px; }
+
+.mono {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+[hidden] { display: none !important; }
+
+/* Lines split for a reveal sit inside a clipping box. */
+.line-mask { display: block; overflow: hidden; padding-block-end: 0.06em; }

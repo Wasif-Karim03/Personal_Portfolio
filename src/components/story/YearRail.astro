@@ -1,0 +1,39 @@
+---
+/**
+ * Where you are in the story: the years down the right edge, the current one
+ * lit. It appears once the story starts and stays out of the way.
+ */
+const years = ['2022', '2023', '2024', '2025', '2026'];
+---
+
+<nav class="rail" data-rail aria-label="Years">
+  <ol>
+    {years.map((year) => <li data-rail-year={year}><span class="mono">{year}</span></li>)}
+  </ol>
+</nav>
+
+<style>
+  .rail {
+    position: fixed;
+    right: var(--gutter);
+    top: 50%;
+    z-index: 20;
+    translate: 0 -50%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 500ms var(--ease-out), visibility 500ms;
+  }
+
+  .rail.is-on { opacity: 1; visibility: visible; }
+
+  .rail ol { display: grid; gap: 0.9rem; margin: 0; padding: 0; list-style: none; }
+
+  .rail li { display: flex; align-items: center; justify-content: flex-end; gap: 0.6rem; color: var(--dim); transition: color 400ms var(--ease-out); }
+
+  .rail li::after { content: ''; width: 14px; height: 1px; background: currentColor; transition: width 400ms var(--ease-out); }
+
+  .rail li.is-current { color: var(--paper); }
+  .rail li.is-current::after { width: 30px; }
+
+  @media (max-width: 47.99rem) { .rail { display: none; } }
+</style>

@@ -1,0 +1,31 @@
+---
+/**
+ * The line that starts the story, alone on black between Wasif now and 2022.
+ * Every fact in it is from his resume and the storyboard.
+ */
+---
+
+<section class="prelude" id="prelude" aria-label="Prologue">
+  <p class="prelude__line" data-lines>
+    In August 2022, I left Dhaka for a small college in Ohio to study the stars and the code behind machines. <em>This is what happened next.</em>
+  </p>
+</section>
+
+<style>
+  .prelude {
+    display: grid;
+    align-content: center;
+    min-height: 90svh;
+    padding: 18svh var(--gutter);
+  }
+
+  .prelude__line {
+    margin: 0;
+    max-width: 21ch;
+    font: 400 clamp(2.1rem, 1.2rem + 3.6vw, 4.6rem)/1.06 var(--serif);
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+  }
+
+  .prelude__line em { color: var(--silver); }
+</style>
