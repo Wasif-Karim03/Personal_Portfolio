@@ -1,0 +1,262 @@
+---
+/**
+ * The flight scene: one pinned stretch of scroll where the story travels.
+ *
+ * Scattered dots gather into a globe while the prologue line arrives; the plane
+ * flies Dhaka to Ohio along the great circle as you scroll, the globe turning
+ * under it; on landing the dots stream into Ohio Wesleyan's University Hall as
+ * dot-art, the real photo develops out of them, and chapter 01 begins.
+ *
+ * The dots are drawn by src/lib/story-scene.ts from scripts/make-story-points.mjs.
+ * The photo is a Higgsfield still built from Wasif's own photo of the hall
+ * (docs/ai-log.md, MB-06a). Without WebGL or script, or with reduced motion,
+ * the scene is laid out still: the globe with the whole route, then the photo
+ * and the chapter below it.
+ */
+import { Picture } from 'astro:assets';
+import hall from '../../assets/story/hall.jpg';
+import { flight } from '../../data/flight';
+import { formatCoordinates, kilometres } from '../../lib/geo-format';
+
+const km = kilometres.format(flight.distanceKm);
+const config = JSON.stringify({
+  samples: flight.samples.map(([, , lat, lon]) => [lat, lon]),
+  distanceKm: flight.distanceKm,
+});
+---
+
+<section class="fs" id="flight" data-flight data-config={config} aria-labelledby="fs-chapter">
+  <div class="fs__pin">
+    <canvas class="fs__canvas" data-canvas aria-hidden="true"></canvas>
+
+    <div class="fs__photo" data-photo>
+      <Picture src={hall} formats={['avif', 'webp']} widths={[960, 1600, 2400]} sizes="100vw" alt="Ohio Wesleyan's University Hall at dusk: a sandstone building with a pointed clock tower, lit windows and lamp posts on the lawn." class="fs__img" />
+    </div>
+
+    <div class="fs__prologue" data-prologue>
+      <p class="fs__line" data-lines>
+        In August 2022, I left Dhaka for a small college in Ohio to study the stars and the code behind machines. <em>This is what happened next.</em>
+      </p>
+    </div>
+
+    <div class="fs__readout" data-readout>
+      <p class="mono fs__route">DAC → Delaware, OH · 10 Aug 2022</p>
+      <p class="fs__row"><span class="mono fs__key">Position</span><span class="mono fs__val" data-pos>{formatCoordinates(flight.destination.lat, flight.destination.lon)}</span></p>
+      <p class="fs__row"><span class="mono fs__key">Flown</span><span class="mono fs__val" data-flown>{km} km of {km} km</span></p>
+    </div>
+
+    {/* Material Icons "flight" (Apache 2.0): nose up, rotated to the direction of travel. */}
+    <div class="fs__plane" data-plane aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" /></svg>
+    </div>
+    <span class="fs__city mono" data-city-from aria-hidden="true">Dhaka</span>
+    <span class="fs__city mono" data-city-to aria-hidden="true">Ohio</span>
+
+    <div class="fs__chapter" data-chapter-text data-year="2022">
+      <p class="mono fs__meta">Chapter 01 · 2022 – 2026 · Ohio Wesleyan University</p>
+      <h2 class="fs__title" id="fs-chapter">Astrophysics and code, <em>four years.</em></h2>
+      <p class="fs__sub">A B.S. in astrophysics and a B.A. in computer science, in Delaware, Ohio.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .fs { position: relative; }
+
+  :global(html.js-motion) .fs { height: 560svh; }
+
+  .fs__pin {
+    position: relative;
+    overflow: hidden;
+    background: var(--night);
+  }
+
+  :global(html.js-motion) .fs__pin { position: sticky; top: 0; height: 100svh; min-height: 36rem; }
+
+  .fs__canvas { display: block; width: 100%; height: 80svh; }
+  :global(html.js-motion) .fs__canvas { position: absolute; inset: 0; height: 100%; }
+
+  .fs__photo { position: relative; aspect-ratio: 16 / 9; max-width: 100%; }
+  :global(html.js-motion) .fs__photo { position: absolute; inset: 0; z-index: 1; aspect-ratio: auto; opacity: 0; }
+  .fs__photo :global(picture) { display: contents; }
+  .fs__photo :global(.fs__img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .fs__photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(11 12 14 / 0.86), transparent 52%);
+  }
+
+  .fs__prologue { padding: 3rem var(--gutter); }
+  :global(html.js-motion) .fs__prologue {
+    position: absolute;
+    left: var(--gutter);
+    top: 50%;
+    z-index: 3;
+    width: min(40vw, 38rem);
+    padding: 0;
+    translate: 0 -50%;
+  }
+
+  .fs__line {
+    margin: 0;
+    max-width: 21ch;
+    font: 400 clamp(2.1rem, 1.2rem + 3vw, 4.4rem)/1.06 var(--serif);
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+  }
+
+  .fs__line em { color: var(--silver); }
+
+  .fs__readout { display: grid; gap: 0.45rem; width: min(100% - 2 * var(--gutter), 21rem); margin: 0 var(--gutter) 3rem; }
+  :global(html.js-motion) .fs__readout { position: absolute; right: calc(var(--gutter) + 6rem); bottom: 2.25rem; z-index: 3; margin: 0; }
+  .fs__readout p { margin: 0; }
+  .fs__route { color: var(--flight); }
+  .fs__row { display: flex; justify-content: space-between; gap: 1rem; padding-block-start: 0.45rem; border-block-start: 1px solid var(--line); }
+  .fs__key { color: var(--dim); }
+  .fs__val { color: var(--silver); font-variant-numeric: tabular-nums; }
+
+  .fs__plane,
+  .fs__city { display: none; }
+
+  :global(html.js-motion) .fs__plane {
+    position: absolute;
+    left: -11px;
+    top: -11px;
+    z-index: 3;
+    display: block;
+    width: 22px;
+    height: 22px;
+    fill: var(--paper);
+    filter: drop-shadow(0 0 6px rgb(255 236 210 / 0.55));
+    opacity: 0;
+    transition: opacity 300ms var(--ease-out);
+    pointer-events: none;
+  }
+
+  :global(html.js-motion) .fs__city {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 3;
+    display: block;
+    padding-inline-start: 0.9rem;
+    margin-block-start: -0.55em;
+    color: var(--flight);
+    opacity: 0;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .fs__chapter { position: relative; z-index: 3; display: grid; gap: 0.9rem; max-width: 46rem; padding: 2rem var(--gutter) 4rem; }
+  :global(html.js-motion) .fs__chapter { position: absolute; left: var(--gutter); right: var(--gutter); bottom: clamp(2rem, 8svh, 5rem); padding: 0; opacity: 0; }
+  .fs__meta { margin: 0; color: var(--silver); }
+  .fs__title { margin: 0; font: 400 clamp(3rem, 1.6rem + 5vw, 6.4rem)/0.95 var(--serif); letter-spacing: -0.015em; }
+  .fs__sub { margin: 0; max-width: 36ch; font-size: clamp(1.02rem, 0.95rem + 0.3vw, 1.2rem); color: var(--silver); }
+
+  @media (max-width: 59.99rem) {
+    :global(html.js-motion) .fs__prologue { top: auto; bottom: 11svh; width: auto; right: var(--gutter); translate: 0 0; }
+    .fs__line { font-size: clamp(1.7rem, 1.2rem + 2.4vw, 2.4rem); }
+    :global(html.js-motion) .fs__readout { display: none; }
+  }
+</style>
+
+<script>
+  import pointsJson from '../../data/story-points.json';
+  import type { StoryPoints, StoryScene } from '../../lib/story-scene';
+  import { gsap, ScrollTrigger, initMotion } from '../../lib/motion';
+  import { SplitText } from 'gsap/SplitText';
+  import { formatCoordinates, kilometres } from '../../lib/geo-format';
+
+  interface FlightConfig {
+    samples: Array<[lat: number, lon: number]>;
+    distanceKm: number;
+  }
+
+  const data = pointsJson as unknown as StoryPoints;
+  const root = document.querySelector<HTMLElement>('[data-flight]');
+  const q = <T extends HTMLElement>(s: string) => root?.querySelector<T>(s) ?? null;
+  const canvas = q<HTMLCanvasElement>('[data-canvas]');
+  const photo = q('[data-photo]');
+  const prologue = q('[data-prologue]');
+  const readout = q('[data-readout]');
+  const chapter = q('[data-chapter-text]');
+  const plane = q('[data-plane]');
+  const cityFrom = q('[data-city-from]');
+  const cityTo = q('[data-city-to]');
+  const pos = q('[data-pos]');
+  const flown = q('[data-flown]');
+
+  const webgl = () => {
+    try { return Boolean(document.createElement('canvas').getContext('webgl2')); } catch { return false; }
+  };
+
+  const clamp = (v: number) => Math.min(Math.max(v, 0), 1);
+  const span = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
+  const smooth = (t: number) => t * t * (3 - 2 * t);
+
+  if (root && canvas && photo && prologue && readout && chapter && plane && cityFrom && cityTo && pos && flown) {
+    const { samples, distanceKm } = JSON.parse(root.dataset.config ?? '{}') as FlightConfig;
+    const total = kilometres.format(distanceKm);
+    const motion = initMotion();
+    const canDraw = webgl();
+    if (!canDraw) canvas.hidden = true;
+    let scene: StoryScene | undefined;
+    let progress = 0;
+
+    // The story's beats, as fractions of this scene's scroll: gather, fly,
+    // stream into the hall, hold it as dots, then let the photo develop.
+    const phases = (p: number) => ({
+      assemble: smooth(span(p, 0.0, 0.1)),
+      flight: span(p, 0.12, 0.56),
+      morph: span(p, 0.6, 0.76),
+      fade: span(p, 0.86, 0.95),
+    });
+
+    const apply = (p: number) => {
+      progress = p;
+      const beat = phases(p);
+      const f = beat.flight;
+      const [lat, lon] = samples[Math.round(f * (samples.length - 1))];
+      pos.textContent = formatCoordinates(lat, lon);
+      flown.textContent = `${kilometres.format(Math.round(distanceKm * f))} km of ${total} km`;
+      const words = 1 - span(p, 0.57, 0.63);
+      prologue.style.opacity = String(words);
+      readout.style.opacity = String(words * span(p, 0.06, 0.12));
+      photo.style.opacity = String(smooth(span(p, 0.83, 0.92)));
+      const title = smooth(span(p, 0.9, 0.96));
+      chapter.style.opacity = String(title);
+      chapter.style.transform = `translateY(${(1 - title) * 24}px)`;
+      document.querySelector('[data-rail-year="2022"]')?.classList.toggle('is-current', p > 0.86);
+      scene?.set(beat);
+    };
+
+    if (motion) {
+      ScrollTrigger.create({ trigger: root, start: 'top top', end: 'bottom bottom', onUpdate: (self) => apply(self.progress) });
+      gsap.registerPlugin(SplitText);
+      const lines = SplitText.create(root.querySelector('[data-lines]'), { type: 'lines', mask: 'lines' }).lines;
+      gsap.from(lines, { yPercent: 110, duration: 1.2, ease: 'power4.out', stagger: 0.09, scrollTrigger: { trigger: root, start: 'top 55%' } });
+      apply(0);
+    }
+
+    if (canDraw) {
+      const io = new IntersectionObserver(async ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+        try {
+          const { createStoryScene } = await import('../../lib/story-scene');
+          const variant = matchMedia('(max-width: 48rem)').matches ? 'mobile' : 'desktop';
+          const background = getComputedStyle(document.documentElement).getPropertyValue('--night').trim() || '#0b0c0e';
+          scene = await createStoryScene(canvas, data, variant, { plane, from: cityFrom, to: cityTo }, background);
+          // Still, without motion: the globe with the whole flight on it.
+          scene.set(motion ? phases(progress) : { assemble: 1, flight: 1, morph: 0, fade: 0 });
+          window.addEventListener('resize', () => scene?.resize());
+        } catch (error) {
+          console.warn('flight scene unavailable', error);
+          canvas.hidden = true;
+        }
+      }, { rootMargin: '100% 0px' });
+      io.observe(root);
+    }
+  }
+</script>

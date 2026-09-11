@@ -7,10 +7,8 @@
 import StoryLayout from '../layouts/StoryLayout.astro';
 import Loader from '../components/story/Loader.astro';
 import Hero from '../components/story/Hero.astro';
-import Prelude from '../components/story/Prelude.astro';
-import Chapter from '../components/story/Chapter.astro';
+import FlightScene from '../components/story/FlightScene.astro';
 import YearRail from '../components/story/YearRail.astro';
-import departure from '../assets/machine/departure.png';
 ---
 
 <StoryLayout title="Wasif Karim" description="Wasif Karim, robotics software engineer. The story from Dhaka in 2022 to Cleveland now.">
@@ -21,17 +19,7 @@ import departure from '../assets/machine/departure.png';
   <YearRail />
   <main>
     <Hero />
-    <Prelude />
-    <Chapter
-      id="chapter-01"
-      number="01"
-      year="2022"
-      place="Dhaka → Delaware, Ohio · 10 Aug 2022"
-      title="Departure"
-      line="One flight, halfway around the world, to start a degree in astrophysics and computer science."
-      image={departure}
-      alt="Night at Dhaka's airport: a lone traveller, seen from behind, looks out at a jet through tall glass."
-    />
+    <FlightScene />
     <p class="proto mono">Stage one · more chapters next</p>
   </main>
 </StoryLayout>
@@ -93,48 +81,14 @@ import departure from '../assets/machine/departure.png';
       .to('[data-hero-scene]', { scale: 1.06, duration: 1, ease: 'none' }, 0)
       .to('[data-hero-dim]', { opacity: 1, duration: 0.45, ease: 'none' }, 0.55);
 
-    // 3. Prologue: its lines rise in as it arrives.
-    for (const el of document.querySelectorAll('.prelude [data-lines]')) {
-      gsap.from(lines(el), {
-        yPercent: 110,
-        duration: 1.2,
-        ease: 'power4.out',
-        stagger: 0.09,
-        scrollTrigger: { trigger: el, start: 'top 78%' },
-      });
-    }
-
-    // 4. Chapters: the year looms, the frame opens from a slit, the words arrive.
-    for (const chapter of document.querySelectorAll<HTMLElement>('[data-chapter]')) {
-      const frame = chapter.querySelector('[data-frame]');
-      const img = chapter.querySelector('.chapter__img');
-      const text = chapter.querySelectorAll('[data-lines]');
-      const meta = chapter.querySelector('.chapter__meta');
-      const tl = gsap.timeline({ scrollTrigger: { trigger: chapter, start: 'top top', end: 'bottom bottom', scrub: 0.8 } });
-      tl.fromTo(chapter.querySelector('[data-year-text]'), { scale: 1.25, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.5, ease: 'none' }, 0)
-        .fromTo(frame, { clipPath: 'inset(46% 38% 46% 38%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9, ease: 'none' }, 0.25)
-        .fromTo(img, { scale: 1.3 }, { scale: 1, duration: 1.4, ease: 'none' }, 0.25)
-        .fromTo(meta, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.25 }, 0.95);
-      text.forEach((el, i) => tl.from(lines(el), { yPercent: 110, duration: 0.35, stagger: 0.05 }, 1.0 + i * 0.12));
-    }
-
     // 5. The year rail: on once the story begins, the current year lit.
     const rail = document.querySelector('[data-rail]');
+    // Each scene lights its own year as it reaches it (see FlightScene).
     ScrollTrigger.create({
-      trigger: '#prelude',
+      trigger: '#flight',
       start: 'top 60%',
       onEnter: () => rail?.classList.add('is-on'),
       onLeaveBack: () => rail?.classList.remove('is-on'),
     });
-    for (const chapter of document.querySelectorAll<HTMLElement>('[data-chapter]')) {
-      ScrollTrigger.create({
-        trigger: chapter,
-        start: 'top 50%',
-        end: 'bottom 50%',
-        onToggle: (self) => {
-          document.querySelector(`[data-rail-year="${chapter.dataset.year}"]`)?.classList.toggle('is-current', self.isActive);
-        },
-      });
-    }
   }
 </script>

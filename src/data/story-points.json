@@ -1,0 +1,25 @@
+{
+  "counts": {
+    "desktop": 64000,
+    "mobile": 26000
+  },
+  "files": {
+    "desktop": "/story/points-desktop.bin",
+    "mobile": "/story/points-mobile.bin"
+  },
+  "route": {
+    "from": [
+      0.448,
+      -0.7297,
+      0.5395
+    ],
+    "to": [
+      -0.448,
+      0.7297,
+      0.5395
+    ]
+  },
+  "picture": {
+    "aspect": 1.7778
+  }
+}
