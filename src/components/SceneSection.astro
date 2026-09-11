@@ -21,7 +21,10 @@ const { scene } = Astro.props;
     </ul>
   </header>
 
-  <h2 class="scene__title" id={`fig-${scene.fig}-title`}>{scene.title}</h2>
+  <h2 class="scene__title" id={`fig-${scene.fig}-title`}>
+    {/* A no-break space ties each middle dot to the word before it. */}
+    {scene.title.replaceAll(' · ', '\u00a0· ')}
+  </h2>
 
   <div class="scene__body">
     <slot>
