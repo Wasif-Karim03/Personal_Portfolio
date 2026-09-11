@@ -97,7 +97,8 @@ export const scenes: Scene[] = [
     sources: ['REAL'],
     technique: 'Photo with animated annotation lines',
     status: 'blocked-on-media',
-    blockedOn: 'The 2022 acceptance and scholarship letters need digging up',
+    blockedOn:
+      'The 2022 acceptance letter, photographed close up, and the callouts set to its real lines. The scene is built.',
   },
   {
     fig: '04',
@@ -142,7 +143,7 @@ export const scenes: Scene[] = [
     sources: ['REAL'],
     technique: 'Parallax photo stack, kept subtle',
     status: 'blocked-on-media',
-    blockedOn: 'Campus photos',
+    blockedOn: 'Three campus photos. The scene is built.',
   },
   {
     fig: '06',
@@ -153,7 +154,7 @@ export const scenes: Scene[] = [
     sources: ['REAL', 'CODE'],
     technique: 'Counters on scroll',
     status: 'blocked-on-media',
-    blockedOn: 'Real club photos for the three frames. The counters are built.',
+    blockedOn: 'Three club photos. The counters are built.',
   },
   {
     fig: '07',
@@ -205,7 +206,7 @@ export const scenes: Scene[] = [
     sources: ['REAL'],
     technique: 'A quiet, held moment',
     status: 'blocked-on-media',
-    blockedOn: 'Graduation photo',
+    blockedOn: 'A graduation photo. The scene is built.',
   },
   {
     fig: '12',
@@ -216,7 +217,7 @@ export const scenes: Scene[] = [
     sources: ['REAL'],
     technique: 'Short looping clips',
     status: 'blocked-on-media',
-    blockedOn: 'Filming day shots H and I',
+    blockedOn: 'Filming day shots H and I, the printer and Poetry Camera. The scene is built.',
   },
   {
     fig: '13',

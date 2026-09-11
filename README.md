@@ -77,3 +77,23 @@ it by hand once and it stays.
 Until then, FIG. 14 runs on a simulated scan from
 `scripts/make-lidar-placeholder.mjs`, labelled as such on the page. three.js is
 fetched only as the scene approaches, and never under reduced motion.
+
+### Photos and clips
+
+The REAL scenes (FIG. 03, 05, 06, 11 and 12) have their frames on the page
+already, labelled until the real thing arrives. Each frame is a named slot in
+`src/data/media.ts`, and filling one is a single command, no code:
+
+```sh
+node scripts/add-photo.mjs ~/Pictures/IMG_2041.jpg accepted-letter
+scripts/add-clip.sh ~/Movies/printer.mov thinkbox-printer --from 3 --to 9
+```
+
+Photos are turned upright, fitted within 2400px and stripped of metadata, GPS
+location included, into `src/assets/media/`; the build makes the responsive
+sizes and formats. Clips are trimmed, scaled down, muted and written to
+`public/media/` with a poster frame. The build fails on a file whose name
+matches no slot. The slots are `accepted-letter`, `campus-1` to `campus-3`,
+`club-1` to `club-3`, `graduation`, `thinkbox-printer` and
+`thinkbox-poetry-camera`. FIG. 03's callouts need their positions set to the
+real letter's lines once its photo is in.

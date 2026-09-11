@@ -1,0 +1,81 @@
+---
+/**
+ * FIG. 12 — think[box] · 2026.
+ *
+ * Two short loops of real footage: the volumetric printer curing a part in one
+ * rotation, and Poetry Camera printing a poem. <MediaFrame> plays them only
+ * while on screen, and never on its own under reduced motion. The role and both
+ * descriptions are from the resume.
+ */
+import MediaFrame from '../MediaFrame.astro';
+
+const clips = [
+  {
+    id: 'thinkbox-printer',
+    title: 'Volumetric resin printer',
+    text: 'Control software for a prototype, with UC Berkeley, that cures a whole part in one rotation of the resin instead of layer by layer.',
+  },
+  {
+    id: 'thinkbox-poetry-camera',
+    title: 'Poetry Camera',
+    text: 'An open-source AI camera, moving from a cloud model to one that runs on the camera itself.',
+  },
+];
+---
+
+<div class="thinkbox">
+  <p class="thinkbox__role label">Robotics Software Engineer · Case Western Reserve University · since June 2026</p>
+
+  <div class="thinkbox__clips">
+    {
+      clips.map(({ id, title, text }) => (
+        <div class="clip">
+          <MediaFrame id={id} sizes="(min-width: 48rem) 45vw, 100vw" />
+          <p class="clip__title">{title}</p>
+          <p class="clip__text">{text}</p>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .thinkbox {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .thinkbox__role {
+    color: var(--ink-60);
+  }
+
+  .thinkbox__clips {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .clip {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2xs);
+  }
+
+  .clip__title {
+    margin-block-start: var(--space-2xs);
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-display);
+    font-weight: 700;
+    font-size: var(--step-2);
+  }
+
+  .clip__text {
+    max-width: 44ch;
+    color: var(--ink-60);
+  }
+
+  @media (min-width: 48rem) {
+    .thinkbox__clips {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

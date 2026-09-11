@@ -5,14 +5,15 @@
  * Two counters roll up with the scroll, 0 to 267 members and $0 to $68K raised,
  * beside the title that matters most here: founding president.
  *
- * The photos have to be real club photos, still to be dug up
- * (docs/storyboard.md), so until then their slots are drawn as empty frames on
- * the sheet rather than filled with anything that isn't the club.
+ * The photos have to be real club photos. They are media slots club-1 to
+ * club-3 (src/data/media.ts), drawn as labelled empty frames until added.
  *
  * Without script, or under reduced motion, the counters show their final
  * values. Script winds them back to zero and lets the scroll carry them up;
  * screen readers always get the final values.
  */
+import MediaFrame from '../MediaFrame.astro';
+
 type Kind = 'count' | 'thousands';
 
 const counters: Array<{ value: number; kind: Kind; label: string }> = [
@@ -22,7 +23,6 @@ const counters: Array<{ value: number; kind: Kind; label: string }> = [
 
 const format = (value: number, kind: Kind) => (kind === 'thousands' ? `$${value}K` : String(value));
 
-const photoSlots = [1, 2, 3];
 ---
 
 <div class="club" data-scene-club>
@@ -44,15 +44,9 @@ const photoSlots = [1, 2, 3];
     }
   </dl>
 
-  <ul class="photos" aria-label="Club photos, still to come">
-    {
-      photoSlots.map((n) => (
-        <li class="photo">
-          <span class="photo__label label">Club photo {n} · to come</span>
-        </li>
-      ))
-    }
-  </ul>
+  <div class="photos">
+    {['club-1', 'club-2', 'club-3'].map((id) => <MediaFrame id={id} sizes="(min-width: 60rem) 30vw, 100vw" />)}
+  </div>
 </div>
 
 <style>
@@ -94,20 +88,6 @@ const photoSlots = [1, 2, 3];
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
     gap: var(--space-s);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .photo {
-    display: grid;
-    place-items: center;
-    aspect-ratio: 4 / 3;
-    border: var(--rule) dashed var(--rule-colour);
-  }
-
-  .photo__label {
-    text-transform: none;
   }
 </style>
 

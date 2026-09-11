@@ -1,0 +1,137 @@
+---
+/**
+ * One media slot from src/data/media.ts, at its fixed proportions.
+ *
+ * A photo renders as a responsive <picture> the build makes from the file in
+ * src/assets/media/. A clip renders as a muted loop that plays only while on
+ * screen, and never on its own under reduced motion or without script, where it
+ * keeps its controls. An empty slot renders as a labelled frame on the sheet.
+ */
+import { Picture } from 'astro:assets';
+import { slot as resolve } from '../data/media';
+
+interface Props {
+  id: string;
+  /** The rendered width, for choosing a photo size. */
+  sizes?: string;
+  class?: string;
+}
+
+const { id, sizes = '(min-width: 60rem) 50vw, 100vw', class: className } = Astro.props;
+const media = resolve(id);
+const [w, h] = media.aspect;
+const widths = media.photo
+  ? [...new Set([480, 960, 1600].filter((width) => width < media.photo!.width).concat(media.photo.width))]
+  : [];
+---
+
+<figure
+  class:list={['frame', !media.photo && !media.clip && 'frame--empty', className]}
+  style={`--aspect: ${w} / ${h}`}
+  data-media={id}
+>
+  {
+    media.photo ? (
+      <Picture
+        src={media.photo}
+        alt={media.alt}
+        widths={widths}
+        sizes={sizes}
+        formats={['avif', 'webp']}
+        class="frame__media"
+      />
+    ) : media.clip ? (
+      <video
+        class="frame__media"
+        src={media.clip.src}
+        poster={media.clip.poster}
+        aria-label={media.alt}
+        muted
+        loop
+        playsinline
+        controls
+        preload="none"
+        data-clip
+      />
+    ) : (
+      <div class="frame__empty">
+        <span class="label">{media.kind === 'photo' ? 'Photo' : 'Clip'} to come</span>
+        <span class="frame__wanted">{media.wanted}</span>
+      </div>
+    )
+  }
+</figure>
+
+<style>
+  .frame {
+    position: relative;
+    margin: 0;
+    aspect-ratio: var(--aspect);
+    overflow: hidden;
+    background: var(--ink-12);
+  }
+
+  .frame :global(picture) {
+    display: contents;
+  }
+
+  .frame :global(.frame__media) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Paper, not transparent, so empty frames that overlap still read as sheets. */
+  .frame--empty {
+    display: grid;
+    place-items: center;
+    background: var(--paper);
+    border: var(--rule) dashed var(--rule-colour);
+  }
+
+  .frame__empty {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3xs);
+    padding: var(--space-s);
+    text-align: center;
+  }
+
+  .frame__wanted {
+    max-width: 24ch;
+    font-size: var(--step--1);
+    color: var(--ink-60);
+  }
+</style>
+
+<script>
+  import { prefersReducedMotion } from '../lib/motion';
+
+  // Clips loop only while on screen, and only when motion is welcome. Otherwise
+  // they keep the controls they were rendered with and wait to be played.
+  const clips = document.querySelectorAll<HTMLVideoElement>('video[data-clip]');
+  if (clips.length > 0 && !prefersReducedMotion()) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const video = entry.target as HTMLVideoElement;
+          if (entry.isIntersecting) {
+            video.preload = 'auto';
+            video.play().catch(() => {
+              // Autoplay refused: bring the controls back so it can be played by hand.
+              video.controls = true;
+            });
+          } else {
+            video.pause();
+          }
+        }
+      },
+      { threshold: 0.25 },
+    );
+    for (const video of clips) {
+      video.controls = false;
+      observer.observe(video);
+    }
+  }
+</script>

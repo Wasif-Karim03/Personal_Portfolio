@@ -1,0 +1,172 @@
+---
+/**
+ * FIG. 03 — Accepted · 2022.
+ *
+ * A close-up of the real acceptance letter, annotated the way a drawing is:
+ * numbered balloons on leader lines, keyed to a legend. They draw in as the
+ * scene scrolls past; without motion they are simply there.
+ *
+ * The balloons point at placeholder positions until the photo exists. Set
+ * each x and y (0–1 across and down the photo) to the line it names on the
+ * real letter.
+ */
+import MediaFrame from '../MediaFrame.astro';
+
+const callouts = [
+  { x: 0.28, y: 0.22, text: 'Ohio Wesleyan University' },
+  { x: 0.66, y: 0.36, text: 'Computer Science + Astrophysics' },
+  { x: 0.4, y: 0.74, text: 'Schubert Scholarship' },
+];
+---
+
+<div class="accepted" data-scene-accepted>
+  <div class="accepted__plate">
+    <MediaFrame id="accepted-letter" sizes="(min-width: 60rem) 55vw, 100vw" />
+    {
+      callouts.map(({ x, y }, index) => (
+        <div class="callout" style={`--x: ${x * 100}%; --y: ${y * 100}%`} data-callout aria-hidden="true">
+          <span class="callout__dot" data-dot />
+          <span class="callout__leader" data-leader />
+          <span class="callout__balloon" data-balloon>
+            {index + 1}
+          </span>
+        </div>
+      ))
+    }
+  </div>
+
+  <ol class="legend">
+    {
+      callouts.map(({ text }, index) => (
+        <li class="legend__item" data-legend>
+          <span class="legend__n" aria-hidden="true">
+            {index + 1}
+          </span>
+          <span>{text}</span>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+<style>
+  .accepted {
+    display: grid;
+    gap: var(--space-l);
+    align-items: center;
+  }
+
+  .accepted__plate {
+    position: relative;
+  }
+
+  /* A zero-size anchor on the photo; everything hangs off it. */
+  .callout {
+    --leader: 3.5rem;
+    --r: 0.95rem;
+    --angle: 40deg;
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+  }
+
+  .callout__dot {
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ink);
+    box-shadow: 0 0 0 3px var(--paper);
+  }
+
+  .callout__leader {
+    position: absolute;
+    left: 0;
+    top: -0.75px;
+    width: var(--leader);
+    height: 1.5px;
+    background: var(--ink);
+    transform-origin: 0 50%;
+    transform: rotate(calc(var(--angle) * -1));
+  }
+
+  /* Centred just past the leader's end, so the line meets its edge. */
+  .callout__balloon {
+    position: absolute;
+    left: calc((var(--leader) + var(--r)) * cos(var(--angle)));
+    top: calc((var(--leader) + var(--r)) * sin(var(--angle)) * -1);
+    width: calc(var(--r) * 2);
+    height: calc(var(--r) * 2);
+    display: grid;
+    place-items: center;
+    translate: -50% -50%;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    background: var(--paper);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+  }
+
+  .legend {
+    display: grid;
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .legend__item {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    align-items: center;
+    gap: var(--space-s);
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-display);
+    font-weight: 700;
+    font-size: var(--step-2);
+    line-height: 1.1;
+  }
+
+  .legend__n {
+    display: grid;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    font-family: var(--font-mono);
+    font-stretch: normal;
+    font-weight: 400;
+    font-size: var(--step--1);
+  }
+
+  @media (min-width: 60rem) {
+    .accepted {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+  }
+</style>
+
+<script>
+  import { gsap, scene } from '../../lib/motion';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-scene-accepted]')) {
+    scene(root, () => {
+      const timeline = gsap.timeline({
+        scrollTrigger: { trigger: root, start: 'top 70%', end: 'center 40%', scrub: true },
+      });
+
+      const legend = root.querySelectorAll<HTMLElement>('[data-legend]');
+      root.querySelectorAll<HTMLElement>('[data-callout]').forEach((callout, index) => {
+        const at = index * 0.8;
+        timeline
+          .fromTo(callout.querySelector('[data-dot]'), { scale: 0 }, { scale: 1, duration: 0.2, ease: 'none' }, at)
+          .fromTo(callout.querySelector('[data-leader]'), { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: 'none' }, at + 0.1)
+          .fromTo(callout.querySelector('[data-balloon]'), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'none' }, at + 0.45)
+          .fromTo(legend[index], { opacity: 0.2 }, { opacity: 1, duration: 0.3, ease: 'none' }, at + 0.45);
+      });
+    });
+  }
+</script>

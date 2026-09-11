@@ -9,6 +9,10 @@ import SceneRoboticsClub from '../components/scenes/SceneRoboticsClub.astro';
 import SceneParallelTracks from '../components/scenes/SceneParallelTracks.astro';
 import SceneResume from '../components/scenes/SceneResume.astro';
 import SceneWorkFlight from '../components/scenes/SceneWorkFlight.astro';
+import SceneAccepted from '../components/scenes/SceneAccepted.astro';
+import SceneCampus from '../components/scenes/SceneCampus.astro';
+import SceneGraduation from '../components/scenes/SceneGraduation.astro';
+import SceneThinkbox from '../components/scenes/SceneThinkbox.astro';
 import SceneHilton from '../components/scenes/SceneHilton.astro';
 import SceneAirbnb from '../components/scenes/SceneAirbnb.astro';
 import SceneContact from '../components/scenes/SceneContact.astro';
@@ -86,6 +90,34 @@ const sections = scenes.filter((scene) => scene.presentation !== 'overlay');
         return (
           <SceneSection scene={scene}>
             <SceneParallelTracks />
+          </SceneSection>
+        );
+      }
+      if (scene.slug === 'accepted') {
+        return (
+          <SceneSection scene={scene}>
+            <SceneAccepted />
+          </SceneSection>
+        );
+      }
+      if (scene.slug === 'ohio-wesleyan') {
+        return (
+          <SceneSection scene={scene}>
+            <SceneCampus />
+          </SceneSection>
+        );
+      }
+      if (scene.slug === 'graduation') {
+        return (
+          <SceneSection scene={scene}>
+            <SceneGraduation />
+          </SceneSection>
+        );
+      }
+      if (scene.slug === 'thinkbox') {
+        return (
+          <SceneSection scene={scene}>
+            <SceneThinkbox />
           </SceneSection>
         );
       }
