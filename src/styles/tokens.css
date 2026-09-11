@@ -14,6 +14,10 @@
   --ink-30: color-mix(in srgb, var(--ink) 30%, var(--paper));
   --ink-12: color-mix(in srgb, var(--ink) 12%, var(--paper));
   --signal-12: color-mix(in srgb, var(--signal) 12%, var(--paper));
+  /* Signal orange is too light for small text (2.9:1 on paper). This darker
+     cut of it is 5:1, for orange words and labels; --signal stays for marks,
+     lines, points and fills. */
+  --signal-text: #b83800;
 
   /*
    * Type. Self-hosted, loaded in BaseLayout.

@@ -80,7 +80,7 @@ a {
 }
 
 a:hover {
-  color: var(--signal);
+  color: var(--signal-text);
 }
 
 :focus-visible {
@@ -99,9 +99,9 @@ a:hover {
   color: var(--ink-60);
 }
 
-/** Anything the robot "sees" is drawn in signal orange. */
+/** Anything the robot "sees" is drawn in signal orange: as text, its legible cut. */
 .robot-vision {
-  color: var(--signal);
+  color: var(--signal-text);
 }
 
 .sheet {

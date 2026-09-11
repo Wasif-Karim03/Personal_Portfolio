@@ -86,7 +86,7 @@ const facts = [
   .box__chrome {
     padding: var(--space-2xs) var(--space-s);
     border-block-end: var(--rule) solid var(--rule-colour);
-    color: var(--ink-30);
+    color: var(--ink-60);
     text-transform: none;
   }
 
@@ -104,7 +104,7 @@ const facts = [
   }
 
   .msg__who {
-    color: var(--ink-30);
+    color: var(--ink-60);
   }
 
   .msg--in .msg__text {
@@ -119,17 +119,17 @@ const facts = [
   .edit-old {
     text-decoration: line-through;
     text-decoration-color: var(--signal);
-    color: var(--ink-30);
+    color: var(--ink-60);
   }
 
   .edit-new {
-    color: var(--signal);
+    color: var(--signal-text);
   }
 
   .box__note {
     padding-block-start: var(--space-2xs);
     border-block-start: var(--rule) dashed var(--rule-colour);
-    color: var(--ink-30);
+    color: var(--ink-60);
     text-transform: none;
   }
 
@@ -209,7 +209,7 @@ const facts = [
             .add(type(ending, endingText, 0.9))
             // The pause is the point: the host reads it, then changes it.
             .to({}, { duration: 0.7 })
-            .to(ending, { color: 'var(--ink-30)', duration: 0.25 })
+            .to(ending, { color: 'var(--ink-60)', duration: 0.25 })
             .fromTo(
               replacement,
               { opacity: 0, y: 4 },

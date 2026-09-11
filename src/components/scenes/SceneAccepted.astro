@@ -158,14 +158,14 @@ const callouts = [
         scrollTrigger: { trigger: root, start: 'top 70%', end: 'center 40%', scrub: true },
       });
 
-      const legend = root.querySelectorAll<HTMLElement>('[data-legend]');
+      // Only the marks draw in. The legend stays at full strength, so it is never
+      // too faint to read, whatever the scroll position.
       root.querySelectorAll<HTMLElement>('[data-callout]').forEach((callout, index) => {
         const at = index * 0.8;
         timeline
           .fromTo(callout.querySelector('[data-dot]'), { scale: 0 }, { scale: 1, duration: 0.2, ease: 'none' }, at)
           .fromTo(callout.querySelector('[data-leader]'), { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: 'none' }, at + 0.1)
-          .fromTo(callout.querySelector('[data-balloon]'), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'none' }, at + 0.45)
-          .fromTo(legend[index], { opacity: 0.2 }, { opacity: 1, duration: 0.3, ease: 'none' }, at + 0.45);
+          .fromTo(callout.querySelector('[data-balloon]'), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'none' }, at + 0.45);
       });
     });
   }

@@ -143,7 +143,7 @@ export class ScrubRenderer {
   private readonly ctx: CanvasRenderingContext2D;
   private readonly sequence: FrameSequence;
   private readonly detections: DetectionTrack | undefined;
-  private readonly colours: { signal: string; paper: string; mono: string };
+  private readonly colours: { signal: string; ink: string; mono: string };
   private frame = 0;
   private drawn: HTMLImageElement | undefined;
   private dpr = 1;
@@ -167,7 +167,7 @@ export class ScrubRenderer {
       styles.getPropertyValue(name).trim() || fallback;
     this.colours = {
       signal: token('--signal', '#ff4f00'),
-      paper: token('--paper', '#f2efe8'),
+      ink: token('--ink', '#141414'),
       mono: token('--font-mono', 'monospace'),
     };
   }
@@ -259,7 +259,8 @@ export class ScrubRenderer {
 
     ctx.fillStyle = colours.signal;
     ctx.fillRect(tagX, tagY, tagWidth, tagHeight);
-    ctx.fillStyle = colours.paper;
+    // Ink on orange: paper on orange is only 2.9:1.
+    ctx.fillStyle = colours.ink;
     ctx.textBaseline = 'middle';
     ctx.fillText(text, tagX + pad, tagY + tagHeight / 2);
   }

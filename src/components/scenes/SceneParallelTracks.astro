@@ -241,13 +241,11 @@ const lines = [
         );
       }
 
-      root.querySelectorAll<HTMLElement>('[data-row]').forEach((row, index) => {
-        const commit = root.querySelector(`[data-commit="${index}"]`);
-        const at = Math.max(index - 0.2, 0);
-        timeline.fromTo(row, { opacity: 0.2 }, { opacity: 1, duration: 0.4, ease: 'none' }, at);
-        if (commit) {
-          timeline.fromTo(commit, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: 'none' }, at + 0.1);
-        }
+      // Only the graph draws in. The rows' text stays at full strength, so it is
+      // never too faint to read, whatever the scroll position.
+      root.querySelectorAll<SVGGElement>('[data-commit]').forEach((commit, index) => {
+        const at = Math.max(index - 0.2, 0) + 0.1;
+        timeline.fromTo(commit, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: 'none' }, at);
       });
     });
   }

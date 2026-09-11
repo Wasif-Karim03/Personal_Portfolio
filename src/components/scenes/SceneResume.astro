@@ -59,7 +59,7 @@ const track = resumePaper.frames.map((frame) => (frame ? frame.slice(0, 4) : nul
     gap: var(--space-3xs);
     text-align: center;
     text-decoration: none;
-    color: var(--paper);
+    color: var(--ink);
     border: 3px solid var(--signal);
     background: transparent;
     /* The stage's overlay ignores pointers; the link itself must not. */
@@ -68,7 +68,7 @@ const track = resumePaper.frames.map((frame) => (frame ? frame.slice(0, 4) : nul
   }
 
   .sheet-link:hover {
-    color: var(--paper);
+    color: var(--ink);
   }
 
   .sheet-link:focus-visible {
@@ -83,7 +83,7 @@ const track = resumePaper.frames.map((frame) => (frame ? frame.slice(0, 4) : nul
     inset-inline-start: -3px;
     padding: 2px var(--space-2xs);
     background: var(--signal);
-    color: var(--paper);
+    color: var(--ink);
     font-family: var(--font-mono);
     font-size: var(--step--1);
     white-space: nowrap;
@@ -104,7 +104,7 @@ const track = resumePaper.frames.map((frame) => (frame ? frame.slice(0, 4) : nul
   }
 
   .sheet-link__meta {
-    color: var(--paper);
+    color: var(--ink);
   }
 
   /* Once the sheet has settled, the box fills in: the paper is the button. */
