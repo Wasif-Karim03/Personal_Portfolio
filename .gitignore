@@ -34,3 +34,6 @@ assets/raw/
 # local-only ML for portrait clouds (see scripts/portrait/make-maps.mjs)
 scripts/portrait/node_modules/
 scripts/portrait/package-lock.json
+
+# internal story previews (animatics); AI person-shots here never ship
+docs/preview/
