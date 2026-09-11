@@ -61,6 +61,7 @@ const commons = (author: string, license: 'CC BY-SA 3.0' | 'CC BY-SA 4.0', file:
 
 /** An image generated for the site, with no real counterpart. */
 const generated: Credit = { text: 'AI-generated image' };
+const generatedVideo: Credit = { text: 'AI-generated video' };
 
 export interface ResolvedSlot extends MediaSlot {
   photo?: ImageMetadata;
@@ -75,6 +76,32 @@ const slots: MediaSlot[] = [
     aspect: [4, 3],
     wanted: 'The 2022 acceptance letter, close up',
     alt: 'The Ohio Wesleyan University acceptance letter, 2022, awarding the Schubert Scholarship.',
+  },
+  // FIG. 04, AI-1 to AI-3. SceneFlight shows only the ones that exist, so a shot
+  // stays off the page until its file is added (AI-1 needs Wasif's approval).
+  {
+    id: 'flight-gate',
+    kind: 'clip',
+    aspect: [16, 9],
+    wanted: 'AI-1: an airport gate window before dawn',
+    alt: 'A traveller seen from behind at an airport gate window before dawn, an airliner beyond.',
+    credit: generatedVideo,
+  },
+  {
+    id: 'flight-window',
+    kind: 'clip',
+    aspect: [16, 9],
+    wanted: 'AI-2: the window seat at sunrise',
+    alt: 'The view from a window seat: the wing over clouds lit by sunrise, the ocean below.',
+    credit: generatedVideo,
+  },
+  {
+    id: 'flight-descent',
+    kind: 'clip',
+    aspect: [16, 9],
+    wanted: 'AI-3: descending over Ohio',
+    alt: 'Descending over green summer farmland in Ohio.',
+    credit: generatedVideo,
   },
   // FIG. 05. Wasif's own campus photos can replace these at any time.
   {

@@ -111,6 +111,12 @@ const widths = media.photo
     color: inherit;
   }
 
+  /* A clip's controls sit along the bottom, so its credit goes to the top. */
+  .frame:has(video) .frame__credit {
+    top: 0;
+    bottom: auto;
+  }
+
   /* Paper, not transparent, so empty frames that overlap still read as sheets. */
   .frame--empty {
     display: grid;

@@ -11,13 +11,23 @@
  * drawn and the readout at the destination. Script only rewinds it to the start
  * and plays it forward with the scroll, which it never drives.
  *
- * The AI shots for the airport and the window seat (AI-1 to AI-3) come later.
+ * Before the globe, a strip of three generated clips (AI-1 to AI-3): the gate,
+ * the window seat, the descent into Ohio. They are nobody's footage, so each is
+ * captioned as generated. Only clips that exist are shown.
  */
+import MediaFrame from '../MediaFrame.astro';
+import { slot } from '../../data/media';
 import { flight } from '../../data/flight';
 import { formatCoordinates, kilometres } from '../../lib/geo-format';
 
 const km = kilometres.format(flight.distanceKm);
 const places = [flight.origin, flight.destination];
+
+const reel = [
+  { id: 'flight-gate', label: 'Gate' },
+  { id: 'flight-window', label: 'Window seat' },
+  { id: 'flight-descent', label: 'Into Ohio' },
+].filter(({ id }) => slot(id).clip);
 
 const config = JSON.stringify({
   samples: flight.samples,
@@ -26,6 +36,21 @@ const config = JSON.stringify({
   distanceKm: flight.distanceKm,
 });
 ---
+
+{
+  reel.length > 0 && (
+    <ol class="reel">
+      {reel.map(({ id, label }, index) => (
+        <li class="reel__shot">
+          <p class="reel__label label">
+            {String(index + 1).padStart(2, '0')} · {label}
+          </p>
+          <MediaFrame id={id} sizes="(min-width: 60rem) 30vw, 100vw" />
+        </li>
+      ))}
+    </ol>
+  )
+}
 
 <div class="flight is-landed" data-scene-flight data-config={config}>
   <div class="flight__stage">
@@ -92,6 +117,24 @@ const config = JSON.stringify({
 </div>
 
 <style>
+  .reel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+    gap: var(--space-s);
+    margin: 0 0 var(--space-xl);
+    padding: 0;
+    list-style: none;
+  }
+
+  .reel__shot {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .reel__label {
+    color: var(--ink-60);
+  }
+
   .flight {
     position: relative;
     height: 220svh;
