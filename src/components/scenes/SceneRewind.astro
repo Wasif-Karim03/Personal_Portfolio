@@ -24,7 +24,7 @@ const fromYear = new Date(from).getUTCFullYear();
 ---
 
 <div class="rewind" data-scene-rewind data-from={from} data-to={to}>
-  <FrameScrub sequence={heroSequence} length={2} reverse bleed>
+  <FrameScrub sequence={heroSequence} length={2} reverse restOn="end" bleed>
     <div
       class="timecode"
       role="img"

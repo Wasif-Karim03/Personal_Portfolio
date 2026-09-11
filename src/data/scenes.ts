@@ -249,7 +249,8 @@ export const scenes: Scene[] = [
     sources: ['REAL'],
     technique: 'Scrubbed clip plus PDF link',
     status: 'blocked-on-media',
-    blockedOn: 'Filming day shot C; resume also needs OpsiClear added first',
+    blockedOn:
+      'Filming day shot C (placeholder frames for now), and the resume PDF needs OpsiClear added. The scene is built.',
   },
   {
     fig: '16',

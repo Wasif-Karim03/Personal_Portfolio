@@ -17,6 +17,8 @@ import { z } from 'zod';
 import type { DetectionTrack, SequenceManifest } from '../../lib/frames';
 import heroJson from './hero.json';
 import heroDetectionsJson from './hero.detections.json';
+import resumeJson from './resume.json';
+import resumePaperJson from './resume.paper.json';
 
 const variantSchema = z.object({
   count: z.number().int().positive(),
@@ -81,3 +83,7 @@ function loadSequence(json: unknown): SequenceManifest {
 
 export const heroSequence = loadSequence(heroJson);
 export const heroDetections: DetectionTrack = detectionTrackSchema.parse(heroDetectionsJson);
+
+export const resumeSequence = loadSequence(resumeJson);
+/** Where the sheet is in each frame of FIG. 15. The download button sits on it. */
+export const resumePaper: DetectionTrack = detectionTrackSchema.parse(resumePaperJson);

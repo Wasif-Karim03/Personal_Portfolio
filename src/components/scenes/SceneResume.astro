@@ -1,0 +1,155 @@
+---
+/**
+ * FIG. 15 — Resume.
+ *
+ * Wasif lifts the resume toward the camera as you scroll, and the paper becomes
+ * the download button. The link rides on the sheet's box in every frame, drawn
+ * as the robot-vision layer draws a detection, and fills in as the sheet
+ * settles.
+ *
+ * The box comes from a per-frame track (src/data/sequences/resume.paper.json)
+ * and is placed with container-query units against <FrameScrub>'s stage, which
+ * reproduces the picture's cover-fit in CSS. So the link sits on the sheet at
+ * any viewport size without measuring anything, and without script it rests on
+ * the final frame's sheet.
+ *
+ * It is a real link the whole time. Motion only moves it with the sheet.
+ * Runs on placeholder frames until filming day shot C.
+ */
+import FrameScrub from '../FrameScrub.astro';
+import { resumePaper, resumeSequence } from '../../data/sequences';
+
+const pdf = '/Resume_WasifKarim.pdf';
+const [x, y, w, h] = resumePaper.frames.at(-1) ?? [0.4, 0.3, 0.2, 0.4];
+const track = resumePaper.frames.map((frame) => (frame ? frame.slice(0, 4) : null));
+---
+
+<div class="resume" data-scene-resume data-track={JSON.stringify(track)}>
+  <FrameScrub sequence={resumeSequence} length={2} restOn="end" bleed>
+    <a
+      class="sheet-link is-settled"
+      href={pdf}
+      download
+      data-sheet-link
+      style={`--x: ${x}; --y: ${y}; --w: ${w}; --h: ${h}`}
+    >
+      <span class="sheet-link__tag" aria-hidden="true">resume.pdf</span>
+      <span class="sheet-link__label">Download resume</span>
+      <span class="sheet-link__meta label">PDF · 1 page</span>
+    </a>
+  </FrameScrub>
+</div>
+
+<style>
+  /*
+   * The picture covers the stage, so its drawn size is the larger of the two
+   * fits: max(100cqw, 100cqh × aspect) wide and max(100cqh, 100cqw ÷ aspect)
+   * tall, centred. A box in 0–1 picture space maps onto the stage from there.
+   */
+  .sheet-link {
+    --drawn-w: max(100cqw, 100cqh * var(--ar));
+    --drawn-h: max(100cqh, 100cqw / var(--ar));
+    position: absolute;
+    left: calc(50cqw + (var(--x) - 0.5) * var(--drawn-w));
+    top: calc(50cqh + (var(--y) - 0.5) * var(--drawn-h));
+    width: calc(var(--w) * var(--drawn-w));
+    height: calc(var(--h) * var(--drawn-h));
+    display: grid;
+    place-content: center;
+    gap: var(--space-3xs);
+    text-align: center;
+    text-decoration: none;
+    color: var(--paper);
+    border: 3px solid var(--signal);
+    background: transparent;
+    /* The stage's overlay ignores pointers; the link itself must not. */
+    pointer-events: auto;
+    transition: background-color var(--dur-base) var(--ease-out);
+  }
+
+  .sheet-link:hover {
+    color: var(--paper);
+  }
+
+  .sheet-link:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  /* Like a detection's class tag, sitting on the box's top edge. */
+  .sheet-link__tag {
+    position: absolute;
+    inset-block-end: 100%;
+    inset-inline-start: -3px;
+    padding: 2px var(--space-2xs);
+    background: var(--signal);
+    color: var(--paper);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    white-space: nowrap;
+  }
+
+  .sheet-link__label,
+  .sheet-link__meta {
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+
+  .sheet-link__label {
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-display);
+    font-weight: 700;
+    font-size: var(--step-2);
+    line-height: 1;
+  }
+
+  .sheet-link__meta {
+    color: var(--paper);
+  }
+
+  /* Once the sheet has settled, the box fills in: the paper is the button. */
+  .sheet-link.is-settled {
+    background: var(--signal);
+  }
+
+  .sheet-link.is-settled .sheet-link__label,
+  .sheet-link.is-settled .sheet-link__meta {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  import { initMotion } from '../../lib/motion';
+
+  /** Scroll progress at which the sheet counts as settled and fills in. */
+  const SETTLED = 0.9;
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-scene-resume]')) {
+    const scrub = root.querySelector<HTMLElement>('[data-frame-scrub]');
+    const link = root.querySelector<HTMLElement>('[data-sheet-link]');
+    const track = JSON.parse(root.dataset.track ?? '[]') as Array<number[] | null>;
+    // Under reduced motion the scrub never runs, so the link stays on the final sheet.
+    if (!scrub || !link || track.length === 0 || !initMotion()) continue;
+
+    const place = (progress: number) => {
+      const p = Math.min(Math.max(progress, 0), 1);
+      // Stepped, not blended, so the box stays on the frame actually shown.
+      const box = track[Math.round(p * (track.length - 1))];
+      if (box) {
+        const [x, y, w, h] = box;
+        link.style.setProperty('--x', String(x));
+        link.style.setProperty('--y', String(y));
+        link.style.setProperty('--w', String(w));
+        link.style.setProperty('--h', String(h));
+      }
+      link.classList.toggle('is-settled', p >= SETTLED);
+    };
+
+    root.addEventListener('scrub:progress', (event) => {
+      place((event as CustomEvent<{ progress: number }>).detail.progress);
+    });
+
+    // The scrub may have reported before this listener existed.
+    place(Number(scrub.dataset.progress ?? 0));
+  }
+</script>

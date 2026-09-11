@@ -1,0 +1,21 @@
+{
+  "name": "resume",
+  "source": "placeholder",
+  "alt": "Placeholder: an ink figure lifting a sheet of paper toward the camera.",
+  "desktop": {
+    "count": 120,
+    "width": 1280,
+    "height": 720,
+    "pattern": "/sequences/resume/desktop/{i}.jpg",
+    "pad": 4
+  },
+  "mobile": {
+    "count": 60,
+    "width": 720,
+    "height": 406,
+    "pattern": "/sequences/resume/mobile/{i}.jpg",
+    "pad": 4
+  },
+  "poster": "/sequences/resume/poster.jpg",
+  "still": "/sequences/resume/still.jpg"
+}

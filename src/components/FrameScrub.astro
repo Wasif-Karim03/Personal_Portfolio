@@ -7,9 +7,10 @@
  * speed is never taken over — the stage is held with CSS sticky, not a pin.
  *
  * Without script, or under reduced motion, the <picture> is all there is. It
- * shows the frame the scrub starts on normally, and the frame it ends on under
- * reduced motion — the held end state is the calm, static version the
- * storyboard asks for. The canvas only stacks over it once a frame is drawn.
+ * shows the frame the scrub starts on, or ends on with restOn="end", and the
+ * frame it ends on under reduced motion — the held end state is the calm,
+ * static version the storyboard asks for. The canvas only stacks over it once
+ * a frame is drawn.
  *
  * Each scroll update is also dispatched as a bubbling `scrub:progress` event,
  * scroll progress in `detail.progress`, so an overlay can follow the scrub.
@@ -27,6 +28,12 @@ interface Props {
   bleed?: boolean;
   /** Play the clip backwards, starting on its last frame. */
   reverse?: boolean;
+  /**
+   * Which end of the clip to show when the scrub isn't running. 'start' suits
+   * the hero, which is on screen before its frames load; a scene further down,
+   * with an overlay that rests on the end state, needs 'end' so the two agree.
+   */
+  restOn?: 'start' | 'end';
 }
 
 const {
@@ -36,18 +43,20 @@ const {
   priority = false,
   bleed = false,
   reverse = false,
+  restOn = 'start',
 } = Astro.props;
 
 // The frame the scrub starts on, and the one it comes to rest on.
 const startImage = reverse ? sequence.still : sequence.poster;
 const endImage = reverse ? sequence.poster : sequence.still;
+const restImage = restOn === 'end' ? endImage : startImage;
 
 const config = JSON.stringify({ sequence, detections, reverse });
 ---
 
 <div
   class:list={['scrub', bleed && 'scrub--bleed']}
-  style={`--track: ${length * 100}svh`}
+  style={`--track: ${length * 100}svh; --ar: ${sequence.desktop.width / sequence.desktop.height}`}
   data-frame-scrub
   data-config={config}
 >
@@ -56,7 +65,7 @@ const config = JSON.stringify({ sequence, detections, reverse });
       <source media="(prefers-reduced-motion: reduce)" srcset={endImage} />
       <img
         class="scrub__poster"
-        src={startImage}
+        src={restImage}
         alt={sequence.alt}
         width={sequence.desktop.width}
         height={sequence.desktop.height}
@@ -91,7 +100,10 @@ const config = JSON.stringify({ sequence, detections, reverse });
     margin-inline: calc(var(--gutter) * -1);
   }
 
+  /* A size container, so an overlay can place itself on the picture using cq
+     units and --ar, the frames' aspect ratio. See SceneResume. */
   .scrub__stage {
+    container-type: size;
     position: sticky;
     inset-block-start: 0;
     height: 100svh;
