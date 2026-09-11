@@ -5,8 +5,11 @@
  * cannot ship without appearing in the colophon. See CLAUDE.md for the face rule.
  */
 
-/** Where a visual comes from. Mirrors the tags in docs/storyboard.md. */
-export type MediaSource = 'REAL' | 'AI' | 'DATA' | 'CODE';
+/**
+ * Where a visual comes from. Mirrors the tags in docs/storyboard.md. CC is a
+ * photo by someone else, used under a Creative Commons licence and credited.
+ */
+export type MediaSource = 'REAL' | 'CC' | 'AI' | 'DATA' | 'CODE';
 
 export interface AiShot {
   /** Stable id matching the Higgsfield plan in docs/storyboard.md, e.g. 'AI-1'. */
@@ -93,12 +96,12 @@ export const scenes: Scene[] = [
     slug: 'accepted',
     title: 'Accepted · 2022',
     summary:
-      'A macro shot of the real acceptance letter, with drawing-style callouts: Ohio Wesleyan University, CS + Astrophysics, Schubert Scholarship.',
-    sources: ['REAL'],
-    technique: 'Photo with animated annotation lines',
-    status: 'blocked-on-media',
-    blockedOn:
-      'The 2022 acceptance letter, photographed close up, and the callouts set to its real lines. The scene is built.',
+      'The acceptance letter, redrawn as a line drawing with callouts: Ohio Wesleyan University, CS + Astrophysics, Schubert Scholarship.',
+    // A drawing, not a copy: no logo, no signature, no invented wording. A photo
+    // of the real letter in the accepted-letter slot replaces it; then this is REAL.
+    sources: ['CODE'],
+    technique: 'Letter drawn in SVG, with animated annotation lines',
+    status: 'done',
   },
   {
     fig: '04',
@@ -139,32 +142,53 @@ export const scenes: Scene[] = [
     fig: '05',
     slug: 'ohio-wesleyan',
     title: 'Ohio Wesleyan · 2022–26',
-    summary: 'Real campus photos. A short line of coursework.',
-    sources: ['REAL'],
+    summary: 'Campus photos, credited to their photographers. A short line of coursework.',
+    sources: ['CC'],
     technique: 'Parallax photo stack, kept subtle',
-    status: 'blocked-on-media',
-    blockedOn: 'Three campus photos. The scene is built.',
+    status: 'done',
   },
   {
     fig: '06',
     slug: 'robotics-club',
     title: 'Robotics Club',
     summary:
-      'Real club photos. Counters roll from 0 to 267 members and $0 to $68K raised. Label: Founding President.',
-    sources: ['REAL', 'CODE'],
+      'Counters roll from 0 to 267 members and $0 to $68K raised. Label: Founding President. Generated pictures of a build night, a competition and the workroom stand in until there are real club photos.',
+    sources: ['AI', 'CODE'],
     technique: 'Counters on scroll',
-    status: 'blocked-on-media',
-    blockedOn: 'Three club photos. The counters are built.',
+    status: 'done',
+    aiShots: [
+      {
+        id: 'AI-6',
+        description: 'Hands assembling a small robot on a workbench. Hands only, no faces.',
+        tool: 'Higgsfield — GPT Image 2',
+        depictsPerson: false,
+        ships: true,
+      },
+      {
+        id: 'AI-7',
+        description: 'A student-built robot on a competition field in a gym. No people.',
+        tool: 'Higgsfield — GPT Image 2',
+        depictsPerson: false,
+        ships: true,
+      },
+      {
+        id: 'AI-8',
+        description: 'A robotics workroom table with robots under construction. No people.',
+        tool: 'Higgsfield — GPT Image 2',
+        depictsPerson: false,
+        ships: true,
+      },
+    ],
   },
   {
     fig: '07',
     slug: 'leland',
     title: 'Summer 2023 · Leland',
-    summary: 'To confirm: what the role was and how much weight it gets.',
-    sources: [],
-    technique: '',
-    status: 'blocked-on-decision',
-    blockedOn: 'Wasif to confirm what Leland was — open question 1 in docs/storyboard.md',
+    summary:
+      'Software Development Intern at Leland, a software company. The first summer in the US, and the first job writing software: the initial commit.',
+    sources: ['CODE'],
+    technique: 'A git log entry that types itself out',
+    status: 'done',
   },
   {
     fig: '08',
@@ -191,11 +215,10 @@ export const scenes: Scene[] = [
     slug: 'parallel-tracks',
     title: 'Parallel tracks',
     summary:
-      'A git-branch graph shows work that ran alongside school: OWU dev internship, HackPrinceton 2nd place (OnlySwap, 245+ users), Bytewright.',
+      'A git-branch graph shows work that ran alongside school: the OWU dev internship and Bytewright.',
     sources: ['CODE'],
     technique: 'SVG branch lines drawn on scroll',
-    status: 'blocked-on-decision',
-    blockedOn: 'The HackPrinceton date, so OnlySwap can take its place on the graph.',
+    status: 'done',
   },
   {
     fig: '11',
@@ -263,7 +286,7 @@ export const scenes: Scene[] = [
     technique: 'Formspree, posted from a plain HTML form so it works without JS',
     status: 'blocked-on-decision',
     blockedOn:
-      'Wasif to create a Formspree form and set PUBLIC_FORMSPREE_ENDPOINT. Until then the form falls back to a mailto link.',
+      'A real Formspree form in PUBLIC_FORMSPREE_ENDPOINT. The form posts to a placeholder address for now, so a message fails and points to email instead.',
   },
 ];
 

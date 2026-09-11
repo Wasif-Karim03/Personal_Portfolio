@@ -13,6 +13,7 @@ import SceneAccepted from '../components/scenes/SceneAccepted.astro';
 import SceneCampus from '../components/scenes/SceneCampus.astro';
 import SceneGraduation from '../components/scenes/SceneGraduation.astro';
 import SceneThinkbox from '../components/scenes/SceneThinkbox.astro';
+import SceneLeland from '../components/scenes/SceneLeland.astro';
 import SceneHilton from '../components/scenes/SceneHilton.astro';
 import SceneAirbnb from '../components/scenes/SceneAirbnb.astro';
 import SceneContact from '../components/scenes/SceneContact.astro';
@@ -69,6 +70,13 @@ const sections = scenes.filter((scene) => scene.presentation !== 'overlay');
         return (
           <SceneSection scene={scene}>
             <SceneRoboticsClub />
+          </SceneSection>
+        );
+      }
+      if (scene.slug === 'leland') {
+        return (
+          <SceneSection scene={scene}>
+            <SceneLeland />
           </SceneSection>
         );
       }

@@ -9,6 +9,7 @@ A scroll-driven story: open on Wasif today, rewind to 2022, play forward to now,
 Every scene is tagged with where its visuals come from:
 
 - `REAL`: filmed or photographed by you. Your face, your hardware, your documents.
+- `CC`: photographed by someone else and used under a Creative Commons licence, credited on the photo and in the colophon.
 - `AI`: generated in Higgsfield. Only for things nobody could film: the flight, transitions, mood.
 - `DATA`: output from your own robots and tools. YOLO detections, LiDAR point clouds, Gaussian splats.
 - `CODE`: drawn live in the browser. Counters, lines, maps, text.
@@ -32,14 +33,14 @@ Your face comes from real footage and photos in `assets/raw/real/face/`. AI-gene
 | 00 | Boot | A few lines of a boot log type out while assets load, then clear. | CODE | Text animation, doubles as the loading screen |
 | 01 | Now · Cleveland, 2026 | You turn toward the camera as the page scrolls. An orange detection box tracks you, labeled `person 0.96`. Your name and one line appear. Metadata: AI Research Engineer, OpsiClear · Cleveland, OH. | REAL + DATA | Scroll-scrubbed image sequence; YOLO run on your own clip |
 | 02 | Rewind | A timecode spins from 2026 back to 2022. The hero clip plays in reverse and frames from later chapters flicker past. | CODE | Counter plus reversed sequence |
-| 03 | Accepted · 2022 | A macro shot of your real acceptance letter or email, with drawing-style callouts: Ohio Wesleyan University, CS + Astrophysics, Schubert Scholarship. | REAL | Photo with animated annotation lines |
+| 03 | Accepted · 2022 | The acceptance letter redrawn as a line drawing (no logo, no signature), with drawing-style callouts: Ohio Wesleyan University, CS + Astrophysics, Schubert Scholarship. A photo of the real letter can replace it. | CODE | Letter drawn in SVG, animated annotation lines |
 | 04 | The flight · 10 AUG 2022 | You at an airport window, seen from behind. Cut to a globe where an orange line draws from Bangladesh to Ohio as you scroll, with coordinates ticking. The line lands on Delaware, OH. | AI + CODE | Higgsfield shot plus SVG route drawn on scroll |
-| 05 | Ohio Wesleyan · 2022–26 | Real campus photos. A short line of coursework. | REAL | Parallax photo stack, kept subtle |
-| 06 | Robotics Club | Real club photos. Counters roll up from 0 to 267 members and from $0 to $68K raised. Label: Founding President. | REAL + CODE | Counters on scroll |
-| 07 | Summer 2023 · Leland | *To confirm: what the role was and how much weight it gets.* | TBD | |
+| 05 | Ohio Wesleyan · 2022–26 | Campus photos from Wikimedia Commons, credited on the photo and in the colophon. A short line of coursework. | CC | Parallax photo stack, kept subtle |
+| 06 | Robotics Club | Counters roll up from 0 to 267 members and from $0 to $68K raised. Label: Founding President. Generated pictures (AI-6 to AI-8, no faces) stand in until there are real club photos. | AI + CODE | Counters on scroll |
+| 07 | Summer 2023 · Leland | Software Development Intern at Leland, a software company: the first summer in the US and the first software job, shown as the initial commit in a git log. | CODE | Git log entry typed out |
 | 08 | Summer 2024 · Hilton | Software Engineering Intern. An API request animates through a small diagram: app → endpoint → PostgreSQL. 6 REST endpoints, Tableau dashboard, CI/CD. | CODE | Animated diagram, no internal screens |
 | 09 | Summer 2025 · Airbnb | Software Engineering Intern. A generic message box where an AI draft types itself out, then a host edits it. 10 production PRs behind feature flags, Java/Kotlin microservices. | CODE | Generic mock UI, not Airbnb's real interface |
-| 10 | Parallel tracks | A git-branch graph shows work that ran alongside school: OWU dev internship, HackPrinceton 2nd place (OnlySwap, 245+ users), Bytewright. | CODE | SVG branch lines drawn on scroll |
+| 10 | Parallel tracks | A git-branch graph shows work that ran alongside school: OWU dev internship, Bytewright. | CODE | SVG branch lines drawn on scroll |
 | 11 | Graduation · May 2026 | A real photo. B.S. Astrophysics, B.A. Computer Science, GPA 3.82, Honors. | REAL | A quiet, held moment |
 | 12 | think[box] · 2026 | Real footage: the volumetric printer curing a part in one rotation, and Poetry Camera printing a poem. | REAL | Short looping clips |
 | 13 | OpsiClear · Now | The timecode catches up to the present and the rewind loop closes. A Gaussian splat you captured yourself resolves out of points. | DATA | Spark splat viewer |
@@ -54,7 +55,7 @@ Each project is a card that opens a full case study page. Suggested order, with 
 1. **Autonomous Vehicle.** Your ROS2 stack on the Traxxas and Jetson Orin Nano. Frame it as a live build log, since it's in progress. Real driving footage, the car's own camera POV with YOLO boxes, and a LiDAR map.
 2. **Poetry Camera.** Porting a cloud-LLM camera to on-device inference.
 3. **Volumetric resin printer control software** (with UC Berkeley).
-4. **OnlySwap.** HackPrinceton 2nd place.
+4. **OnlySwap.** A verified student marketplace, 245+ users.
 5. **VersityRooms.**
 6. **Bytewright.** The software studio you co-founded.
 
@@ -141,7 +142,7 @@ Keep AI to about six shots. Explore cheaply first, then render the finals in hig
 
 ## Before we build
 
-1. Leland: what was it?
+1. ~~Leland: what was it?~~ Software Development Intern, summer 2023, the first summer in the US.
 2. ~~Bytewright, Polaris, or both?~~ Bytewright.
 3. Final project list, 4 to 6 projects.
 4. Update the resume with OpsiClear before it goes on the site.

@@ -1,6 +1,6 @@
 ---
 title: "OnlySwap"
-summary: "HackPrinceton 2nd place. 245+ users."
+summary: "A verified student marketplace. 245+ users."
 order: 4
 year: "2024"
 role: "Co-creator"

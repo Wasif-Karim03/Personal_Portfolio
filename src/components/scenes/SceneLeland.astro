@@ -1,0 +1,127 @@
+---
+/**
+ * FIG. 07 — Summer 2023 · Leland.
+ *
+ * The first summer in the US and the first job writing software, so it is the
+ * first entry in the log: the initial commit. The facts are Wasif's own; nothing
+ * here is from Leland's code or screens.
+ *
+ * The entry is plain text and complete without script. Motion types each line
+ * out as the scene scrolls past, following the scroll both ways.
+ */
+
+type Line = { text: string; kind?: 'command' | 'meta' | 'subject' };
+
+const header: Line[] = [
+  { text: '$ git log --reverse', kind: 'command' },
+  { text: 'commit 0000001', kind: 'meta' },
+  { text: 'Author: Wasif Karim', kind: 'meta' },
+  { text: 'Date:   Summer 2023', kind: 'meta' },
+];
+
+// The message, indented as git indents it. The indent is padding on the block,
+// not spaces, so the subject in the display face lines up with the mono body.
+const message: Line[] = [
+  { text: 'Initial commit', kind: 'subject' },
+  { text: 'Software Development Intern at Leland,' },
+  { text: 'a software company.' },
+  { text: 'First summer in the US. First job writing software.' },
+];
+---
+
+<div class="leland" data-scene-leland>
+  <p class="leland__role label">Software Development Intern · Summer 2023</p>
+
+  <pre class="log"><code>{
+    header.map(({ text, kind }) => (
+      <span class:list={['log__line', kind && `log__line--${kind}`]} data-line data-chars={text.length}>{text}</span>
+    ))
+  }<span class="log__message">{
+    message.map(({ text, kind }) => (
+      <span class:list={['log__line', kind && `log__line--${kind}`]} data-line data-chars={text.length}>{text}</span>
+    ))
+  }</span></code></pre>
+</div>
+
+<style>
+  .leland {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
+  .leland__role {
+    color: var(--ink-60);
+  }
+
+  .log {
+    max-width: 40rem;
+    margin: 0;
+    padding: var(--space-m);
+    border: 1.5px solid var(--ink);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: clamp(0.78rem, 0.7rem + 0.4vw, 1rem);
+    line-height: 1.7;
+  }
+
+  .log__line {
+    display: block;
+    width: max-content;
+  }
+
+  /* 4ch here is four mono characters, git's indent, whatever face each line is in. */
+  .log__message {
+    display: block;
+    margin-block-start: 1.7em;
+    padding-inline-start: 4ch;
+  }
+
+  .log__line--subject {
+    margin-block-end: 0.4em;
+  }
+
+  .log__line--command,
+  .log__line--meta {
+    color: var(--ink-60);
+  }
+
+  .log__line--meta:first-of-type {
+    color: var(--signal-text);
+  }
+
+  .log__line--subject {
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-display);
+    font-weight: 700;
+    font-size: var(--step-2);
+    line-height: 1.3;
+  }
+</style>
+
+<script>
+  import { gsap, scene } from '../../lib/motion';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-scene-leland]')) {
+    scene(root, () => {
+      const timeline = gsap.timeline({
+        scrollTrigger: { trigger: root, start: 'top 75%', end: 'bottom 55%', scrub: true },
+      });
+
+      // Each line is uncovered a character at a time, like typing. A clip, not a
+      // fade, so the text is always at full contrast where it shows.
+      let at = 0;
+      for (const line of root.querySelectorAll<HTMLElement>('[data-line]')) {
+        const chars = Number(line.dataset.chars);
+        const duration = Math.max(chars / 40, 0.15);
+        timeline.fromTo(
+          line,
+          { clipPath: 'inset(0 100% 0 0)' },
+          { clipPath: 'inset(0 0% 0 0)', duration, ease: `steps(${chars})` },
+          at,
+        );
+        at += duration;
+      }
+    });
+  }
+</script>

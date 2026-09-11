@@ -6,6 +6,9 @@
  * src/assets/media/. A clip renders as a muted loop that plays only while on
  * screen, and never on its own under reduced motion or without script, where it
  * keeps its controls. An empty slot renders as a labelled frame on the sheet.
+ *
+ * Media Wasif didn't shoot carries its credit as a caption on the frame,
+ * linked to the original where there is one.
  */
 import { Picture } from 'astro:assets';
 import { slot as resolve } from '../data/media';
@@ -60,6 +63,13 @@ const widths = media.photo
       </div>
     )
   }
+  {
+    media.credit && (media.photo || media.clip) && (
+      <figcaption class="frame__credit">
+        {media.credit.source ? <a href={media.credit.source}>{media.credit.text}</a> : media.credit.text}
+      </figcaption>
+    )
+  }
 </figure>
 
 <style>
@@ -80,6 +90,25 @@ const widths = media.photo
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  /* Sits on the picture, so the frame keeps its proportions. Ink on paper, so it
+     reads over any photo. */
+  .frame__credit {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    max-width: 100%;
+    padding: 0.15rem var(--space-2xs);
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    line-height: 1.4;
+  }
+
+  .frame__credit a {
+    color: inherit;
   }
 
   /* Paper, not transparent, so empty frames that overlap still read as sheets. */

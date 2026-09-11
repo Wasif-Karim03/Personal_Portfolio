@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { scenes, shippingAiShots, assertFaceRule } from '../data/scenes';
+import { credited } from '../data/media';
 
 /**
  * How this site was made.
@@ -14,12 +15,15 @@ assertFaceRule();
 
 const aiShots = shippingAiShots();
 const personShots = aiShots.filter((shot) => shot.depictsPerson);
+// Photos by other people. Generated media is already listed with the AI shots.
+const licensed = credited().filter((media) => media.credit?.license);
 
 /** "1 scene", not "1 scenes". */
 const sceneCount = (n: number) => `${n} scene${n === 1 ? '' : 's'}`;
 
 const sourceCounts = {
   REAL: scenes.filter((s) => s.sources.includes('REAL')).length,
+  CC: scenes.filter((s) => s.sources.includes('CC')).length,
   DATA: scenes.filter((s) => s.sources.includes('DATA')).length,
   CODE: scenes.filter((s) => s.sources.includes('CODE')).length,
   AI: scenes.filter((s) => s.sources.includes('AI')).length,
@@ -48,6 +52,13 @@ const sourceCounts = {
           <dd>Filmed or photographed by me. My face, my hardware, my documents.</dd>
         </div>
         <div>
+          <dt class="label">CC — {sceneCount(sourceCounts.CC)}</dt>
+          <dd>
+            Photographed by someone else and used under a Creative Commons
+            licence. Credited on the photo and listed below.
+          </dd>
+        </div>
+        <div>
           <dt class="label">DATA — {sceneCount(sourceCounts.DATA)}</dt>
           <dd>
             Output from my own robots and tools: YOLO detections, LiDAR point
@@ -61,8 +72,9 @@ const sourceCounts = {
         <div>
           <dt class="label robot-vision">AI — {sceneCount(sourceCounts.AI)}</dt>
           <dd>
-            Generated, and only for things nobody could film: a flight I took in
-            2022, transitions, mood. Listed individually below.
+            Generated, for what I have no footage of: a flight I took in 2022,
+            transitions, mood, and stand-ins for club photos. Marked on the image
+            and listed individually below.
           </dd>
         </div>
       </dl>
@@ -89,6 +101,26 @@ const sourceCounts = {
               </li>
             ))}
           </ul>
+        )
+      }
+
+      {
+        licensed.length > 0 && (
+          <>
+            <h2>Photos by other people</h2>
+            <ul class="shots">
+              {licensed.map((media) => (
+                <li>
+                  <p>{media.alt}</p>
+                  <p class="tool label">
+                    {media.credit!.text.replace(/, CC.*$/, '')} ·{' '}
+                    <a href={media.credit!.license!.url}>{media.credit!.license!.name}</a> ·{' '}
+                    <a href={media.credit!.source}>original on Wikimedia Commons</a>
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </>
         )
       }
 

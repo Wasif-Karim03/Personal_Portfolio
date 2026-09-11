@@ -13,6 +13,7 @@ Scroll-driven personal site. Full storyboard and scene list: `docs/storyboard.md
 Every visual is tagged by where it comes from:
 
 - `REAL` — filmed or photographed by Wasif. His face, his hardware, his documents.
+- `CC` — photographed by someone else and used under a Creative Commons licence. Credited on the photo and in the colophon.
 - `AI` — generated in Higgsfield. For things nobody could film: the flight, transitions, mood.
 - `DATA` — output from his own robots and tools. YOLO detections, LiDAR point clouds, Gaussian splats.
 - `CODE` — drawn live in the browser. Counters, lines, maps, text.

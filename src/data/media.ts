@@ -1,9 +1,12 @@
 /**
- * Photo and clip slots for the REAL scenes (FIG. 03, 05, 06, 11, 12).
+ * Photo and clip slots for the scenes that show pictures (FIG. 03, 05, 06, 11, 12).
  *
  * Every slot has its place on the page from the start. Until its file exists it
- * renders as a labelled empty frame on the sheet, never a stand-in picture:
- * these scenes are the proof, so nothing else goes in them.
+ * renders as a labelled empty frame on the sheet.
+ *
+ * Anything Wasif didn't shoot himself carries a credit, shown under it as a
+ * caption: a photographer and licence, or that it was generated. The colophon
+ * lists every credit too.
  *
  * Filling a slot is one command, no code:
  *   node scripts/add-photo.mjs ~/Pictures/letter.jpg accepted-letter
@@ -34,7 +37,30 @@ export interface MediaSlot {
   alt: string;
   /** Frame proportions, width / height, so nothing shifts when media arrives. */
   aspect: [number, number];
+  /** For media Wasif didn't shoot. Shown as the caption and in the colophon. */
+  credit?: Credit;
 }
+
+export interface Credit {
+  /** The caption, e.g. "Photo: Jane Doe, CC BY-SA 4.0". */
+  text: string;
+  /** Where the original lives, for a photo used under licence. */
+  source?: string;
+  license?: { name: string; url: string };
+}
+
+/** A Wikimedia Commons photo used under its Creative Commons licence. */
+const commons = (author: string, license: 'CC BY-SA 3.0' | 'CC BY-SA 4.0', file: string): Credit => ({
+  text: `Photo: ${author}, ${license}`,
+  source: `https://commons.wikimedia.org/wiki/File:${file}`,
+  license: {
+    name: license,
+    url: `https://creativecommons.org/licenses/by-sa/${license.endsWith('4.0') ? '4.0' : '3.0'}/`,
+  },
+});
+
+/** An image generated for the site, with no real counterpart. */
+const generated: Credit = { text: 'AI-generated image' };
 
 export interface ResolvedSlot extends MediaSlot {
   photo?: ImageMetadata;
@@ -50,14 +76,56 @@ const slots: MediaSlot[] = [
     wanted: 'The 2022 acceptance letter, close up',
     alt: 'The Ohio Wesleyan University acceptance letter, 2022, awarding the Schubert Scholarship.',
   },
-  // FIG. 05
-  { id: 'campus-1', kind: 'photo', aspect: [3, 2], wanted: 'Ohio Wesleyan, wide', alt: 'The Ohio Wesleyan University campus.' },
-  { id: 'campus-2', kind: 'photo', aspect: [4, 5], wanted: 'Ohio Wesleyan, a detail', alt: 'The Ohio Wesleyan University campus.' },
-  { id: 'campus-3', kind: 'photo', aspect: [3, 2], wanted: 'Ohio Wesleyan, day to day', alt: 'The Ohio Wesleyan University campus.' },
-  // FIG. 06
-  { id: 'club-1', kind: 'photo', aspect: [4, 3], wanted: 'A build event', alt: 'OWU Robotics Club members at a build event.' },
-  { id: 'club-2', kind: 'photo', aspect: [4, 3], wanted: 'A competition', alt: 'The OWU Robotics Club at a competition.' },
-  { id: 'club-3', kind: 'photo', aspect: [4, 3], wanted: 'The club, together', alt: 'The OWU Robotics Club.' },
+  // FIG. 05. Wasif's own campus photos can replace these at any time.
+  {
+    id: 'campus-1',
+    kind: 'photo',
+    aspect: [3, 2],
+    wanted: 'Ohio Wesleyan, wide',
+    alt: 'University Hall at Ohio Wesleyan, a sandstone building with a tall square tower, behind trees on the lawn.',
+    credit: commons('Christopher L. Riley', 'CC BY-SA 4.0', 'University_Hall_—_Delaware,_Ohio.jpg'),
+  },
+  {
+    id: 'campus-2',
+    kind: 'photo',
+    aspect: [4, 5],
+    wanted: 'Ohio Wesleyan, a detail',
+    alt: 'Stuyvesant Hall at Ohio Wesleyan, red brick with a white cupola, framed by trees against a blue sky.',
+    credit: commons('Phillip M. Kukelhan', 'CC BY-SA 3.0', '2012sept_WesleyanUniversityStuyvesantHall001.jpg'),
+  },
+  {
+    id: 'campus-3',
+    kind: 'photo',
+    aspect: [3, 2],
+    wanted: 'Ohio Wesleyan, day to day',
+    alt: "The Ohio Wesleyan Student Observatory, a brick building with a round tower under a metal dome.",
+    credit: commons('Christopher L. Riley', 'CC BY-SA 4.0', 'OWU_Student_Observatory_—_Delaware,_Ohio.jpg'),
+  },
+  // FIG. 06. Generated stand-ins until there are real club photos. No faces.
+  {
+    id: 'club-1',
+    kind: 'photo',
+    aspect: [4, 3],
+    wanted: 'A build night',
+    alt: 'Hands assembling a small wheeled robot on a workbench, beside a soldering iron and circuit boards.',
+    credit: generated,
+  },
+  {
+    id: 'club-2',
+    kind: 'photo',
+    aspect: [4, 3],
+    wanted: 'A competition',
+    alt: 'A small student-built robot driving across a competition field in a gym.',
+    credit: generated,
+  },
+  {
+    id: 'club-3',
+    kind: 'photo',
+    aspect: [4, 3],
+    wanted: 'The workroom',
+    alt: 'A workroom table covered in robots under construction, a 3D-printed part and a laptop.',
+    credit: generated,
+  },
   // FIG. 11
   { id: 'graduation', kind: 'photo', aspect: [4, 5], wanted: 'Graduation day, May 2026', alt: 'Wasif Karim in a graduation cap and gown with a blue stole and honor cords, smiling beside a stone pillar in front of a campus building.' },
   // FIG. 12
@@ -112,6 +180,11 @@ for (const id of clipIds) {
 
 if (problems.length > 0) {
   throw new Error(`Media files don't match their slots in src/data/media.ts:\n  ${problems.join('\n  ')}`);
+}
+
+/** Every slot with a credit that has its media, for the colophon. */
+export function credited(): ResolvedSlot[] {
+  return slots.map((s) => slot(s.id)).filter((s) => s.credit && (s.photo || s.clip));
 }
 
 /** A slot, with its photo or clip if one has been added. */

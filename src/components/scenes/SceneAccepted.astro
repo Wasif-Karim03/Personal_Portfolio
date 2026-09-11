@@ -2,26 +2,102 @@
 /**
  * FIG. 03 — Accepted · 2022.
  *
- * A close-up of the real acceptance letter, annotated the way a drawing is:
- * numbered balloons on leader lines, keyed to a legend. They draw in as the
- * scene scrolls past; without motion they are simply there.
+ * The acceptance letter, annotated the way a drawing is: numbered balloons on
+ * leader lines, keyed to a legend. They draw in as the scene scrolls past;
+ * without motion they are simply there.
  *
- * The balloons point at placeholder positions until the photo exists. Set
- * each x and y (0–1 across and down the photo) to the line it names on the
- * real letter.
+ * There is no photo of the real letter, so the letter is drawn: a sheet with
+ * the university's name and blocks standing for lines of text. Deliberately no
+ * logo, no signature and no invented wording, and it says it is redrawn, so it
+ * can't pass for the document itself. A photo in the accepted-letter slot
+ * replaces the drawing; then set each photo callout's x and y (0–1 across and
+ * down the photo) to the line it names.
  */
 import MediaFrame from '../MediaFrame.astro';
+import { slot } from '../../data/media';
 
-const callouts = [
-  { x: 0.28, y: 0.22, text: 'Ohio Wesleyan University' },
-  { x: 0.66, y: 0.36, text: 'Computer Science + Astrophysics' },
-  { x: 0.4, y: 0.74, text: 'Schubert Scholarship' },
+const photo = slot('accepted-letter').photo;
+
+const labels = ['Ohio Wesleyan University', 'Computer Science + Astrophysics', 'Schubert Scholarship'];
+
+// The drawing is 800 × 600. Positions are 0–1 of that, on the marked lines.
+const W = 800;
+const H = 600;
+const at = (x: number, y: number) => ({ x: x / W, y: y / H });
+const points = photo
+  ? [
+      { x: 0.28, y: 0.22 },
+      { x: 0.66, y: 0.36 },
+      { x: 0.4, y: 0.74 },
+    ]
+  : // The first sits just past the end of the letterhead, so it covers no letters.
+    [at(612, 98), at(490, 288), at(330, 412)];
+const callouts = labels.map((text, index) => ({ text, ...points[index] }));
+
+// Lines of text on the sheet as [y, width]. `mark` is a line a callout names.
+const SHEET = { x: 150, y: 44, w: 500, h: 647 };
+const TEXT_X = 190;
+const body: Array<{ y: number; w: number; mark?: boolean }> = [
+  { y: 206, w: 140 },
+  { y: 240, w: 420 },
+  { y: 262, w: 404 },
+  { y: 284, w: 300, mark: true },
+  { y: 306, w: 412 },
+  { y: 328, w: 236 },
+  { y: 364, w: 420 },
+  { y: 386, w: 396 },
+  { y: 408, w: 280, mark: true },
+  { y: 430, w: 410 },
+  { y: 452, w: 170 },
+  { y: 500, w: 110 },
+  { y: 568, w: 150 },
 ];
 ---
 
 <div class="accepted" data-scene-accepted>
   <div class="accepted__plate">
-    <MediaFrame id="accepted-letter" sizes="(min-width: 60rem) 55vw, 100vw" />
+    {
+      photo ? (
+        <MediaFrame id="accepted-letter" sizes="(min-width: 60rem) 55vw, 100vw" />
+      ) : (
+        <figure class="drawing">
+          <svg
+            viewBox={`0 0 ${W} ${H}`}
+            role="img"
+            aria-label="A line drawing of the 2022 acceptance letter from Ohio Wesleyan University: the university's name at the top, then blocks standing for lines of text. Not the original letter."
+          >
+            <!-- Overall size, dimensioned as on a drawing. -->
+            <g class="dim">
+              <path d={`M${SHEET.x} 16 V32 M${SHEET.x + SHEET.w} 16 V32 M${SHEET.x} 24 H${SHEET.x + SHEET.w}`} />
+              <path d={`M${SHEET.x} 24 l9 -4 v8 z M${SHEET.x + SHEET.w} 24 l-9 -4 v8 z`} class="dim__arrow" />
+              <rect x={W / 2 - 34} y="15" width="68" height="18" class="dim__gap" />
+              <text x={W / 2} y="28">8.5 in</text>
+              <path d={`M112 ${SHEET.y} H128 M120 ${SHEET.y} V${H}`} />
+              <path d={`M120 ${SHEET.y} l-4 9 h8 z`} class="dim__arrow" />
+              <rect x="102" y="300" width="36" height="52" class="dim__gap" />
+              <text x="120" y="326" transform="rotate(-90 120 326)">11 in</text>
+            </g>
+
+            <rect class="sheet" x={SHEET.x} y={SHEET.y} width={SHEET.w} height={SHEET.h} />
+
+            <text class="letterhead" x={W / 2} y="108">OHIO WESLEYAN UNIVERSITY</text>
+            <text class="place" x={W / 2} y="130">DELAWARE, OHIO</text>
+            <path class="rule" d={`M${TEXT_X} 146 H${SHEET.x + SHEET.w - 40}`} />
+            <text class="date" x={SHEET.x + SHEET.w - 40} y="176">2022</text>
+
+            {
+              body.map(({ y, w, mark }) => (
+                <>
+                  {mark && <rect class="mark" x={TEXT_X - 6} y={y - 6} width={w + 12} height="20" />}
+                  <rect class:list={['line', mark && 'line--mark']} x={TEXT_X} y={y} width={w} height="8" />
+                </>
+              ))
+            }
+          </svg>
+          <figcaption class="drawing__note">Redrawn · not the original letter</figcaption>
+        </figure>
+      )
+    }
     {
       callouts.map(({ x, y }, index) => (
         <div class="callout" style={`--x: ${x * 100}%; --y: ${y * 100}%`} data-callout aria-hidden="true">
@@ -58,6 +134,100 @@ const callouts = [
 
   .accepted__plate {
     position: relative;
+  }
+
+  .drawing {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border: var(--rule) solid var(--rule-colour);
+  }
+
+  .drawing svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .sheet {
+    fill: color-mix(in srgb, var(--paper) 40%, white);
+    stroke: var(--ink);
+    stroke-width: 1.5;
+  }
+
+  .letterhead {
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-display);
+    font-weight: 700;
+    font-size: 30px;
+    letter-spacing: 0.04em;
+    text-anchor: middle;
+    fill: var(--ink);
+  }
+
+  .place,
+  .date,
+  .dim text {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    fill: var(--ink-60);
+  }
+
+  .place,
+  .dim text {
+    text-anchor: middle;
+  }
+
+  .date {
+    text-anchor: end;
+  }
+
+  .rule {
+    stroke: var(--ink);
+    stroke-width: 1;
+  }
+
+  .line {
+    fill: var(--ink-30);
+  }
+
+  .line--mark {
+    fill: var(--ink);
+  }
+
+  .mark {
+    fill: var(--signal-12);
+  }
+
+  .dim path {
+    fill: none;
+    stroke: var(--ink-60);
+    stroke-width: 1;
+  }
+
+  .dim .dim__arrow {
+    fill: var(--ink-60);
+    stroke: none;
+  }
+
+  .dim__gap {
+    fill: var(--paper);
+  }
+
+  /* Same place and look as a photo credit, so it reads as the image's label. */
+  .drawing__note {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    padding: 0.15rem var(--space-2xs);
+    background: var(--paper);
+    border-block-start: var(--rule) solid var(--rule-colour);
+    border-inline-end: var(--rule) solid var(--rule-colour);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    line-height: 1.4;
   }
 
   /* A zero-size anchor on the photo; everything hangs off it. */

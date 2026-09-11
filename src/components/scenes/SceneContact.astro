@@ -8,8 +8,9 @@
  * switched off. Script only upgrades it to submit in place and show the result
  * without a page change.
  *
- * Until PUBLIC_FORMSPREE_ENDPOINT is set it degrades to a mailto: link rather
- * than presenting a form that silently goes nowhere.
+ * Until PUBLIC_FORMSPREE_ENDPOINT is set it posts to a placeholder address, so
+ * the form can be seen working. Sending fails there, and the visitor is told
+ * to email instead. Without an endpoint at all it degrades to a mailto: link.
  */
 
 interface Props {
@@ -19,7 +20,10 @@ interface Props {
 
 const { idPrefix = 'contact' } = Astro.props;
 
-const endpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT;
+// A placeholder, never a real form. Formspree ids are letters and digits only,
+// so this one can't belong to anyone. Set the real one in PUBLIC_FORMSPREE_ENDPOINT.
+const PLACEHOLDER_ENDPOINT = 'https://formspree.io/f/your-form-id';
+const endpoint = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT || PLACEHOLDER_ENDPOINT;
 const email = 'mdwasifkarim2003@gmail.com';
 ---
 
