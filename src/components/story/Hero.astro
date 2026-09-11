@@ -8,8 +8,12 @@
  * The city behind him is graded darker and softly out of focus, as a portrait
  * lens would render it, so the name reads cleanly and he stands forward.
  *
- * With motion, the name rises in letter by letter once the page is ready, and on
- * scroll it drifts at a different depth from him before the scene darkens.
+ * The name is drawn as gaussian dots on its own canvas between the two picture
+ * layers (src/lib/name-dots.ts), so it still passes behind his head. The dots
+ * settle into the letters when the page opens, and as the opening scrolls away
+ * they lift toward the globe that gathers next, carrying the story's dots from
+ * one scene into the other. The heading itself stays in the page for screen
+ * readers, and is shown instead of the dots where WebGL is missing.
  */
 import { Picture } from 'astro:assets';
 import now from '../../assets/story/now.jpg';
@@ -20,9 +24,10 @@ import cutout from '../../assets/story/now-cutout.png';
   <div class="hero__pin" data-hero-pin>
     <div class="hero__scene" data-hero-scene>
       <Picture src={now} formats={['avif', 'webp']} widths={[900, 1400, 1800]} sizes="100vw" loading="eager" fetchpriority="high" alt="" class="hero__layer" />
+      <canvas class="hero__dots" data-hero-dots aria-hidden="true"></canvas>
       <h1 class="hero__name" id="hero-name" data-hero-name>
-        <span class="hero__word" data-word>Wasif</span>
-        <span class="hero__word" data-word>Karim</span>
+        <span class="hero__word">Wasif</span>
+        <span class="hero__word">Karim</span>
       </h1>
       <Picture src={cutout} formats={['avif', 'webp']} widths={[900, 1400, 1800]} sizes="100vw" loading="eager" alt="Wasif Karim smiling in a denim jacket on a rooftop in New York, black and white." class="hero__layer hero__cut" />
     </div>
@@ -44,6 +49,64 @@ import cutout from '../../assets/story/now-cutout.png';
     <div class="hero__dim" data-hero-dim aria-hidden="true"></div>
   </div>
 </section>
+
+<script>
+  import { ScrollTrigger, initMotion } from '../../lib/motion';
+  import type { NameDots } from '../../lib/name-dots';
+
+  // The name as dots, and their flight out toward the globe.
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  const dotsCanvas = hero?.querySelector<HTMLCanvasElement>('[data-hero-dots]');
+  const webgl = () => {
+    try { return Boolean(document.createElement('canvas').getContext('webgl2')); } catch { return false; }
+  };
+
+  if (hero && dotsCanvas && webgl() && initMotion()) {
+    let dots: NameDots | null = null;
+    let leaving = 0;
+    let settled = false;
+
+    const start = async () => {
+      try {
+        const face = "'Big Shoulders Display Variable', 'Arial Narrow', sans-serif";
+        // The sampled letterforms are only his if the display face has arrived.
+        await document.fonts.load(`850 100px ${face}`).catch(() => {});
+        const [{ createNameDots }] = await Promise.all([import('../../lib/name-dots'), document.fonts.ready]);
+        const portrait = window.matchMedia('(max-aspect-ratio: 4/5)').matches;
+        const light = window.matchMedia('(max-width: 48rem)').matches;
+        dots = createNameDots(
+          dotsCanvas,
+          { lines: portrait ? ['Wasif', 'Karim'] : ['Wasif Karim'], weight: 850, family: face },
+          light ? 40000 : 110000,
+        );
+        if (!dots) return;
+        hero.classList.add('is-dots');
+        dots.setScroll(leaving);
+        if (settled) dots.intro();
+        window.addEventListener('resize', () => dots?.resize());
+      } catch (error) {
+        console.warn('name dots unavailable', error);
+      }
+    };
+
+    document.addEventListener('story:reveal', () => {
+      settled = true;
+      dots?.intro();
+    }, { once: true });
+
+    ScrollTrigger.create({
+      trigger: hero,
+      start: 'top top',
+      end: 'bottom bottom',
+      onUpdate: (self) => {
+        leaving = self.progress;
+        dots?.setScroll(leaving);
+      },
+    });
+
+    start();
+  }
+</script>
 
 <script>
   // Wasif's local time, a small true detail in the corner.
@@ -85,6 +148,24 @@ import cutout from '../../assets/story/now-cutout.png';
   }
 
   .hero__scene :global(.hero__cut) { z-index: 2; }
+
+  .hero__dots {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Once the dots draw the name, the heading stays only for screen readers. */
+  .hero.is-dots .hero__name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
 
   .hero__name {
     position: absolute;

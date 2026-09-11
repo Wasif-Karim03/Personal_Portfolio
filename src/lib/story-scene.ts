@@ -88,7 +88,8 @@ const vertexShader = /* glsl */ `
     vec3 g = onGlobe * uGlobeScale + uGlobeOffset;
 
     // Gathering: each dot arrives from somewhere in the dark at its own moment.
-    vec3 dust = normalize(hash3(aSeed * 13.1) + 0.0001) * (2.2 + 2.4 * fract(aSeed * 7.3)) + vec3(0.0, 0.0, -1.5);
+    // The dust falls in from above, where the name's dots went.
+    vec3 dust = normalize(hash3(aSeed * 13.1) + 0.0001) * (2.2 + 2.4 * fract(aSeed * 7.3)) + vec3(0.35, 0.9, -1.5);
     float ta = clamp(uAssemble * 1.5 - aSeed * 0.5, 0.0, 1.0);
     ta = ta * ta * (3.0 - 2.0 * ta);
     vec3 p = mix(dust, g, ta);

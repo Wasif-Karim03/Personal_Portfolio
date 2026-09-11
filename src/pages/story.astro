@@ -30,7 +30,6 @@ import YearRail from '../components/story/YearRail.astro';
 
 <script>
   import { gsap, ScrollTrigger, initMotion } from '../lib/motion';
-  import { SplitText } from 'gsap/SplitText';
 
   const motion = initMotion();
   const loader = document.querySelector<HTMLElement>('[data-loader]');
@@ -38,12 +37,6 @@ import YearRail from '../components/story/YearRail.astro';
   if (!motion) {
     loader?.remove();
   } else {
-    gsap.registerPlugin(SplitText);
-
-    // Lines of the story rise into place, each from behind its own edge.
-    const lines = (el: Element) =>
-      SplitText.create(el, { type: 'lines', mask: 'lines', linesClass: 'split-line' }).lines;
-
     // 1. Loader: the years roll to now, then lift away.
     const reel = document.querySelector('[data-reel]');
     const photo = document.querySelector<HTMLImageElement>('.hero__layer');
@@ -59,10 +52,6 @@ import YearRail from '../components/story/YearRail.astro';
     // It rushes through the years and slows as it reaches now.
     const rows = Number((reel as HTMLElement | null)?.dataset.rows ?? 1);
     gsap.to(reel, { y: `-${((rows - 1) * 1.1).toFixed(1)}em`, duration: 2.2, ease: 'expo.inOut' });
-    const letters = [...document.querySelectorAll('[data-word]')].flatMap(
-      (word) => SplitText.create(word, { type: 'chars', mask: 'chars' }).chars,
-    );
-    gsap.set(letters, { yPercent: 110 });
     gsap.set('[data-fade]', { autoAlpha: 0 });
     gsap.set('[data-hero-scene]', { scale: 1.08 });
 
@@ -70,14 +59,17 @@ import YearRail from '../components/story/YearRail.astro';
       gsap.timeline()
         .to(loader, { yPercent: -100, duration: 1.1, ease: 'power4.inOut' })
         .to('[data-hero-scene]', { scale: 1, duration: 2.2, ease: 'power3.out' }, 0.3)
-        .to(letters, { yPercent: 0, duration: 1.2, ease: 'power4.out', stagger: 0.035 }, 0.5)
         .to('[data-fade]', { autoAlpha: 1, duration: 0.9, ease: 'power2.out' }, 1.0)
-        .add(() => loader?.remove());
+        .add(() => {
+          loader?.remove();
+          // The name's dots settle now (src/components/story/Hero.astro).
+          document.dispatchEvent(new CustomEvent('story:reveal'));
+        }, 0.45);
     });
 
-    // 2. Hero: the name drifts deeper than Wasif as the scene darkens.
+    // 2. Hero: the scene settles back as it darkens; the name's dots leave on
+    //    their own (Hero.astro), flying toward where the globe gathers.
     gsap.timeline({ scrollTrigger: { trigger: '[data-hero]', start: 'top top', end: 'bottom bottom', scrub: 0.8 } })
-      .to('[data-hero-name]', { yPercent: 18, duration: 1, ease: 'none' }, 0)
       .to('[data-hero-scene]', { scale: 1.06, duration: 1, ease: 'none' }, 0)
       .to('[data-hero-dim]', { opacity: 1, duration: 0.45, ease: 'none' }, 0.55);
 
