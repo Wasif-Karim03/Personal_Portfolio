@@ -29,7 +29,14 @@ for (let i = 0; i < 80 && !events.some((e) => e.method === 'Page.loadEventFired'
 await sleep(3500);
 for (const step of steps) {
   const [name, ...js] = step.split('=');
-  if (js.length) await send('Runtime.evaluate', { expression: js.join('='), awaitPromise: true });
+  const action = js.join('=');
+  // "wheel:N" scrolls like a mouse wheel, for pages whose smooth-scroll library ignores scrollTo.
+  if (action.startsWith('wheel:')) {
+    for (let left = Number(action.slice(6)); left > 0; left -= 100) {
+      await send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: +w / 2, y: +h / 2, deltaX: 0, deltaY: Math.min(100, left) });
+      await sleep(35);
+    }
+  } else if (action) await send('Runtime.evaluate', { expression: action, awaitPromise: true });
   await sleep(2600);
   const shot = await send('Page.captureScreenshot', { format: 'png' });
   writeFileSync(join(outDir, `${name}.png`), Buffer.from(shot.result.data, 'base64'));
