@@ -6,6 +6,16 @@ interface Props {
 }
 
 const { scene } = Astro.props;
+
+// Keep each middle dot on the line with the word before it, so a wrapped title
+// never starts a line with "·". A nowrap span does it with ordinary spaces: a
+// no-break space set visibly wider in the title face, and Chrome ignored a word
+// joiner placed after the space.
+const titleParts = scene.title.split(' · ').map((part, index, all) => {
+  if (index === all.length - 1) return { lead: part, keep: '' };
+  const cut = part.lastIndexOf(' ') + 1;
+  return { lead: part.slice(0, cut), keep: `${part.slice(cut)} ·` };
+});
 ---
 
 <section
@@ -21,10 +31,7 @@ const { scene } = Astro.props;
     </ul>
   </header>
 
-  <h2 class="scene__title" id={`fig-${scene.fig}-title`}>
-    {/* A no-break space ties each middle dot to the word before it. */}
-    {scene.title.replaceAll(' · ', '\u00a0· ')}
-  </h2>
+  <h2 class="scene__title" id={`fig-${scene.fig}-title`}>{titleParts.map(({ lead, keep }, index) => <>{lead}{keep && <span class="scene__keep">{keep}</span>}{index < titleParts.length - 1 && ' '}</>)}</h2>
 
   <div class="scene__body">
     <slot>
@@ -83,6 +90,10 @@ const { scene } = Astro.props;
   .scene__title {
     font-size: var(--step-4);
     max-width: 20ch;
+  }
+
+  .scene__keep {
+    white-space: nowrap;
   }
 
   .scene__summary {
