@@ -39,7 +39,7 @@ Your face comes from real footage and photos in `assets/raw/real/face/`. AI-gene
 | 07 | Summer 2023 · Leland | *To confirm: what the role was and how much weight it gets.* | TBD | |
 | 08 | Summer 2024 · Hilton | Software Engineering Intern. An API request animates through a small diagram: app → endpoint → PostgreSQL. 6 REST endpoints, Tableau dashboard, CI/CD. | CODE | Animated diagram, no internal screens |
 | 09 | Summer 2025 · Airbnb | Software Engineering Intern. A generic message box where an AI draft types itself out, then a host edits it. 10 production PRs behind feature flags, Java/Kotlin microservices. | CODE | Generic mock UI, not Airbnb's real interface |
-| 10 | Parallel tracks | A git-branch graph shows work that ran alongside school: OWU dev internship, HackPrinceton 2nd place (OnlySwap, 245+ users), Bytewright / Polaris. | CODE | SVG branch lines drawn on scroll |
+| 10 | Parallel tracks | A git-branch graph shows work that ran alongside school: OWU dev internship, HackPrinceton 2nd place (OnlySwap, 245+ users), Bytewright. | CODE | SVG branch lines drawn on scroll |
 | 11 | Graduation · May 2026 | A real photo. B.S. Astrophysics, B.A. Computer Science, GPA 3.82, Honors. | REAL | A quiet, held moment |
 | 12 | think[box] · 2026 | Real footage: the volumetric printer curing a part in one rotation, and Poetry Camera printing a poem. | REAL | Short looping clips |
 | 13 | OpsiClear · Now | The timecode catches up to the present and the rewind loop closes. A Gaussian splat you captured yourself resolves out of points. | DATA | Spark splat viewer |
@@ -56,7 +56,7 @@ Each project is a card that opens a full case study page. Suggested order, with 
 3. **Volumetric resin printer control software** (with UC Berkeley).
 4. **OnlySwap.** HackPrinceton 2nd place.
 5. **VersityRooms.**
-6. **Bytewright / Polaris SoftwareFarm.** Decide which name the site uses.
+6. **Bytewright.** The software studio you co-founded.
 
 *You pick the final set. Four to six is the sweet spot.*
 
@@ -142,7 +142,7 @@ Keep AI to about six shots. Explore cheaply first, then render the finals in hig
 ## Before we build
 
 1. Leland: what was it?
-2. Bytewright, Polaris, or both?
+2. ~~Bytewright, Polaris, or both?~~ Bytewright.
 3. Final project list, 4 to 6 projects.
 4. Update the resume with OpsiClear before it goes on the site.
 5. Dig up the 2022 photos.

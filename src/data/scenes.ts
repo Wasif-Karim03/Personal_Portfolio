@@ -190,11 +190,10 @@ export const scenes: Scene[] = [
     slug: 'parallel-tracks',
     title: 'Parallel tracks',
     summary:
-      'A git-branch graph shows work that ran alongside school: OWU dev internship, HackPrinceton 2nd place (OnlySwap, 245+ users), Bytewright / Polaris.',
+      'A git-branch graph shows work that ran alongside school: OWU dev internship, HackPrinceton 2nd place (OnlySwap, 245+ users), Bytewright.',
     sources: ['CODE'],
     technique: 'SVG branch lines drawn on scroll',
-    status: 'blocked-on-decision',
-    blockedOn: 'Bytewright vs Polaris naming — open question 2 in docs/storyboard.md',
+    status: 'ready',
   },
   {
     fig: '11',
