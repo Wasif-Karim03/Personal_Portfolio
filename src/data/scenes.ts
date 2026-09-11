@@ -205,8 +205,7 @@ export const scenes: Scene[] = [
       'A real photo. B.S. Astrophysics, B.A. Computer Science, GPA 3.82, Honors.',
     sources: ['REAL'],
     technique: 'A quiet, held moment',
-    status: 'blocked-on-media',
-    blockedOn: 'A graduation photo. The scene is built.',
+    status: 'done',
   },
   {
     fig: '12',

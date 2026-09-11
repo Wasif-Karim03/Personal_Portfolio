@@ -59,7 +59,7 @@ const slots: MediaSlot[] = [
   { id: 'club-2', kind: 'photo', aspect: [4, 3], wanted: 'A competition', alt: 'The OWU Robotics Club at a competition.' },
   { id: 'club-3', kind: 'photo', aspect: [4, 3], wanted: 'The club, together', alt: 'The OWU Robotics Club.' },
   // FIG. 11
-  { id: 'graduation', kind: 'photo', aspect: [4, 5], wanted: 'Graduation day, May 2026', alt: 'Wasif Karim at graduation, May 2026.' },
+  { id: 'graduation', kind: 'photo', aspect: [4, 5], wanted: 'Graduation day, May 2026', alt: 'Wasif Karim in a graduation cap and gown with a blue stole and honor cords, smiling beside a stone pillar in front of a campus building.' },
   // FIG. 12
   {
     id: 'thinkbox-printer',
