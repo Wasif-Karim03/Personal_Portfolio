@@ -111,9 +111,8 @@ export const scenes: Scene[] = [
       'Wasif at an airport window, seen from behind. Cut to a globe where an orange line draws from Bangladesh to Ohio, coordinates ticking, landing on Delaware, OH.',
     sources: ['AI', 'CODE'],
     technique: 'Higgsfield shot plus SVG route drawn on scroll',
-    status: 'blocked-on-decision',
-    blockedOn:
-      "Wasif's OK on AI-1, the traveller at the gate, seen from behind. AI-2 and AI-3 are in.",
+    status: 'blocked-on-media',
+    blockedOn: 'The AI shots AI-1 to AI-3: the gate, the window seat and the descent. The route map and the clip strip are built.',
     aiShots: [
       {
         id: 'AI-1',
@@ -127,14 +126,14 @@ export const scenes: Scene[] = [
         description: 'Window seat view: the wing over clouds at sunrise, the ocean below',
         tool: 'Higgsfield — GPT Image 2 still, Veo 3.1 Lite motion',
         depictsPerson: false,
-        ships: true,
+        ships: false,
       },
       {
         id: 'AI-3',
         description: 'Descent over green summer Ohio farmland',
         tool: 'Higgsfield — GPT Image 2 still, Veo 3.1 Lite motion',
         depictsPerson: false,
-        ships: true,
+        ships: false,
       },
     ],
   },
@@ -152,33 +151,11 @@ export const scenes: Scene[] = [
     slug: 'robotics-club',
     title: 'Robotics Club',
     summary:
-      'Counters roll from 0 to 267 members and $0 to $68K raised. Label: Founding President. Generated pictures of a build night, a competition and the workroom stand in until there are real club photos.',
-    sources: ['AI', 'CODE'],
+      'Real club photos. Counters roll from 0 to 267 members and $0 to $68K raised. Label: Founding President.',
+    sources: ['REAL', 'CODE'],
     technique: 'Counters on scroll',
-    status: 'done',
-    aiShots: [
-      {
-        id: 'AI-6',
-        description: 'Hands assembling a small robot on a workbench. Hands only, no faces.',
-        tool: 'Higgsfield — GPT Image 2',
-        depictsPerson: false,
-        ships: true,
-      },
-      {
-        id: 'AI-7',
-        description: 'A student-built robot on a competition field in a gym. No people.',
-        tool: 'Higgsfield — GPT Image 2',
-        depictsPerson: false,
-        ships: true,
-      },
-      {
-        id: 'AI-8',
-        description: 'A robotics workroom table with robots under construction. No people.',
-        tool: 'Higgsfield — GPT Image 2',
-        depictsPerson: false,
-        ships: true,
-      },
-    ],
+    status: 'blocked-on-media',
+    blockedOn: 'Three club photos. The counters are built.',
   },
   {
     fig: '07',

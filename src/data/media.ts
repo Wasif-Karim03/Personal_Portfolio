@@ -59,8 +59,7 @@ const commons = (author: string, license: 'CC BY-SA 3.0' | 'CC BY-SA 4.0', file:
   },
 });
 
-/** An image generated for the site, with no real counterpart. */
-const generated: Credit = { text: 'AI-generated image' };
+/** A clip generated for the site, with no real counterpart. */
 const generatedVideo: Credit = { text: 'AI-generated video' };
 
 export interface ResolvedSlot extends MediaSlot {
@@ -128,31 +127,10 @@ const slots: MediaSlot[] = [
     alt: "The Ohio Wesleyan Student Observatory, a brick building with a round tower under a metal dome.",
     credit: commons('Christopher L. Riley', 'CC BY-SA 4.0', 'OWU_Student_Observatory_—_Delaware,_Ohio.jpg'),
   },
-  // FIG. 06. Generated stand-ins until there are real club photos. No faces.
-  {
-    id: 'club-1',
-    kind: 'photo',
-    aspect: [4, 3],
-    wanted: 'A build night',
-    alt: 'Hands assembling a small wheeled robot on a workbench, beside a soldering iron and circuit boards.',
-    credit: generated,
-  },
-  {
-    id: 'club-2',
-    kind: 'photo',
-    aspect: [4, 3],
-    wanted: 'A competition',
-    alt: 'A small student-built robot driving across a competition field in a gym.',
-    credit: generated,
-  },
-  {
-    id: 'club-3',
-    kind: 'photo',
-    aspect: [4, 3],
-    wanted: 'The workroom',
-    alt: 'A workroom table covered in robots under construction, a 3D-printed part and a laptop.',
-    credit: generated,
-  },
+  // FIG. 06
+  { id: 'club-1', kind: 'photo', aspect: [4, 3], wanted: 'A build event', alt: 'OWU Robotics Club members at a build event.' },
+  { id: 'club-2', kind: 'photo', aspect: [4, 3], wanted: 'A competition', alt: 'The OWU Robotics Club at a competition.' },
+  { id: 'club-3', kind: 'photo', aspect: [4, 3], wanted: 'The club, together', alt: 'The OWU Robotics Club.' },
   // FIG. 11
   { id: 'graduation', kind: 'photo', aspect: [4, 5], wanted: 'Graduation day, May 2026', alt: 'Wasif Karim in a graduation cap and gown with a blue stole and honor cords, smiling beside a stone pillar in front of a campus building.' },
   // FIG. 12
