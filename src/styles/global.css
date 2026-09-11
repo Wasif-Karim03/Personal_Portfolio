@@ -24,6 +24,13 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* The hidden attribute must always win. A component that sets its own display
+   (the boot overlay's grid, say) otherwise overrides the browser's rule and
+   stays on screen with hidden set. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   min-height: 100vh;
   background: var(--paper);
