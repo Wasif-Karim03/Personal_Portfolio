@@ -238,7 +238,8 @@ export const scenes: Scene[] = [
     sources: ['DATA'],
     technique: 'three.js points',
     status: 'blocked-on-media',
-    blockedOn: 'LiDAR rosbag exported to decimated PLY',
+    blockedOn:
+      "The car's LiDAR scan, exported to PLY (placeholder cloud for now). The fly-through is built.",
   },
   {
     fig: '15',

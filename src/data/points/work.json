@@ -1,0 +1,52 @@
+{
+  "name": "work",
+  "source": "placeholder",
+  "caption": "Placeholder point cloud: a simulated 16-beam LiDAR driven down a street.",
+  "desktop": {
+    "file": "/points/work/desktop.bin",
+    "count": 120000
+  },
+  "mobile": {
+    "file": "/points/work/mobile.bin",
+    "count": 40000
+  },
+  "bounds": {
+    "min": [
+      -20.05,
+      -20.05,
+      -0.01
+    ],
+    "max": [
+      100.05,
+      20.06,
+      8.11
+    ]
+  },
+  "path": [
+    [
+      -14,
+      0,
+      12
+    ],
+    [
+      -2,
+      0,
+      5
+    ],
+    [
+      12,
+      0,
+      1.6
+    ],
+    [
+      40,
+      0,
+      1.2
+    ],
+    [
+      66,
+      0,
+      1.3
+    ]
+  ]
+}

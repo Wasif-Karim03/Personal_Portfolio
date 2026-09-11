@@ -1,0 +1,213 @@
+---
+/**
+ * FIG. 14 — Work.
+ *
+ * The page flies through a point cloud from the car's LiDAR and lands on the
+ * way into the work. The points are orange: they are what the robot sees.
+ *
+ * three.js is imported only as the scene approaches, and only when motion is
+ * welcome and WebGL is there. Otherwise, and without script, this is simply
+ * the landing: a link into the work, with no tall empty track to scroll past.
+ *
+ * Runs on a placeholder cloud (scripts/make-lidar-placeholder.mjs) until the
+ * car's scan is converted with scripts/ply-to-points.mjs.
+ */
+import { workPoints } from '../../data/points';
+
+const config = JSON.stringify(workPoints);
+---
+
+<div class="points" data-scene-points data-config={config}>
+  <div class="points__stage">
+    <canvas class="points__canvas" data-points-canvas aria-hidden="true"></canvas>
+
+    {
+      workPoints.source === 'placeholder' && (
+        <p class="points__placeholder label">
+          Placeholder point cloud · the car's LiDAR scan comes later
+        </p>
+      )
+    }
+
+    <div class="points__landing" data-points-landing>
+      <a class="points__link" href="/work">
+        <span class="points__link-label">See the work</span>
+        <span class="points__link-meta label">Projects, robotics first</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .points {
+    position: relative;
+  }
+
+  .points__canvas,
+  .points__placeholder {
+    display: none;
+  }
+
+  .points__landing {
+    display: flex;
+    padding-block: var(--space-m);
+  }
+
+  .points__link {
+    display: inline-grid;
+    gap: var(--space-3xs);
+    padding: var(--space-s) var(--space-m);
+    border: var(--rule) solid var(--ink);
+    background: var(--paper);
+    text-decoration: none;
+  }
+
+  .points__link:hover {
+    color: inherit;
+    border-color: var(--signal);
+  }
+
+  .points__link-label {
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-display);
+    font-weight: 700;
+    font-size: var(--step-3);
+    line-height: 1;
+  }
+
+  /* Only once the fly-through can actually run does this become a tall,
+     full-bleed scroll track. */
+  .points.is-live {
+    height: 260svh;
+    margin-inline: calc(var(--gutter) * -1);
+  }
+
+  .points.is-live .points__stage {
+    position: sticky;
+    inset-block-start: 0;
+    height: 100svh;
+    overflow: hidden;
+    background: var(--paper);
+  }
+
+  .points.is-live .points__canvas {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .points.is-live .points__placeholder {
+    display: block;
+    position: absolute;
+    inset-block-end: var(--space-s);
+    inset-inline-start: var(--gutter);
+    padding: var(--space-3xs) var(--space-2xs);
+    background: var(--paper);
+    border: var(--rule) dashed var(--rule-colour);
+    text-transform: none;
+  }
+
+  .points.is-live .points__landing {
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-slow) var(--ease-out);
+  }
+
+  .points.is-live.is-landed .points__landing {
+    opacity: 1;
+    pointer-events: auto;
+  }
+</style>
+
+<script>
+  import { ScrollTrigger, scene } from '../../lib/motion';
+  import type { PointCloudManifest, PointFlight } from '../../lib/point-flight';
+
+  /** The fly-through finishes here; the rest of the scroll is the landing. */
+  const FLIGHT_END = 0.9;
+
+  const webglAvailable = () => {
+    try {
+      const probe = document.createElement('canvas');
+      return Boolean(probe.getContext('webgl2') ?? probe.getContext('webgl'));
+    } catch {
+      return false;
+    }
+  };
+
+  /** Phones, and anyone asking to save data, get the lighter cloud. */
+  const wantsLightCloud = () =>
+    matchMedia('(max-width: 48rem)').matches ||
+    (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+      ?.saveData === true;
+
+  const smoothstep = (a: number, b: number, x: number) => {
+    const t = Math.min(Math.max((x - a) / (b - a), 0), 1);
+    return t * t * (3 - 2 * t);
+  };
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-scene-points]')) {
+    // scene() does nothing under reduced motion, which leaves the plain landing.
+    scene(root, () => {
+      const canvas = root.querySelector<HTMLCanvasElement>('[data-points-canvas]');
+      const config = root.dataset.config;
+      if (!canvas || !config || !webglAvailable()) return;
+
+      const manifest = JSON.parse(config) as PointCloudManifest;
+      let flight: PointFlight | undefined;
+      let progress = 0;
+
+      root.classList.add('is-live');
+      // The track just grew, so everything below it has moved.
+      ScrollTrigger.refresh();
+
+      const apply = (next: number) => {
+        progress = next;
+        flight?.setProgress(Math.min(next / FLIGHT_END, 1));
+        canvas.style.opacity = String(1 - smoothstep(0.8, 0.95, next));
+        root.classList.toggle('is-landed', next >= FLIGHT_END);
+      };
+
+      const load = async () => {
+        try {
+          const { createPointFlight } = await import('../../lib/point-flight');
+          const styles = getComputedStyle(document.documentElement);
+          flight = await createPointFlight(canvas, manifest, wantsLightCloud() ? 'mobile' : 'desktop', {
+            paper: styles.getPropertyValue('--paper').trim() || '#f2efe8',
+            signal: styles.getPropertyValue('--signal').trim() || '#ff4f00',
+          });
+          apply(progress);
+          window.addEventListener('resize', () => flight?.resize());
+        } catch (error) {
+          // A cloud that can't load leaves the plain landing, not an empty stage.
+          console.warn('FIG. 14: point cloud unavailable', error);
+          root.classList.remove('is-live');
+          ScrollTrigger.refresh();
+        }
+      };
+
+      // Fetch three and the points a viewport before the scene arrives.
+      ScrollTrigger.create({
+        trigger: root,
+        start: 'top bottom+=100%',
+        once: true,
+        onEnter: () => void load(),
+      });
+
+      const trigger = ScrollTrigger.create({
+        trigger: root,
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => apply(self.progress),
+      });
+      apply(trigger.progress);
+    });
+  }
+</script>

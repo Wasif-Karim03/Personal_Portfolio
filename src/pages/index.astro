@@ -8,6 +8,7 @@ import SceneRewind from '../components/scenes/SceneRewind.astro';
 import SceneRoboticsClub from '../components/scenes/SceneRoboticsClub.astro';
 import SceneParallelTracks from '../components/scenes/SceneParallelTracks.astro';
 import SceneResume from '../components/scenes/SceneResume.astro';
+import SceneWorkFlight from '../components/scenes/SceneWorkFlight.astro';
 import SceneHilton from '../components/scenes/SceneHilton.astro';
 import SceneAirbnb from '../components/scenes/SceneAirbnb.astro';
 import SceneContact from '../components/scenes/SceneContact.astro';
@@ -85,6 +86,13 @@ const sections = scenes.filter((scene) => scene.presentation !== 'overlay');
         return (
           <SceneSection scene={scene}>
             <SceneParallelTracks />
+          </SceneSection>
+        );
+      }
+      if (scene.slug === 'work') {
+        return (
+          <SceneSection scene={scene}>
+            <SceneWorkFlight />
           </SceneSection>
         );
       }

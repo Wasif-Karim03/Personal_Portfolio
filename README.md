@@ -56,3 +56,24 @@ Until filming day, the hero runs on abstract placeholder frames from
 detection box reads `src/data/sequences/hero.detections.json`, one normalized
 `[x, y, w, h, confidence]` box (or `null`) per frame, which a YOLO pass over the
 real clip will replace.
+
+### Point clouds
+
+FIG. 14 flies through a point cloud from the car's LiDAR. Swapping in the real
+scan is one command, from a PLY exported out of the rosbag:
+
+```sh
+node scripts/ply-to-points.mjs ~/scans/street.ply work \
+  --caption "A LiDAR scan from the car, driving down the street"
+```
+
+That writes a desktop set and a lighter mobile set to `public/points/<name>/`
+and a manifest to `src/data/points/<name>.json`; the build fails if the files
+don't hold the number of points the manifest claims. Coordinates stay as ROS
+publishes them (x forward, y left, z up). The camera's path through the cloud
+is the `path` list in the manifest: re-running keeps an existing one, so tune
+it by hand once and it stays.
+
+Until then, FIG. 14 runs on a simulated scan from
+`scripts/make-lidar-placeholder.mjs`, labelled as such on the page. three.js is
+fetched only as the scene approaches, and never under reduced motion.
