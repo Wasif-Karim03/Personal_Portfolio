@@ -41,7 +41,15 @@ export interface Cloud {
 
 export interface CloudManifest {
   counts: Record<Variant, number>;
-  shapes: Record<string, { files: Record<Variant, string>; detection?: Detection }>;
+  shapes: Record<
+    string,
+    {
+      files: Record<Variant, string>;
+      detection?: Detection;
+      /** For the globe: the two ends of the flight's arc, in cloud coordinates. */
+      route?: { from: Vec3; to: Vec3 };
+    }
+  >;
 }
 
 const INK: RGB = [20, 20, 20];

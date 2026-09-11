@@ -40,6 +40,18 @@
       "files": {
         "desktop": "/clouds/globe-desktop.bin",
         "mobile": "/clouds/globe-mobile.bin"
+      },
+      "route": {
+        "from": [
+          0.4121,
+          -0.6713,
+          0.4963
+        ],
+        "to": [
+          -0.4121,
+          0.6713,
+          0.4963
+        ]
       }
     }
   }

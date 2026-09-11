@@ -1,0 +1,156 @@
+---
+/**
+ * The prologue's globe: Earth as white gaussian dots, and the 2022 flight from
+ * Dhaka to Ohio in orange, drawn by the scroll, with the position and distance ticking
+ * below. The dots are Natural Earth land, placed when the site is built
+ * (scripts/make-clouds.mjs); the route is the great circle, which the readout
+ * says.
+ *
+ * Without WebGL or script, the readout shows the landing and the canvas stays
+ * empty. Under reduced motion the globe shows the whole route at once.
+ */
+import { flight } from '../../data/flight';
+import { formatCoordinates, kilometres } from '../../lib/geo-format';
+
+const km = kilometres.format(flight.distanceKm);
+const config = JSON.stringify({
+  samples: flight.samples.map(([, , lat, lon]) => [lat, lon]),
+  distanceKm: flight.distanceKm,
+});
+---
+
+<figure class="globe" data-globe data-config={config}>
+  <div class="globe__stage">
+    <canvas class="globe__canvas" data-globe-canvas aria-hidden="true"></canvas>
+    <span class="globe__city mono" data-city="from" aria-hidden="true">Dhaka</span>
+    <span class="globe__city mono" data-city="to" aria-hidden="true">Ohio</span>
+  </div>
+  <figcaption class="globe__readout">
+    <span class="mono globe__route">DAC → Delaware, OH · 10 Aug 2022</span>
+    <span class="globe__row"><span class="mono globe__key">Position</span><span class="mono" data-pos>{formatCoordinates(flight.destination.lat, flight.destination.lon)}</span></span>
+    <span class="globe__row"><span class="mono globe__key">Flown</span><span class="mono" data-flown>{km} km of {km} km</span></span>
+  </figcaption>
+</figure>
+
+<style>
+  .globe {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+    width: 100%;
+  }
+
+  .globe__stage {
+    position: relative;
+    aspect-ratio: 1;
+    width: min(100%, 72svh);
+    justify-self: center;
+  }
+
+  .globe__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .globe__city {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding-inline-start: 0.9rem;
+    margin-block-start: -0.55em;
+    color: var(--flight);
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .globe__readout {
+    display: grid;
+    gap: 0.45rem;
+    justify-self: center;
+    width: min(100%, 22rem);
+  }
+
+  .globe__route { color: var(--flight); }
+
+  .globe__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block-start: 0.45rem;
+    border-block-start: 1px solid var(--line);
+  }
+
+  .globe__key { color: var(--dim); }
+
+  [data-pos],
+  [data-flown] { color: var(--silver); font-variant-numeric: tabular-nums; }
+</style>
+
+<script>
+  import manifestJson from '../../data/clouds.json';
+  import type { CloudManifest } from '../../lib/cloud-shapes';
+  import { ScrollTrigger, initMotion } from '../../lib/motion';
+  import { formatCoordinates, kilometres } from '../../lib/geo-format';
+
+  interface FlightConfig {
+    samples: Array<[lat: number, lon: number]>;
+    distanceKm: number;
+  }
+
+  const manifest = manifestJson as unknown as CloudManifest;
+  const root = document.querySelector<HTMLElement>('[data-globe]');
+  const canvas = root?.querySelector<HTMLCanvasElement>('[data-globe-canvas]');
+  const prelude = root?.closest<HTMLElement>('[data-prelude]');
+  const pos = root?.querySelector<HTMLElement>('[data-pos]');
+  const flown = root?.querySelector<HTMLElement>('[data-flown]');
+
+  const webgl = () => {
+    try { return Boolean(document.createElement('canvas').getContext('webgl2')); } catch { return false; }
+  };
+
+  if (root && canvas && prelude && pos && flown && webgl()) {
+    const { samples, distanceKm } = JSON.parse(root.dataset.config ?? '{}') as FlightConfig;
+    const total = kilometres.format(distanceKm);
+    const motion = initMotion();
+    const variant = matchMedia('(max-width: 48rem)').matches ? 'mobile' : 'desktop';
+    const pins = [...root.querySelectorAll<HTMLElement>('[data-city]')].map((el) => ({ el, at: el.dataset.city as 'from' | 'to' }));
+    let progress = motion ? 0 : 1;
+    let globe: { setProgress(p: number): void; resize(): void } | undefined;
+
+    const readout = (p: number) => {
+      const f = Math.min(Math.max((p - 0.08) / 0.84, 0), 1);
+      const [lat, lon] = samples[Math.round(f * (samples.length - 1))];
+      pos.textContent = formatCoordinates(lat, lon);
+      flown.textContent = `${kilometres.format(Math.round(distanceKm * f))} km of ${total} km`;
+    };
+
+    const apply = (p: number) => {
+      progress = p;
+      readout(p);
+      globe?.setProgress(p);
+    };
+
+    if (motion) {
+      ScrollTrigger.create({ trigger: prelude, start: 'top top', end: 'bottom bottom', onUpdate: (self) => apply(self.progress) });
+    }
+    apply(progress);
+
+    // Three and the points load a screen before the prologue arrives.
+    const io = new IntersectionObserver(async ([entry]) => {
+      if (!entry.isIntersecting) return;
+      io.disconnect();
+      try {
+        const { createFlightGlobe } = await import('../../lib/globe-dots');
+        globe = await createFlightGlobe(canvas, manifest, variant, pins);
+        globe.setProgress(progress);
+        window.addEventListener('resize', () => globe?.resize());
+      } catch (error) {
+        console.warn('flight globe unavailable', error);
+      }
+    }, { rootMargin: '100% 0px' });
+    io.observe(root);
+  }
+</script>

@@ -200,7 +200,10 @@ function globe(count, seed) {
     }
   });
   shuffle(positions, colors, r);
-  return { positions, colors };
+  // The route's two ends, so a page can move a marker along the exact arc.
+  const ends = { from: xyz(ORIGIN, R * 1.012), to: xyz(DESTINATION, R * 1.012) };
+  const round = (v) => v.map((n) => Number(n.toFixed(4)));
+  return { positions, colors, route: { from: round(ends.from), to: round(ends.to) } };
 }
 
 for (const { shape, maps } of PORTRAITS) {
@@ -225,10 +228,13 @@ for (const { shape, maps } of PORTRAITS) {
 }
 
 const globeFiles = {};
+let route;
 for (const [variant, count] of Object.entries(COUNTS)) {
-  globeFiles[variant] = write('globe', variant, globe(count, variant === 'desktop' ? 303 : 404));
+  const cloud = globe(count, variant === 'desktop' ? 303 : 404);
+  globeFiles[variant] = write('globe', variant, cloud);
+  route = cloud.route;
 }
-manifest.shapes.globe = { files: globeFiles };
+manifest.shapes.globe = { files: globeFiles, route };
 console.log(`globe: ${Object.values(COUNTS).join(' / ')} points`);
 
 writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
