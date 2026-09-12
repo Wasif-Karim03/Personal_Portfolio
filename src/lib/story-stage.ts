@@ -16,7 +16,7 @@ export const PLACES = ['Leland', 'Hilton', 'Airbnb', 'think[box]', 'OpsiClear'];
 
 let scene: StoryScene | null = null;
 let opening: Promise<StoryScene | null> | null = null;
-const beats: Phases = { enter: 0, scatter: 0, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0, word: 0 };
+const beats: Phases = { enter: 0, scatter: 0, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0, word: 0, wordBlend: 0 };
 
 export function stageCanvas(): HTMLCanvasElement | null {
   return document.querySelector<HTMLCanvasElement>('[data-stage-dots]');
@@ -74,9 +74,9 @@ export function setStage(part: Partial<Phases>): void {
   scene?.set(beats);
 }
 
-/** Chooses which of those names the dots are holding. */
-export function selectStagePlace(index: number): void {
-  scene?.showWord(index);
+/** Chooses the name the dots hold and the one they are travelling to. */
+export function selectStagePlaces(a: number, b: number): void {
+  scene?.showWords(a, b);
 }
 
 /** Writes the name in, dot by dot. Runs once, when the loader lifts. */

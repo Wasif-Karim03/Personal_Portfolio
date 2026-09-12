@@ -69,6 +69,8 @@ export interface Phases {
   machine: number;
   /** Letting the car go and setting a name: one company at a time. */
   word: number;
+  /** Travelling from the name it holds to the one after it, 0 to 1. */
+  wordBlend: number;
 }
 
 export interface Overlays {
@@ -80,8 +82,8 @@ export interface Overlays {
 export interface StoryScene {
   set(phases: Phases): void;
   resize(): void;
-  /** Switches which of the sampled names the dots hold. */
-  showWord(index: number): void;
+  /** Sets which name the dots hold and which one they are travelling to. */
+  showWords(a: number, b: number): void;
   /** False when the name could not be drawn, so the page keeps its heading. */
   readonly named: boolean;
 }
@@ -99,6 +101,8 @@ const vertexShader = /* glsl */ `
   attribute float aSeed;
   attribute vec2 aName;
   attribute vec2 aWord;
+  attribute vec2 aWordB;
+  attribute float aRank;
   attribute float aSweep;
   uniform mat3 uRot;
   uniform float uGlobeScale;
@@ -115,7 +119,9 @@ const vertexShader = /* glsl */ `
   uniform float uMachine;
   uniform float uMachineSize;
   uniform float uWord;
+  uniform float uWordBlend;
   uniform float uWordSize;
+  uniform float uWordSizeB;
   uniform float uScale;
   uniform float uBase;
   uniform vec3 uRouteTone;
@@ -158,8 +164,22 @@ const vertexShader = /* glsl */ `
     p = mix(p, built, tw) + hash3(aSeed * 9.1) * 0.32 * sin(3.14159 * tw);
 
     // 6. The car lets go, and the dots set the words the next chapter opens on.
+    // One name travels into the next: the dots do not vanish and re-gather,
+    // they carry. Each leaves at its own moment rather than all at once — sent
+    // together, every dot sits exactly half way between its letter and its
+    // target at the mid-point, and the midway set of two different words is not
+    // a word but a smear. Staggered, some have arrived and some have yet to go,
+    // so one name is always coming apart while the next is assembling.
+    // Keyed to where the dot sits in the line, not to chance: the names are
+    // stored in reading order, so this crosses them as a wipe — one name coming
+    // apart from the left while the next builds from the left. Keyed to chance
+    // instead, nearly every dot is in flight at once and the middle of the
+    // crossing is an average of two words, which is not a word.
+    float cross = ramp(clamp(uWordBlend * 3.2 - aRank * 2.2, 0.0, 1.0));
+    vec2 saying = mix(aWord, aWordB, cross);
     float tq = ramp(clamp(uWord * 1.7 - aSweep * 0.6, 0.0, 1.0));
-    p = mix(p, vec3(aWord, 0.0), tq) + hash3(aSeed * 4.1) * 0.26 * sin(3.14159 * tq);
+    p = mix(p, vec3(saying, 0.0), tq) + hash3(aSeed * 4.1) * 0.26 * sin(3.14159 * tq);
+    p += hash3(aSeed * 7.9) * 0.055 * sin(3.14159 * cross) * tq;
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -179,7 +199,8 @@ const vertexShader = /* glsl */ `
     vec3 machineTone = vec3(pow(aLight2, 0.85)) * 0.76;
     vColor = mix(mix(mix(mix(nameTone, globeTone, ta), pictureTone, tm), machineTone, tw), nameTone, tq);
 
-    float size = mix(mix(mix(mix(1.4, route ? 1.25 : 1.0, ta), 1.55, tm), uMachineSize, tw), uWordSize, tq);
+    float said = mix(uWordSize, uWordSizeB, cross);
+    float size = mix(mix(mix(mix(1.4, route ? 1.25 : 1.0, ta), 1.55, tm), uMachineSize, tw), said, tq);
     gl_PointSize = max(uBase * size * uScale / -mv.z, 1.0);
     vAlpha = te * globeMod * (1.0 - uFade);
   }
@@ -264,6 +285,8 @@ export async function createStoryScene(
   const light = new Float32Array(count);
   const light2 = new Float32Array(count);
   const seed = new Float32Array(count);
+  // Where each dot falls in reading order, once the names are sorted that way.
+  const rank = new Float32Array(count);
   for (let i = 0; i < count; i++) {
     for (let k = 0; k < 3; k++) position[i * 3 + k] = (packed[i * 3 + k] / 32767) * 1.05;
     uv[i * 2] = uvPacked[0][i * 2] / 65535;
@@ -275,9 +298,11 @@ export async function createStoryScene(
     light[i] = lightPacked[0][i] / 255;
     light2[i] = lightPacked[second][i] / 255;
     seed[i] = Math.random();
+    rank[i] = i / count;
   }
   const nameXY = new Float32Array(count * 2);
   const wordXY = new Float32Array(count * 2);
+  const wordBXY = new Float32Array(count * 2);
   const sweep = new Float32Array(count);
 
   const geometry = new BufferGeometry();
@@ -289,8 +314,10 @@ export async function createStoryScene(
   geometry.setAttribute('aLight', new BufferAttribute(light, 1));
   geometry.setAttribute('aLight2', new BufferAttribute(light2, 1));
   geometry.setAttribute('aSeed', new BufferAttribute(seed, 1));
+  geometry.setAttribute('aRank', new BufferAttribute(rank, 1));
   geometry.setAttribute('aName', new BufferAttribute(nameXY, 2));
   geometry.setAttribute('aWord', new BufferAttribute(wordXY, 2));
+  geometry.setAttribute('aWordB', new BufferAttribute(wordBXY, 2));
   geometry.setAttribute('aSweep', new BufferAttribute(sweep, 1));
 
   const uniforms = {
@@ -313,7 +340,9 @@ export async function createStoryScene(
     // car in solid on a phone — so the size it shrinks to follows the count.
     uMachineSize: { value: 0.78 * Math.sqrt(count / 64000) },
     uWord: { value: 0 },
+    uWordBlend: { value: 0 },
     uWordSize: { value: 1 },
+    uWordSizeB: { value: 1 },
     uScale: { value: 1 },
     uBase: { value: 0.0068 * Math.sqrt(64000 / count) },
     // The flight's tone: a soft champagne, warm against the white Earth without shouting.
@@ -374,10 +403,11 @@ export async function createStoryScene(
   let globeScale = 0.8;
   let namedOk = false;
   let shown = 0;
+  let shownB = 0;
   const wordSets: Float32Array[] = [];
   const wordSizes: number[] = [];
   const globeOffset = new Vector3();
-  let phases: Phases = { enter: name ? 0 : 1, scatter: name ? 0 : 1, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0, word: 0 };
+  let phases: Phases = { enter: name ? 0 : 1, scatter: name ? 0 : 1, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0, word: 0, wordBlend: 0 };
 
   /**
    * Spreads the dots evenly over whatever was drawn on the mask, walking the lit
@@ -491,21 +521,65 @@ export async function createStoryScene(
 
       const out = new Float32Array(count * 2);
       const step = scatterMask(mask, ctx, dpr, out, null);
-      wordSets.push(out);
+      wordSets.push(inReadingOrder(out));
       // Fewer pixels than his name, so the same dots pack tighter: size follows.
       wordSizes.push(step === 0 ? 1 : Math.min(Math.max(1.05 * Math.sqrt(step), 0.3), 1.6));
     }
-    showWord(shown);
+    showWords(shown, shownB);
   };
 
-  /** Puts one of those names on the dots. */
-  const showWord = (index: number) => {
-    const set = wordSets[index];
-    if (!set) return;
-    shown = index;
-    wordXY.set(set);
-    uniforms.uWordSize.value = wordSizes[index];
+  /**
+   * Sorts a name's dots left to right: banded into columns across the line,
+   * then down within each column.
+   *
+   * Two names are crossed by pairing the nth dot of one with the nth dot of the
+   * other, so the order they are stored in is the order they travel in — and
+   * the order they are staggered in. Left as sampled, that pairing is random, a
+   * dot in one name's first letter is sent somewhere arbitrary in the next, and
+   * the crossing collapses into an even smear. Sorted across, each dot has a
+   * short way to go and the crossing runs as a wipe.
+   *
+   * The columns must run across and not down. Banded the other way the rank is
+   * really a vertical ordinate, the wipe goes top to bottom, and the middle of
+   * a crossing shows the top half of one name stacked over the bottom half of
+   * the other — legible, and quite wrong.
+   */
+  const inReadingOrder = (set: Float32Array) => {
+    let left = Infinity;
+    let right = -Infinity;
+    for (let i = 0; i < count; i++) {
+      const x = set[i * 2];
+      if (x < left) left = x;
+      if (x > right) right = x;
+    }
+    const columns = 150;
+    const span = right - left || 1;
+    const key = (i: number) => {
+      const column = Math.min(Math.floor(((set[i * 2] - left) / span) * columns), columns - 1);
+      return column * 1e6 + set[i * 2 + 1];
+    };
+    const order = Array.from({ length: count }, (_, i) => i).sort((a, b) => key(a) - key(b));
+    const sorted = new Float32Array(count * 2);
+    for (let i = 0; i < count; i++) {
+      sorted[i * 2] = set[order[i] * 2];
+      sorted[i * 2 + 1] = set[order[i] * 2 + 1];
+    }
+    return sorted;
+  };
+
+  /** Puts two of those names on the dots: the one held, and the one next. */
+  const showWords = (a: number, b: number) => {
+    const from = wordSets[a];
+    const to = wordSets[b];
+    if (!from || !to) return;
+    shown = a;
+    shownB = b;
+    wordXY.set(from);
+    wordBXY.set(to);
+    uniforms.uWordSize.value = wordSizes[a];
+    uniforms.uWordSizeB.value = wordSizes[b];
     geometry.attributes.aWord.needsUpdate = true;
+    geometry.attributes.aWordB.needsUpdate = true;
   };
 
   const slerp = (t: number, out: Vector3) => {
@@ -529,7 +603,7 @@ export async function createStoryScene(
   const cityTo = { x: 0, y: 0, z: 0 };
 
   const render = () => {
-    const { enter, scatter, assemble, flight, morph, fade, machine, word: typed } = phases;
+    const { enter, scatter, assemble, flight, morph, fade, machine, word: typed, wordBlend } = phases;
     slerp(flight, heading);
     // The globe turns under the plane, like a camera following it.
     turn.setFromUnitVectors(heading, hold);
@@ -543,6 +617,7 @@ export async function createStoryScene(
     uniforms.uFade.value = fade;
     uniforms.uMachine.value = machine;
     uniforms.uWord.value = typed;
+    uniforms.uWordBlend.value = wordBlend;
     rimGroup.quaternion.copy(turn);
     rimGroup.scale.setScalar(globeScale);
     rimGroup.position.copy(globeOffset);
@@ -611,7 +686,7 @@ export async function createStoryScene(
       render();
     },
     resize,
-    showWord,
+    showWords,
     get named() {
       return namedOk;
     },

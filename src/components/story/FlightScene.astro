@@ -257,7 +257,7 @@ const config = JSON.stringify({
           const { createStoryScene } = await import('../../lib/story-scene');
           const variant = matchMedia('(max-width: 48rem)').matches ? 'mobile' : 'desktop';
           scene = await createStoryScene(canvas, data, variant, { plane, from: cityFrom, to: cityTo });
-          scene.set({ enter: 1, scatter: 1, assemble: 1, flight: 1, morph: 0, fade: 0, machine: 0, word: 0 });
+          scene.set({ enter: 1, scatter: 1, assemble: 1, flight: 1, morph: 0, fade: 0, machine: 0, word: 0, wordBlend: 0 });
           window.addEventListener('resize', () => scene?.resize());
         } catch (error) {
           console.warn('flight scene unavailable', error);
