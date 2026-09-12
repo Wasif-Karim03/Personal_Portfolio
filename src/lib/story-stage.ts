@@ -74,6 +74,16 @@ export function setStage(part: Partial<Phases>): void {
   scene?.set(beats);
 }
 
+/** Leans the words toward the pointer. */
+export function tiltStage(x: number, y: number): void {
+  scene?.setTilt(x, y);
+}
+
+/** Keeps the stage drawing, so the words breathe and the lean can follow. */
+export function enliven(on: boolean): void {
+  scene?.setLively(on);
+}
+
 /** Chooses the name the dots hold and the one they are travelling to. */
 export function selectStagePlaces(a: number, b: number): void {
   scene?.showWords(a, b);

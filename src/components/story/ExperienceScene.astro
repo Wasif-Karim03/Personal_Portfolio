@@ -2,10 +2,14 @@
 /**
  * Chapter 03: where he has worked.
  *
- * Five places, one segment. The dots do not drop one name and gather another —
- * they carry, so LELAND becomes HILTON becomes AIRBNB, swirling hardest as they
- * cross. The list beside them arrives a row at a time and accumulates, so the
- * five build up rather than sitting greyed out waiting.
+ * Five places, one segment. The dots carry from one name to the next rather
+ * than dropping one and gathering another, and the list beside them arrives a
+ * row at a time and accumulates.
+ *
+ * Everything before this chapter is dimensional — a graded photograph, a globe
+ * with a rim light, a machine. Flat type on flat black read as a slide dropped
+ * into the middle of it, so the words here stand in depth, lean toward the
+ * pointer, breathe where they stand, and run warm while they are crossing.
  *
  * The names are set as type, not as logos: shipping other companies' marks is
  * forbidden by CLAUDE.md, invites a trademark complaint, and would put five
@@ -36,7 +40,7 @@ const places = [
             <li class="xp__row" data-row={index} data-year={place.year}>
               <span class="xp__name">{place.name}</span>
               <span class="mono xp__when">{place.when}</span>
-              <span class="xp__role">{place.role}</span>
+              <span class="mono xp__role">{place.role}</span>
             </li>
           ))
         }
@@ -53,6 +57,16 @@ const places = [
   .xp__pin { position: relative; overflow: hidden; background: var(--night); }
   :global(html.js-motion) .xp__pin { position: sticky; top: 0; height: 100svh; min-height: 36rem; background: transparent; }
 
+  /* A pool of light for the words to stand in, so they are not on a void. */
+  :global(html.js-motion) .xp__pin::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(52% 40% at 64% 46%, rgb(233 207 166 / 0.07), rgb(243 242 238 / 0.03) 42%, transparent 72%);
+  }
+
   /* Which of the five you are on, set like a plate number. */
   .xp__count { display: none; }
   :global(html.js-motion) .xp__count {
@@ -65,9 +79,8 @@ const places = [
     font: 850 min(15vw, 22svh)/1 var(--display);
     letter-spacing: -0.02em;
     color: transparent;
-    -webkit-text-stroke: 1px rgb(243 242 238 / 0.22);
+    -webkit-text-stroke: 1px rgb(243 242 238 / 0.2);
     font-variant-numeric: tabular-nums;
-    transition: opacity 500ms var(--ease-out);
   }
 
   .xp__side { padding: 3rem var(--gutter) 4rem; }
@@ -76,7 +89,7 @@ const places = [
     left: var(--gutter);
     top: 50%;
     z-index: 3;
-    width: min(42%, 28rem);
+    width: min(42%, 29rem);
     padding: 0;
     translate: 0 -50%;
   }
@@ -90,43 +103,74 @@ const places = [
   :global(html.js-motion) .xp__rule {
     display: block;
     height: 1px;
-    margin-block: 1.6rem;
-    background: rgb(243 242 238 / 0.16);
+    margin-block: 1.7rem;
+    background: rgb(243 242 238 / 0.14);
   }
   .xp__rule i { display: block; height: 100%; background: var(--flight); transform-origin: 0 50%; transform: scaleX(0); }
 
-  .xp__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 1.15rem; }
+  .xp__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 1.25rem; }
 
   .xp__row {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 0.15rem 1rem;
+    gap: 0.3rem 1rem;
+    padding-inline-start: 1.1rem;
   }
+
+  /* A mark against the place you are on. */
+  .xp__row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.35em;
+    width: 2px;
+    height: 0;
+    background: var(--flight);
+    transition: height 600ms var(--ease-out);
+  }
+  .xp__row.is-here::before { height: 1.1em; }
 
   /* With motion each row arrives as you reach it, and the five accumulate. */
   :global(html.js-motion) .xp__row {
     opacity: 0;
-    translate: 0 12px;
-    transition: opacity 700ms var(--ease-out), translate 700ms var(--ease-out);
+    translate: 0 14px;
+    transition: opacity 800ms var(--ease-out), translate 800ms var(--ease-out);
   }
-  :global(html.js-motion) .xp__row.is-in { opacity: 0.42; translate: 0 0; }
+  :global(html.js-motion) .xp__row.is-in { opacity: 0.34; translate: 0 0; }
   :global(html.js-motion) .xp__row.is-here { opacity: 1; }
 
-  .xp__name { font: 500 clamp(1.05rem, 0.98rem + 0.4vw, 1.3rem)/1.25 var(--sans); color: var(--paper); }
-  .xp__when { grid-column: 2; grid-row: 1; align-self: baseline; color: var(--dim); font-variant-numeric: tabular-nums; transition: color 500ms var(--ease-out); }
+  .xp__name {
+    font: 400 clamp(1.3rem, 1.1rem + 0.7vw, 1.75rem)/1.15 var(--serif);
+    letter-spacing: -0.01em;
+    color: var(--paper);
+  }
+  .xp__when {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: baseline;
+    font-size: 0.72rem;
+    letter-spacing: 0.07em;
+    color: var(--dim);
+    font-variant-numeric: tabular-nums;
+    transition: color 600ms var(--ease-out);
+  }
   .xp__row.is-here .xp__when { color: var(--flight); }
   .xp__role {
     grid-column: 1 / -1;
-    max-width: 30ch;
-    font-size: 0.86rem;
-    line-height: 1.5;
+    max-width: 32ch;
+    font-size: 0.7rem;
+    line-height: 1.6;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
     color: var(--dim);
   }
 
   @media (max-width: 59.99rem) {
+    :global(html.js-motion) .xp__pin::before { background: radial-gradient(60% 26% at 50% 34%, rgb(233 207 166 / 0.08), transparent 70%); }
     :global(html.js-motion) .xp__count { right: var(--gutter); top: 4%; font-size: min(22vw, 14svh); }
     :global(html.js-motion) .xp__side { width: auto; right: var(--gutter); top: auto; bottom: clamp(1.5rem, 5svh, 3rem); translate: 0 0; }
-    :global(html.js-motion) .xp__list { gap: 0.75rem; }
+    :global(html.js-motion) .xp__list { gap: 0.8rem; }
     .xp__role { display: none; }
     :global(html.js-motion) .xp__row.is-here .xp__role { display: block; }
   }
@@ -134,7 +178,7 @@ const places = [
 
 <script>
   import { ScrollTrigger, initMotion } from '../../lib/motion';
-  import { openStage, setStage, selectStagePlaces } from '../../lib/story-stage';
+  import { openStage, setStage, selectStagePlaces, tiltStage, enliven } from '../../lib/story-stage';
 
   const root = document.querySelector<HTMLElement>('[data-experience]');
   const count = root?.querySelector<HTMLElement>('[data-count]') ?? null;
@@ -195,6 +239,20 @@ const places = [
     };
 
     ScrollTrigger.create({ trigger: root, start: 'top top', end: 'bottom bottom', onUpdate: (self) => apply(self.progress) });
+
+    // The words only breathe and follow the pointer while this chapter is on
+    // screen; everywhere else the stage still draws once per scroll.
+    ScrollTrigger.create({
+      trigger: root,
+      start: 'top bottom',
+      end: 'bottom top',
+      onToggle: (self) => enliven(self.isActive),
+    });
+
+    window.addEventListener('pointermove', (event) => {
+      tiltStage((event.clientX / window.innerWidth - 0.5) * 2, (event.clientY / window.innerHeight - 0.5) * 2);
+    }, { passive: true });
+
     apply(0);
     // The names are sampled when the stage opens; put the right pair up then.
     openStage().then(() => { pair = ''; here = -1; apply(last); });

@@ -82,6 +82,10 @@ export interface Overlays {
 export interface StoryScene {
   set(phases: Phases): void;
   resize(): void;
+  /** Leans the words toward the reader's pointer, each -1 to 1. */
+  setTilt(x: number, y: number): void;
+  /** Keeps drawing, so the words breathe and the lean can follow. */
+  setLively(on: boolean): void;
   /** Sets which name the dots hold and which one they are travelling to. */
   showWords(a: number, b: number): void;
   /** False when the name could not be drawn, so the page keeps its heading. */
@@ -122,6 +126,9 @@ const vertexShader = /* glsl */ `
   uniform float uWordBlend;
   uniform float uWordSize;
   uniform float uWordSizeB;
+  uniform vec2 uTilt;
+  uniform float uTime;
+  uniform float uThick;
   uniform float uScale;
   uniform float uBase;
   uniform vec3 uRouteTone;
@@ -177,8 +184,19 @@ const vertexShader = /* glsl */ `
     // crossing is an average of two words, which is not a word.
     float cross = ramp(clamp(uWordBlend * 3.2 - aRank * 2.2, 0.0, 1.0));
     vec2 saying = mix(aWord, aWordB, cross);
+    float travelling = cross * (1.0 - cross) * 4.0;
+
+    // Depth belongs to the crossing, not to the name standing still: at rest
+    // this is type and has to stay sharp, so it keeps only a trace of it.
+    float deep = (fract(aSeed * 23.7) - 0.5) * uThick * (0.3 + 0.7 * travelling);
+    vec3 standing = vec3(saying, deep);
+    // The lean carries the word as one rigid block. Leaning each dot by its own
+    // depth is a shear instead, and any shear large enough to feel furs the
+    // letters; a rigid move is just as visible and cannot blur anything.
+    standing.xy += uTilt * 0.055;
+    standing += hash3(aSeed * 3.1) * 0.0025 * sin(uTime * 0.6 + aSeed * 6.2831);
     float tq = ramp(clamp(uWord * 1.7 - aSweep * 0.6, 0.0, 1.0));
-    p = mix(p, vec3(saying, 0.0), tq) + hash3(aSeed * 4.1) * 0.26 * sin(3.14159 * tq);
+    p = mix(p, standing, tq) + hash3(aSeed * 4.1) * 0.26 * sin(3.14159 * tq);
     p += hash3(aSeed * 7.9) * 0.055 * sin(3.14159 * cross) * tq;
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
@@ -197,7 +215,10 @@ const vertexShader = /* glsl */ `
     vec3 globeTone = route ? uRouteTone : vec3(0.8, 0.8, 0.78) * (0.7 + 0.3 * fract(aSeed * 11.0));
     vec3 pictureTone = vec3(pow(aLight, 0.8)) * 0.78;
     vec3 machineTone = vec3(pow(aLight2, 0.85)) * 0.76;
-    vColor = mix(mix(mix(mix(nameTone, globeTone, ta), pictureTone, tm), machineTone, tw), nameTone, tq);
+    // Warm while they are travelling, cooling to white as they settle, and a
+    // little dimmer the further back they stand.
+    vec3 wordTone = mix(nameTone, uRouteTone, travelling * 0.6) * (1.0 - 0.3 * (0.5 - deep / max(uThick, 0.001)));
+    vColor = mix(mix(mix(mix(nameTone, globeTone, ta), pictureTone, tm), machineTone, tw), wordTone, tq);
 
     float said = mix(uWordSize, uWordSizeB, cross);
     float size = mix(mix(mix(mix(1.4, route ? 1.25 : 1.0, ta), 1.55, tm), uMachineSize, tw), said, tq);
@@ -343,6 +364,9 @@ export async function createStoryScene(
     uWordBlend: { value: 0 },
     uWordSize: { value: 1 },
     uWordSizeB: { value: 1 },
+    uTilt: { value: [0, 0] as [number, number] },
+    uTime: { value: 0 },
+    uThick: { value: 0.07 },
     uScale: { value: 1 },
     uBase: { value: 0.0068 * Math.sqrt(64000 / count) },
     // The flight's tone: a soft champagne, warm against the white Earth without shouting.
@@ -602,6 +626,23 @@ export async function createStoryScene(
   const cityFrom = { x: 0, y: 0, z: 0 };
   const cityTo = { x: 0, y: 0, z: 0 };
 
+  // Kept drawing only while a scene asks for it: the words breathe and the
+  // lean eases toward the pointer, and everywhere else the scene still draws
+  // once per scroll.
+  let lively = false;
+  let frame = 0;
+  let started = 0;
+  const wantTilt: [number, number] = [0, 0];
+  const tick = () => {
+    if (!lively) return;
+    uniforms.uTime.value = (performance.now() - started) / 1000;
+    const tilt = uniforms.uTilt.value;
+    tilt[0] += (wantTilt[0] - tilt[0]) * 0.06;
+    tilt[1] += (wantTilt[1] - tilt[1]) * 0.06;
+    render();
+    frame = requestAnimationFrame(tick);
+  };
+
   const render = () => {
     const { enter, scatter, assemble, flight, morph, fade, machine, word: typed, wordBlend } = phases;
     slerp(flight, heading);
@@ -687,6 +728,21 @@ export async function createStoryScene(
     },
     resize,
     showWords,
+    setTilt(x, y) {
+      wantTilt[0] = Math.min(Math.max(x, -1), 1);
+      wantTilt[1] = Math.min(Math.max(y, -1), 1);
+      if (!lively) render();
+    },
+    setLively(on) {
+      if (on === lively) return;
+      lively = on;
+      if (on) {
+        started = performance.now();
+        frame = requestAnimationFrame(tick);
+      } else {
+        cancelAnimationFrame(frame);
+      }
+    },
     get named() {
       return namedOk;
     },
