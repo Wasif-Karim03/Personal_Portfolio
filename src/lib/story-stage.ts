@@ -13,7 +13,7 @@ const data = pointsJson as unknown as StoryPoints;
 
 let scene: StoryScene | null = null;
 let opening: Promise<StoryScene | null> | null = null;
-const beats: Phases = { enter: 0, scatter: 0, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0 };
+const beats: Phases = { enter: 0, scatter: 0, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0, word: 0 };
 
 export function stageCanvas(): HTMLCanvasElement | null {
   return document.querySelector<HTMLCanvasElement>('[data-stage-dots]');
@@ -50,6 +50,8 @@ export function openStage(): Promise<StoryScene | null> {
         matchMedia('(max-width: 48rem)').matches ? 'mobile' : 'desktop',
         overlays,
         { lines: portrait ? ['Wasif', 'Karim'] : ['Wasif Karim'], weight: 850, family: face },
+        // Chapter 03 opens on these, set in the same face as his name.
+        { lines: ['git init'], weight: 850, family: face },
       );
       scene.set(beats);
       window.addEventListener('resize', () => scene?.resize());

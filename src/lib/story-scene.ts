@@ -3,7 +3,7 @@
  * opening needs, in order.
  *
  *   his name  →  scattered  →  the globe  →  the flight  →  University Hall
- *   →  the machine he builds
+ *   →  the machine he builds  →  the words of the next chapter
  *
  * They are the same points throughout. That is the whole point of the scene:
  * the name does not fade out and a globe fade in, the letters break apart and
@@ -67,6 +67,8 @@ export interface Phases {
   fade: number;
   /** Letting the hall go and building his car out of the same dots. */
   machine: number;
+  /** Letting the car go and setting the next chapter's words. */
+  word: number;
 }
 
 export interface Overlays {
@@ -94,6 +96,7 @@ const vertexShader = /* glsl */ `
   attribute float aLight2;
   attribute float aSeed;
   attribute vec2 aName;
+  attribute vec2 aWord;
   attribute float aSweep;
   uniform mat3 uRot;
   uniform float uGlobeScale;
@@ -109,6 +112,8 @@ const vertexShader = /* glsl */ `
   uniform float uFade;
   uniform float uMachine;
   uniform float uMachineSize;
+  uniform float uWord;
+  uniform float uWordSize;
   uniform float uScale;
   uniform float uBase;
   uniform vec3 uRouteTone;
@@ -150,12 +155,16 @@ const vertexShader = /* glsl */ `
     float tw = ramp(clamp(uMachine * 1.6 - fract(aSeed * 8.3) * 0.6, 0.0, 1.0));
     p = mix(p, built, tw) + hash3(aSeed * 9.1) * 0.32 * sin(3.14159 * tw);
 
+    // 6. The car lets go, and the dots set the words the next chapter opens on.
+    float tq = ramp(clamp(uWord * 1.7 - aSweep * 0.6, 0.0, 1.0));
+    p = mix(p, vec3(aWord, 0.0), tq) + hash3(aSeed * 4.1) * 0.26 * sin(3.14159 * tq);
+
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
 
     bool route = aRole > 0.5;
     // The far side of the globe falls away, so it reads as a sphere.
-    float depth = mix(smoothstep(-0.25, 0.55, normalize(onGlobe).z), 1.0, max(tm, tw));
+    float depth = mix(smoothstep(-0.25, 0.55, normalize(onGlobe).z), 1.0, max(max(tm, tw), tq));
     float drawn = (!route || aOrder <= 0.0) ? 1.0 : clamp((uReveal - aOrder) * 60.0 + 1.0, 0.0, 1.0);
     drawn = mix(drawn, 1.0, tm);
     // Depth and the flight's reveal only mean anything once the dots are a globe.
@@ -166,9 +175,9 @@ const vertexShader = /* glsl */ `
     vec3 globeTone = route ? uRouteTone : vec3(0.8, 0.8, 0.78) * (0.7 + 0.3 * fract(aSeed * 11.0));
     vec3 pictureTone = vec3(pow(aLight, 0.8)) * 0.78;
     vec3 machineTone = vec3(pow(aLight2, 0.85)) * 0.76;
-    vColor = mix(mix(mix(nameTone, globeTone, ta), pictureTone, tm), machineTone, tw);
+    vColor = mix(mix(mix(mix(nameTone, globeTone, ta), pictureTone, tm), machineTone, tw), nameTone, tq);
 
-    float size = mix(mix(mix(1.4, route ? 1.25 : 1.0, ta), 1.55, tm), uMachineSize, tw);
+    float size = mix(mix(mix(mix(1.4, route ? 1.25 : 1.0, ta), 1.55, tm), uMachineSize, tw), uWordSize, tq);
     gl_PointSize = max(uBase * size * uScale / -mv.z, 1.0);
     vAlpha = te * globeMod * (1.0 - uFade);
   }
@@ -216,6 +225,7 @@ export async function createStoryScene(
   variant: 'desktop' | 'mobile',
   overlays: Overlays,
   name?: NameSetting,
+  word?: NameSetting,
 ): Promise<StoryScene> {
   const count = data.counts[variant];
   const response = await fetch(data.files[variant]);
@@ -265,6 +275,7 @@ export async function createStoryScene(
     seed[i] = Math.random();
   }
   const nameXY = new Float32Array(count * 2);
+  const wordXY = new Float32Array(count * 2);
   const sweep = new Float32Array(count);
 
   const geometry = new BufferGeometry();
@@ -277,6 +288,7 @@ export async function createStoryScene(
   geometry.setAttribute('aLight2', new BufferAttribute(light2, 1));
   geometry.setAttribute('aSeed', new BufferAttribute(seed, 1));
   geometry.setAttribute('aName', new BufferAttribute(nameXY, 2));
+  geometry.setAttribute('aWord', new BufferAttribute(wordXY, 2));
   geometry.setAttribute('aSweep', new BufferAttribute(sweep, 1));
 
   const uniforms = {
@@ -298,6 +310,8 @@ export async function createStoryScene(
     // ever make. Fewer points means bigger ones (uBase), which would fill the
     // car in solid on a phone — so the size it shrinks to follows the count.
     uMachineSize: { value: 0.78 * Math.sqrt(count / 64000) },
+    uWord: { value: 0 },
+    uWordSize: { value: 1 },
     uScale: { value: 1 },
     uBase: { value: 0.0068 * Math.sqrt(64000 / count) },
     // The flight's tone: a soft champagne, warm against the white Earth without shouting.
@@ -358,31 +372,59 @@ export async function createStoryScene(
   let globeScale = 0.8;
   let namedOk = false;
   const globeOffset = new Vector3();
-  let phases: Phases = { enter: name ? 0 : 1, scatter: name ? 0 : 1, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0 };
+  let phases: Phases = { enter: name ? 0 : 1, scatter: name ? 0 : 1, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0, word: 0 };
 
   /**
-   * Sets the name into an offscreen canvas and spreads the dots evenly over its
-   * letterforms, walking the lit pixels with a fractional step so the coverage
-   * reaches the foot of the letters however many dots there are.
+   * Spreads the dots evenly over whatever was drawn on the mask, walking the lit
+   * pixels with a fractional step so the coverage reaches the foot of the
+   * letters however many dots there are. Returns the pixels each dot stands for,
+   * which is what their size has to follow, or 0 if nothing was drawn.
    */
-  const layoutName = () => {
-    if (!name) return;
-    namedOk = false;
+  const scatterMask = (mask: HTMLCanvasElement, ctx: CanvasRenderingContext2D, dpr: number, out: Float32Array, sweepOut: Float32Array | null) => {
+    const { data: pixels } = ctx.getImageData(0, 0, mask.width, mask.height);
+    const hits: number[] = [];
+    for (let i = 0; i < mask.width * mask.height; i++) if (pixels[i * 4 + 3] > 120) hits.push(i);
+    if (hits.length === 0) return 0;
+
+    const step = hits.length / count;
+    for (let i = 0; i < count; i++) {
+      const hit = hits[Math.min(hits.length - 1, Math.floor(i * step))];
+      const x = ((hit % mask.width) + Math.random()) / dpr;
+      const y = (Math.floor(hit / mask.width) + Math.random()) / dpr;
+      // Screen pixels to the world, on the plane the camera looks straight at.
+      out[i * 2] = (x / width - 0.5) * visW;
+      out[i * 2 + 1] = (0.5 - y / height) * visH;
+      if (sweepOut) sweepOut[i] = x / width;
+    }
+    return step;
+  };
+
+  /** An offscreen canvas the size of the view, ready to be written on. */
+  const freshMask = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const mask = document.createElement('canvas');
     mask.width = Math.round(width * dpr);
     mask.height = Math.round(height * dpr);
     const ctx = mask.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return;
-
-    const words = name.lines.map((line) => line.toUpperCase());
-    const two = words.length > 1;
+    if (!ctx) return null;
     ctx.scale(dpr, dpr);
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.005em';
+    return { mask, ctx, dpr };
+  };
 
+  /** His name, set as the page would set it. */
+  const layoutName = () => {
+    if (!name) return;
+    namedOk = false;
+    const sheet = freshMask();
+    if (!sheet) return;
+    const { mask, ctx, dpr } = sheet;
+
+    const words = name.lines.map((line) => line.toUpperCase());
+    const two = words.length > 1;
     // Set it as large as the page would, then pull back until the name fits.
     let size = two ? Math.min(width * 0.33, height * 0.22) : Math.min(width * 0.17, height * 0.34);
     const widest = () => {
@@ -399,24 +441,39 @@ export async function createStoryScene(
       ctx.fillText(word, width / 2, foot - (words.length - 1 - i) * size * 0.82);
     });
 
-    const { data: pixels } = ctx.getImageData(0, 0, mask.width, mask.height);
-    const hits: number[] = [];
-    for (let i = 0; i < mask.width * mask.height; i++) if (pixels[i * 4 + 3] > 120) hits.push(i);
-    if (hits.length === 0) return;
-
-    const step = hits.length / count;
-    for (let i = 0; i < count; i++) {
-      const hit = hits[Math.min(hits.length - 1, Math.floor(i * step))];
-      const x = ((hit % mask.width) + Math.random()) / dpr;
-      const y = (Math.floor(hit / mask.width) + Math.random()) / dpr;
-      // Screen pixels to the world, on the plane the camera looks straight at.
-      nameXY[i * 2] = (x / width - 0.5) * visW;
-      nameXY[i * 2 + 1] = (0.5 - y / height) * visH;
-      sweep[i] = x / width;
-    }
+    if (scatterMask(mask, ctx, dpr, nameXY, sweep) === 0) return;
     geometry.attributes.aName.needsUpdate = true;
     geometry.attributes.aSweep.needsUpdate = true;
     namedOk = true;
+  };
+
+  /** The next chapter's words, smaller and centred, in the same face. */
+  const layoutWord = () => {
+    if (!word) return;
+    const sheet = freshMask();
+    if (!sheet) return;
+    const { mask, ctx, dpr } = sheet;
+
+    const lines = word.lines.map((line) => line.toUpperCase());
+    let size = Math.min(width * 0.13, height * 0.24);
+    const widest = () => {
+      ctx.font = `${word.weight} ${size}px ${word.family}`;
+      return Math.max(...lines.map((line) => ctx.measureText(line).width));
+    };
+    const room = width * 0.74;
+    if (widest() > room) size *= room / widest();
+    ctx.font = `${word.weight} ${size}px ${word.family}`;
+
+    const foot = height * 0.54;
+    lines.forEach((line, i) => {
+      ctx.fillText(line, width / 2, foot - (lines.length - 1 - i) * size * 0.86);
+    });
+
+    const step = scatterMask(mask, ctx, dpr, wordXY, null);
+    if (step === 0) return;
+    // Fewer pixels than the name, so the same dots pack tighter: size follows.
+    uniforms.uWordSize.value = Math.min(Math.max(1.05 * Math.sqrt(step), 0.3), 1.6);
+    geometry.attributes.aWord.needsUpdate = true;
   };
 
   const slerp = (t: number, out: Vector3) => {
@@ -440,7 +497,7 @@ export async function createStoryScene(
   const cityTo = { x: 0, y: 0, z: 0 };
 
   const render = () => {
-    const { enter, scatter, assemble, flight, morph, fade, machine } = phases;
+    const { enter, scatter, assemble, flight, morph, fade, machine, word: typed } = phases;
     slerp(flight, heading);
     // The globe turns under the plane, like a camera following it.
     turn.setFromUnitVectors(heading, hold);
@@ -453,6 +510,7 @@ export async function createStoryScene(
     uniforms.uMorph.value = morph;
     uniforms.uFade.value = fade;
     uniforms.uMachine.value = machine;
+    uniforms.uWord.value = typed;
     rimGroup.quaternion.copy(turn);
     rimGroup.scale.setScalar(globeScale);
     rimGroup.position.copy(globeOffset);
@@ -509,6 +567,7 @@ export async function createStoryScene(
     uniforms.uOffset2.value.set(wide ? visW * 0.2 : 0, wide ? 0.02 : visH * 0.16, 0);
     uniforms.uScale.value = (height * renderer.getPixelRatio()) / (2 * tan);
     layoutName();
+    layoutWord();
     render();
   };
 
