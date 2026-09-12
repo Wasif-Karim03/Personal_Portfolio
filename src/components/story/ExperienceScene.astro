@@ -1,0 +1,155 @@
+---
+/**
+ * Chapter 03: where he has worked.
+ *
+ * Five places rather than five chapters. Each one held a whole pinned screen
+ * before, which made the story repeat itself and buried a list a reader wants
+ * to take in at a glance. So the list stays up and readable the whole way
+ * through, and the dots set one company's name at a time beside it.
+ *
+ * The names are set as type, not as logos: shipping other companies' marks is
+ * forbidden by CLAUDE.md, invites a trademark complaint, and would put five
+ * brand palettes into a black-and-white story. Roles and dates are the ones
+ * his own files record; nothing here describes what he built, by request.
+ */
+const places = [
+  { name: 'Leland', role: 'Software Development Intern', when: 'Summer 2023', year: '2023' },
+  { name: 'Hilton', role: 'Software Engineering Intern', when: 'Summer 2024', year: '2024' },
+  { name: 'Airbnb', role: 'Software Engineering Intern', when: 'Summer 2025', year: '2025' },
+  { name: 'think[box]', role: 'Robotics Software Engineer · Case Western Reserve', when: '2026', year: '2026' },
+  { name: 'OpsiClear', role: 'AI Research Engineer · Cleveland', when: 'Now', year: '2026' },
+];
+---
+
+<section class="xp" id="experience" data-experience aria-labelledby="xp-title" data-count={places.length}>
+  <div class="xp__pin">
+    <div class="xp__head" data-head>
+      <p class="mono xp__meta">Chapter 03 · 2023 – now</p>
+      <h2 class="xp__title" id="xp-title">Five places, <em>five summers and a job.</em></h2>
+    </div>
+
+    <ol class="xp__list" data-list>
+      {
+        places.map((place, index) => (
+          <li class="xp__row" data-row={index} data-year={place.year}>
+            <span class="xp__name">{place.name}</span>
+            <span class="xp__role">{place.role}</span>
+            <span class="mono xp__when">{place.when}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .xp { position: relative; }
+
+  :global(html.js-motion) .xp { height: 560svh; }
+
+  .xp__pin { position: relative; overflow: hidden; background: var(--night); }
+  :global(html.js-motion) .xp__pin { position: sticky; top: 0; height: 100svh; min-height: 36rem; background: transparent; }
+
+  .xp__head { padding: 3rem var(--gutter) 0; }
+  :global(html.js-motion) .xp__head {
+    position: absolute;
+    left: var(--gutter);
+    top: 2.25rem;
+    z-index: 3;
+    width: min(44%, 30rem);
+    padding: 0;
+    opacity: 0;
+  }
+  .xp__meta { margin: 0 0 0.6rem; color: var(--silver); }
+  .xp__title { margin: 0; font: 400 clamp(1.8rem, 1.2rem + 1.8vw, 2.6rem)/1.05 var(--serif); letter-spacing: -0.015em; text-wrap: balance; }
+  .xp__title em { color: var(--silver); }
+
+  .xp__list { margin: 0; padding: 2rem var(--gutter) 4rem; list-style: none; display: grid; gap: 1.5rem; }
+  :global(html.js-motion) .xp__list {
+    position: absolute;
+    left: var(--gutter);
+    bottom: clamp(2rem, 8svh, 5rem);
+    z-index: 3;
+    width: min(44%, 30rem);
+    padding: 0;
+    gap: 0.9rem;
+  }
+
+  .xp__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.1rem 1rem;
+    padding-block-start: 0.7rem;
+    border-block-start: 1px solid var(--line);
+    color: var(--dim);
+    transition: color 400ms var(--ease-out), opacity 400ms var(--ease-out);
+  }
+  :global(html.js-motion) .xp__row { opacity: 0.38; }
+  :global(html.js-motion) .xp__row.is-here { opacity: 1; }
+
+  .xp__name { font: 500 1.02rem/1.3 var(--sans); color: var(--silver); }
+  .xp__row.is-here .xp__name { color: var(--paper); }
+  .xp__when { grid-column: 2; grid-row: 1; align-self: center; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .xp__row.is-here .xp__when { color: var(--flight); }
+  .xp__role { grid-column: 1 / -1; font-size: 0.86rem; color: var(--dim); }
+
+  @media (max-width: 59.99rem) {
+    :global(html.js-motion) .xp__head { width: auto; right: var(--gutter); }
+    :global(html.js-motion) .xp__list { width: auto; right: var(--gutter); bottom: clamp(1.5rem, 5svh, 3rem); }
+    .xp__role { display: none; }
+    :global(html.js-motion) .xp__row.is-here .xp__role { display: block; }
+  }
+</style>
+
+<script>
+  import { ScrollTrigger, initMotion } from '../../lib/motion';
+  import { openStage, setStage, selectStagePlace } from '../../lib/story-stage';
+
+  const root = document.querySelector<HTMLElement>('[data-experience]');
+  const head = root?.querySelector<HTMLElement>('[data-head]') ?? null;
+  const rows = [...(root?.querySelectorAll<HTMLElement>('[data-row]') ?? [])];
+
+  const clamp = (v: number) => Math.min(Math.max(v, 0), 1);
+  const span = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
+  const smooth = (t: number) => t * t * (3 - 2 * t);
+
+  if (root && head && rows.length && initMotion()) {
+    const total = rows.length;
+    let showing = -1;
+    let last = 0;
+
+    const apply = (p: number) => {
+      last = p;
+      // One slot per place: the dots gather its name, hold, then let it go
+      // again just before the next one takes over.
+      const slot = Math.min(Math.floor(p * total), total - 1);
+      const local = p * total - slot;
+      const held = smooth(span(local, 0.02, 0.3)) * (1 - smooth(span(local, 0.84, 0.99)));
+
+      if (slot !== showing) {
+        showing = slot;
+        selectStagePlace(slot);
+        rows.forEach((row, i) => row.classList.toggle('is-here', i === slot));
+        const year = rows[slot]?.dataset.year;
+        for (const el of document.querySelectorAll('[data-rail-year]')) {
+          el.classList.toggle('is-current', (el as HTMLElement).dataset.railYear === year);
+        }
+      }
+
+      if (p > 0.001) {
+        setStage({
+          enter: 1, scatter: 1, assemble: 1, flight: 1, morph: 1,
+          fade: 0, machine: 1,
+          word: held,
+        });
+      }
+
+      head.style.opacity = String(smooth(span(p, 0.01, 0.06)));
+    };
+
+    ScrollTrigger.create({ trigger: root, start: 'top top', end: 'bottom bottom', onUpdate: (self) => apply(self.progress) });
+    apply(0);
+    // The names are sampled when the stage opens; show the right one then.
+    openStage().then(() => { showing = -1; apply(last); });
+  }
+</script>

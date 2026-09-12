@@ -11,65 +11,12 @@ import { createStoryScene, type Overlays, type Phases, type StoryPoints, type St
 
 const data = pointsJson as unknown as StoryPoints;
 
+/** The names the dots take in the experience chapter, in order. */
+export const PLACES = ['Leland', 'Hilton', 'Airbnb', 'think[box]', 'OpsiClear'];
+
 let scene: StoryScene | null = null;
 let opening: Promise<StoryScene | null> | null = null;
-const beats: Phases = { enter: 0, scatter: 0, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0, word: 0, plan: 0 };
-
-/**
- * Chapter 04's shape: the path a request takes through the system, drawn as
- * outlines so the dots trace edges rather than filling boxes in. Wide screens
- * lay it left to right; narrow ones stack it. The six ticks over the middle are
- * the six endpoints.
- */
-function requestPath(ctx: CanvasRenderingContext2D, w: number, h: number): void {
-  const wide = w >= 960;
-  const boxW = wide ? w * 0.17 : w * 0.56;
-  const boxH = wide ? h * 0.15 : h * 0.1;
-  const xs = wide ? [w * 0.25, w * 0.5, w * 0.75] : [w * 0.5, w * 0.5, w * 0.5];
-  const ys = wide ? [h * 0.45, h * 0.45, h * 0.45] : [h * 0.26, h * 0.44, h * 0.62];
-  const edge = Math.max(2, Math.min(boxW, boxH) * 0.055);
-
-  const box = (x: number, y: number) => {
-    const radius = Math.min(boxW, boxH) * 0.16;
-    ctx.save();
-    ctx.beginPath();
-    ctx.roundRect(x - boxW / 2, y - boxH / 2, boxW, boxH, radius);
-    ctx.fill();
-    // Punch the middle out, so what is left is the outline.
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.roundRect(x - boxW / 2 + edge, y - boxH / 2 + edge, boxW - 2 * edge, boxH - 2 * edge, Math.max(radius - edge, 1));
-    ctx.fill();
-    ctx.restore();
-  };
-
-  // The run between one box and the next.
-  for (let i = 0; i < 2; i++) {
-    if (wide) ctx.fillRect(xs[i] + boxW / 2, ys[i] - edge / 2, xs[i + 1] - xs[i] - boxW, edge);
-    else ctx.fillRect(xs[i] - edge / 2, ys[i] + boxH / 2, edge, ys[i + 1] - ys[i] - boxH);
-  }
-  for (let i = 0; i < 3; i++) box(xs[i], ys[i]);
-
-  // Six endpoints, ticked against the middle of the path. Laid out left to
-  // right there is room above the boxes; stacked there is not — that space
-  // belongs to the labels — so the ticks stand alongside instead.
-  const tick = Math.max(2, edge);
-  if (wide) {
-    const tall = boxH * 0.32;
-    const gap = boxW / 7;
-    for (let i = 0; i < 6; i++) {
-      const x = xs[1] - boxW / 2 + gap * (i + 1) - tick / 2;
-      ctx.fillRect(x, ys[1] - boxH / 2 - tall - boxH * 0.22, tick, tall);
-    }
-  } else {
-    const long = boxW * 0.17;
-    const gap = boxH / 7;
-    for (let i = 0; i < 6; i++) {
-      const y = ys[1] - boxH / 2 + gap * (i + 1) - tick / 2;
-      ctx.fillRect(xs[1] + boxW / 2 + boxW * 0.07, y, long, tick);
-    }
-  }
-}
+const beats: Phases = { enter: 0, scatter: 0, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0, word: 0 };
 
 export function stageCanvas(): HTMLCanvasElement | null {
   return document.querySelector<HTMLCanvasElement>('[data-stage-dots]');
@@ -106,9 +53,8 @@ export function openStage(): Promise<StoryScene | null> {
         matchMedia('(max-width: 48rem)').matches ? 'mobile' : 'desktop',
         overlays,
         { lines: portrait ? ['Wasif', 'Karim'] : ['Wasif Karim'], weight: 850, family: face },
-        // Chapter 03 opens on these, set in the same face as his name.
-        { lines: ['git init'], weight: 850, family: face },
-        requestPath,
+        // Every place he has worked, in order, set in the face his name is.
+        PLACES.map((place) => ({ lines: [place], weight: 850, family: face })),
       );
       scene.set(beats);
       window.addEventListener('resize', () => scene?.resize());
@@ -126,6 +72,11 @@ export function openStage(): Promise<StoryScene | null> {
 export function setStage(part: Partial<Phases>): void {
   Object.assign(beats, part);
   scene?.set(beats);
+}
+
+/** Chooses which of those names the dots are holding. */
+export function selectStagePlace(index: number): void {
+  scene?.showWord(index);
 }
 
 /** Writes the name in, dot by dot. Runs once, when the loader lifts. */
