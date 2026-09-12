@@ -2,19 +2,18 @@
 /**
  * Chapter 03: where he has worked.
  *
- * Five places, one segment. The dots carry from one name to the next rather
- * than dropping one and gathering another, and the list beside them arrives a
- * row at a time and accumulates.
+ * Five places, one segment, zig-zagging down the page: each mark stands on the
+ * opposite side from the one before it, with its card across from it, so the
+ * eye travels rather than parking on one edge.
  *
- * Everything before this chapter is dimensional — a graded photograph, a globe
- * with a rim light, a machine. Flat type on flat black read as a slide dropped
- * into the middle of it, so the words here stand in depth, lean toward the
- * pointer, breathe where they stand, and run warm while they are crossing.
+ * Every place is drawn as its own mark — Leland, Hilton and Airbnb have real
+ * ones, think[box] sets its name as type with the brackets, and OpsiClear has
+ * none to find. All five are sampled into the same dots as the rest of the
+ * story instead of being pasted on as flat artwork. Provenance and the
+ * trademark position are in public/logos/SOURCES.md and CLAUDE.md.
  *
- * The names are set as type, not as logos: shipping other companies' marks is
- * forbidden by CLAUDE.md, invites a trademark complaint, and would put five
- * brand palettes into a black-and-white story. Roles and dates are the ones his
- * own files record; nothing here describes what he built, by request.
+ * Without motion every card is simply listed, which is why all five are real
+ * markup rather than one card the script rewrites.
  */
 const places = [
   { name: 'Leland', role: 'Software Development Intern', when: 'Summer 2023', year: '2023' },
@@ -27,25 +26,25 @@ const places = [
 
 <section class="xp" id="experience" data-experience aria-labelledby="xp-title">
   <div class="xp__pin">
-    <p class="xp__count" data-count aria-hidden="true">01</p>
-
-    <div class="xp__side">
+    <div class="xp__head">
       <p class="mono xp__meta">Chapter 03 · 2023 – now</p>
       <h2 class="xp__title" id="xp-title">Five places, <em>five summers and a job.</em></h2>
-      <span class="xp__rule" aria-hidden="true"><i data-rule></i></span>
-
-      <ol class="xp__list">
-        {
-          places.map((place, index) => (
-            <li class="xp__row" data-row={index} data-year={place.year}>
-              <span class="xp__name">{place.name}</span>
-              <span class="mono xp__when">{place.when}</span>
-              <span class="mono xp__role">{place.role}</span>
-            </li>
-          ))
-        }
-      </ol>
     </div>
+
+    <ol class="xp__list">
+      {
+        places.map((place, index) => (
+          <li class="xp__card" data-row={index} data-year={place.year}>
+            <p class="mono xp__no">{String(index + 1).padStart(2, '0')} / 05</p>
+            <p class="xp__name">{place.name}</p>
+            <p class="mono xp__role">{place.role}</p>
+            <p class="mono xp__when">{place.when}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <span class="xp__rule" aria-hidden="true"><i data-rule></i></span>
   </div>
 </section>
 
@@ -57,122 +56,84 @@ const places = [
   .xp__pin { position: relative; overflow: hidden; background: var(--night); }
   :global(html.js-motion) .xp__pin { position: sticky; top: 0; height: 100svh; min-height: 36rem; background: transparent; }
 
-  /* A pool of light for the words to stand in, so they are not on a void. */
+  /* A pool of light for the marks to stand in, so they are not on a void. */
   :global(html.js-motion) .xp__pin::before {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background: radial-gradient(52% 40% at 64% 46%, rgb(233 207 166 / 0.07), rgb(243 242 238 / 0.03) 42%, transparent 72%);
+    background: radial-gradient(46% 38% at 50% 46%, rgb(233 207 166 / 0.06), rgb(243 242 238 / 0.025) 44%, transparent 72%);
   }
 
-  /* Which of the five you are on, set like a plate number. */
-  .xp__count { display: none; }
-  :global(html.js-motion) .xp__count {
-    position: absolute;
-    right: calc(var(--gutter) + 5rem);
-    top: 6%;
-    z-index: 2;
-    display: block;
-    margin: 0;
-    font: 850 min(15vw, 22svh)/1 var(--display);
-    letter-spacing: -0.02em;
-    color: transparent;
-    -webkit-text-stroke: 1px rgb(243 242 238 / 0.2);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .xp__side { padding: 3rem var(--gutter) 4rem; }
-  :global(html.js-motion) .xp__side {
+  .xp__head { padding: 3rem var(--gutter) 0; }
+  :global(html.js-motion) .xp__head {
     position: absolute;
     left: var(--gutter);
-    top: 50%;
+    top: 2.25rem;
     z-index: 3;
-    width: min(42%, 29rem);
+    width: min(38%, 26rem);
     padding: 0;
-    translate: 0 -50%;
   }
-
-  .xp__meta { margin: 0 0 0.7rem; color: var(--silver); }
-  .xp__title { margin: 0; font: 400 clamp(1.8rem, 1.2rem + 1.8vw, 2.6rem)/1.05 var(--serif); letter-spacing: -0.015em; text-wrap: balance; }
+  .xp__meta { margin: 0 0 0.6rem; color: var(--silver); }
+  .xp__title { margin: 0; font: 400 clamp(1.5rem, 1.1rem + 1.3vw, 2.1rem)/1.1 var(--serif); letter-spacing: -0.015em; text-wrap: balance; }
   .xp__title em { color: var(--silver); }
 
-  /* How far through the five you are. */
+  .xp__list { margin: 0; padding: 2rem var(--gutter) 4rem; list-style: none; display: grid; gap: 2rem; }
+  :global(html.js-motion) .xp__list { display: block; padding: 0; }
+
+  .xp__card { display: grid; gap: 0.3rem; max-width: 26rem; }
+
+  /* With motion each card waits its turn, across from its own mark. */
+  :global(html.js-motion) .xp__card {
+    position: absolute;
+    top: 50%;
+    z-index: 3;
+    width: min(30%, 21rem);
+    opacity: 0;
+    translate: 0 -46%;
+    transition: opacity 700ms var(--ease-out), translate 700ms var(--ease-out);
+    pointer-events: none;
+  }
+  :global(html.js-motion) .xp__card.is-here { opacity: 1; translate: 0 -50%; }
+
+  /* Marks sit at 63% and 37% by turns, so the cards take the far side. The
+     right-hand ones clear the year rail, which already owns that column. */
+  :global(html.js-motion) .xp__card:nth-child(odd) { left: var(--gutter); }
+  :global(html.js-motion) .xp__card:nth-child(even) { right: calc(var(--gutter) + 6rem); text-align: right; }
+
+  .xp__no { margin: 0 0 0.9rem; font-size: 0.7rem; letter-spacing: 0.14em; color: var(--flight); font-variant-numeric: tabular-nums; }
+  .xp__name { margin: 0; font: 400 clamp(1.6rem, 1.2rem + 1.4vw, 2.4rem)/1.1 var(--serif); letter-spacing: -0.015em; color: var(--paper); }
+  .xp__role { margin: 0.45rem 0 0; font-size: 0.7rem; line-height: 1.6; letter-spacing: 0.07em; text-transform: uppercase; color: var(--dim); }
+  .xp__when { margin: 0.55rem 0 0; font-size: 0.72rem; letter-spacing: 0.07em; color: var(--silver); font-variant-numeric: tabular-nums; }
+
   .xp__rule { display: none; }
   :global(html.js-motion) .xp__rule {
+    position: absolute;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: 2.4rem;
+    z-index: 3;
     display: block;
     height: 1px;
-    margin-block: 1.7rem;
-    background: rgb(243 242 238 / 0.14);
+    background: rgb(243 242 238 / 0.12);
   }
   .xp__rule i { display: block; height: 100%; background: var(--flight); transform-origin: 0 50%; transform: scaleX(0); }
 
-  .xp__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 1.25rem; }
-
-  .xp__row {
-    position: relative;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 0.3rem 1rem;
-    padding-inline-start: 1.1rem;
-  }
-
-  /* A mark against the place you are on. */
-  .xp__row::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.35em;
-    width: 2px;
-    height: 0;
-    background: var(--flight);
-    transition: height 600ms var(--ease-out);
-  }
-  .xp__row.is-here::before { height: 1.1em; }
-
-  /* With motion each row arrives as you reach it, and the five accumulate. */
-  :global(html.js-motion) .xp__row {
-    opacity: 0;
-    translate: 0 14px;
-    transition: opacity 800ms var(--ease-out), translate 800ms var(--ease-out);
-  }
-  :global(html.js-motion) .xp__row.is-in { opacity: 0.34; translate: 0 0; }
-  :global(html.js-motion) .xp__row.is-here { opacity: 1; }
-
-  .xp__name {
-    font: 400 clamp(1.3rem, 1.1rem + 0.7vw, 1.75rem)/1.15 var(--serif);
-    letter-spacing: -0.01em;
-    color: var(--paper);
-  }
-  .xp__when {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: baseline;
-    font-size: 0.72rem;
-    letter-spacing: 0.07em;
-    color: var(--dim);
-    font-variant-numeric: tabular-nums;
-    transition: color 600ms var(--ease-out);
-  }
-  .xp__row.is-here .xp__when { color: var(--flight); }
-  .xp__role {
-    grid-column: 1 / -1;
-    max-width: 32ch;
-    font-size: 0.7rem;
-    line-height: 1.6;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--dim);
-  }
-
   @media (max-width: 59.99rem) {
-    :global(html.js-motion) .xp__pin::before { background: radial-gradient(60% 26% at 50% 34%, rgb(233 207 166 / 0.08), transparent 70%); }
-    :global(html.js-motion) .xp__count { right: var(--gutter); top: 4%; font-size: min(22vw, 14svh); }
-    :global(html.js-motion) .xp__side { width: auto; right: var(--gutter); top: auto; bottom: clamp(1.5rem, 5svh, 3rem); translate: 0 0; }
-    :global(html.js-motion) .xp__list { gap: 0.8rem; }
-    .xp__role { display: none; }
-    :global(html.js-motion) .xp__row.is-here .xp__role { display: block; }
+    :global(html.js-motion) .xp__head { width: auto; right: var(--gutter); }
+    :global(html.js-motion) .xp__card,
+    :global(html.js-motion) .xp__card:nth-child(odd),
+    :global(html.js-motion) .xp__card:nth-child(even) {
+      left: var(--gutter);
+      right: var(--gutter);
+      top: auto;
+      bottom: clamp(4rem, 12svh, 7rem);
+      width: auto;
+      text-align: left;
+      translate: 0 0;
+    }
+    :global(html.js-motion) .xp__card.is-here { translate: 0 0; }
   }
 </style>
 
@@ -181,16 +142,15 @@ const places = [
   import { openStage, setStage, selectStagePlaces, tiltStage, enliven } from '../../lib/story-stage';
 
   const root = document.querySelector<HTMLElement>('[data-experience]');
-  const count = root?.querySelector<HTMLElement>('[data-count]') ?? null;
   const rule = root?.querySelector<HTMLElement>('[data-rule]') ?? null;
-  const rows = [...(root?.querySelectorAll<HTMLElement>('[data-row]') ?? [])];
+  const cards = [...(root?.querySelectorAll<HTMLElement>('[data-row]') ?? [])];
 
   const clamp = (v: number) => Math.min(Math.max(v, 0), 1);
   const span = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
   const smooth = (t: number) => t * t * (3 - 2 * t);
 
-  if (root && count && rule && rows.length && initMotion()) {
-    const total = rows.length;
+  if (root && rule && cards.length && initMotion()) {
+    const total = cards.length;
     let pair = '';
     let here = -1;
     let last = 0;
@@ -201,7 +161,7 @@ const places = [
       const slot = Math.min(Math.floor(t), total - 1);
       const next = Math.min(slot + 1, total - 1);
       const local = t - slot;
-      // Each name is held, then carried into the one after it. The last place
+      // Each mark is held, then carried into the one after it. The last place
       // has nothing to cross to, so it simply stays itself.
       const blend = next === slot ? 0 : smooth(span(local, 0.62, 0.95));
 
@@ -211,27 +171,26 @@ const places = [
         selectStagePlaces(slot, next);
       }
 
-      setStage({
-        enter: 1, scatter: 1, assemble: 1, flight: 1, morph: 1,
-        fade: 0, machine: 1,
-        // The dots gather the first name as the chapter opens, then stay in words.
-        word: smooth(span(p, 0.008, 0.07)),
-        wordBlend: blend,
-      });
+      // Only once this chapter is actually moving. At its own progress 0 these
+      // are the states of every chapter before it, and writing them on page
+      // load puts the car on the opening screen in place of his name — the
+      // stage is shared, so silence is the only safe thing to say at rest.
+      if (p > 0.001) {
+        setStage({
+          enter: 1, scatter: 1, assemble: 1, flight: 1, morph: 1,
+          fade: 0, machine: 1,
+          word: smooth(span(p, 0.008, 0.07)),
+          wordBlend: blend,
+        });
+      }
 
       rule.style.transform = `scaleX(${p.toFixed(4)})`;
 
-      // Once the dots are more than halfway across, the next place is the one
-      // being read, so the list and the number turn over with them.
       const current = blend > 0.5 ? next : slot;
       if (current !== here) {
         here = current;
-        count.textContent = String(current + 1).padStart(2, '0');
-        rows.forEach((row, i) => {
-          row.classList.toggle('is-in', i <= current);
-          row.classList.toggle('is-here', i === current);
-        });
-        const year = rows[current]?.dataset.year;
+        cards.forEach((card, i) => card.classList.toggle('is-here', i === current));
+        const year = cards[current]?.dataset.year;
         for (const el of document.querySelectorAll('[data-rail-year]')) {
           el.classList.toggle('is-current', (el as HTMLElement).dataset.railYear === year);
         }
@@ -240,7 +199,7 @@ const places = [
 
     ScrollTrigger.create({ trigger: root, start: 'top top', end: 'bottom bottom', onUpdate: (self) => apply(self.progress) });
 
-    // The words only breathe and follow the pointer while this chapter is on
+    // The marks only breathe and follow the pointer while this chapter is on
     // screen; everywhere else the stage still draws once per scroll.
     ScrollTrigger.create({
       trigger: root,
@@ -254,7 +213,6 @@ const places = [
     }, { passive: true });
 
     apply(0);
-    // The names are sampled when the stage opens; put the right pair up then.
     openStage().then(() => { pair = ''; here = -1; apply(last); });
   }
 </script>

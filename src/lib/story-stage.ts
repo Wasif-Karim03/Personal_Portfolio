@@ -7,12 +7,23 @@
  * leave his name are the dots that become the Earth. Nothing else owns them.
  */
 import pointsJson from '../data/story-points.json';
-import { createStoryScene, type Overlays, type Phases, type StoryPoints, type StoryScene } from './story-scene';
+import { createStoryScene, type Mark, type Overlays, type Phases, type StoryPoints, type StoryScene } from './story-scene';
 
 const data = pointsJson as unknown as StoryPoints;
 
-/** The names the dots take in the experience chapter, in order. */
-export const PLACES = ['Leland', 'Hilton', 'Airbnb', 'think[box]', 'OpsiClear'];
+/**
+ * Every place he has worked, in order, as the dots draw it: the real mark where
+ * one exists, the name as type where the name is the mark. Leland, Hilton and
+ * Airbnb have marks; think[box] sets its name as type, brackets and all, and
+ * OpsiClear has none to find. See public/logos/SOURCES.md.
+ */
+const MARKS: Mark[] = [
+  { kind: 'image', src: '/logos/leland.png', width: 0.13, invert: true },
+  { kind: 'image', src: '/logos/hilton.svg', width: 0.26 },
+  { kind: 'image', src: '/logos/airbnb.svg', width: 0.15 },
+  { kind: 'text', lines: ['think[box]'], weight: 850, family: "'Big Shoulders Display Variable', 'Arial Narrow', sans-serif" },
+  { kind: 'text', lines: ['OpsiClear'], weight: 850, family: "'Big Shoulders Display Variable', 'Arial Narrow', sans-serif" },
+];
 
 let scene: StoryScene | null = null;
 let opening: Promise<StoryScene | null> | null = null;
@@ -53,8 +64,7 @@ export function openStage(): Promise<StoryScene | null> {
         matchMedia('(max-width: 48rem)').matches ? 'mobile' : 'desktop',
         overlays,
         { lines: portrait ? ['Wasif', 'Karim'] : ['Wasif Karim'], weight: 850, family: face },
-        // Every place he has worked, in order, set in the face his name is.
-        PLACES.map((place) => ({ lines: [place], weight: 850, family: face })),
+        MARKS,
       );
       scene.set(beats);
       window.addEventListener('resize', () => scene?.resize());

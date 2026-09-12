@@ -54,6 +54,14 @@ export interface NameSetting {
   family: string;
 }
 
+/**
+ * One thing the dots draw in the experience chapter: a company's real mark where
+ * one exists, or its name set as type where the name is the mark.
+ */
+export type Mark =
+  | { kind: 'text'; lines: string[]; weight: number; family: string }
+  | { kind: 'image'; src: string; width: number; invert?: boolean };
+
 /** Where the scene is, each 0 to 1. */
 export interface Phases {
   /** The name arriving, dot by dot, left to right. */
@@ -269,7 +277,7 @@ export async function createStoryScene(
   variant: 'desktop' | 'mobile',
   overlays: Overlays,
   name?: NameSetting,
-  words?: NameSetting[],
+  words?: Mark[],
 ): Promise<StoryScene> {
   const count = data.counts[variant];
   const response = await fetch(data.files[variant]);
@@ -428,6 +436,18 @@ export async function createStoryScene(
   let namedOk = false;
   let shown = 0;
   let shownB = 0;
+  // Every picture mark decoded once, so laying the chapter out stays instant.
+  const loaded = new Map<string, HTMLImageElement>();
+  await Promise.all(
+    (words ?? [])
+      .filter((entry): entry is Extract<Mark, { kind: 'image' }> => entry.kind === 'image')
+      .map(async (entry) => {
+        const art = new Image();
+        art.src = entry.src;
+        await art.decode().catch(() => {});
+        loaded.set(entry.src, art);
+      }),
+  );
   const wordSets: Float32Array[] = [];
   const wordSizes: number[] = [];
   const globeOffset = new Vector3();
@@ -442,7 +462,7 @@ export async function createStoryScene(
   const scatterMask = (mask: HTMLCanvasElement, ctx: CanvasRenderingContext2D, dpr: number, out: Float32Array, sweepOut: Float32Array | null) => {
     const { data: pixels } = ctx.getImageData(0, 0, mask.width, mask.height);
     const hits: number[] = [];
-    for (let i = 0; i < mask.width * mask.height; i++) if (pixels[i * 4 + 3] > 120) hits.push(i);
+    for (let i = 0; i < mask.width * mask.height; i++) if (pixels[i * 4] > 120) hits.push(i);
     if (hits.length === 0) return 0;
 
     const step = hits.length / count;
@@ -458,7 +478,11 @@ export async function createStoryScene(
     return step;
   };
 
-  /** An offscreen canvas the size of the view, ready to be written on. */
+  /**
+   * An offscreen canvas the size of the view, ready to be written on. Black to
+   * start: marks are sampled by brightness, not by coverage, because a picture
+   * with an opaque ground covers every pixel and would light the whole frame.
+   */
   const freshMask = (scale?: number) => {
     const dpr = scale ?? Math.min(window.devicePixelRatio || 1, 2);
     const mask = document.createElement('canvas');
@@ -467,6 +491,8 @@ export async function createStoryScene(
     const ctx = mask.getContext('2d', { willReadFrequently: true });
     if (!ctx) return null;
     ctx.scale(dpr, dpr);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
@@ -521,34 +547,52 @@ export async function createStoryScene(
     wordSizes.length = 0;
     const wide = width >= 960;
 
-    for (const entry of words) {
+    words.forEach((entry, index) => {
       const sheet = freshMask(1);
       if (!sheet) return;
       const { mask, ctx, dpr } = sheet;
-      const lines = entry.lines.map((line) => line.toUpperCase());
 
-      let size = Math.min(width * (wide ? 0.1 : 0.13), height * 0.2);
-      const widest = () => {
+      // The journey zig-zags down the page: each place stands on the opposite
+      // side from the one before it, and its words sit across from it.
+      const side = index % 2 === 0 ? 0.63 : 0.37;
+      const midX = width * (wide ? side : 0.5);
+      const midY = height * (wide ? 0.47 : 0.34);
+
+      if (entry.kind === 'text') {
+        const lines = entry.lines.map((line) => line.toUpperCase());
+        let size = Math.min(width * (wide ? 0.1 : 0.13), height * 0.2);
+        const widest = () => {
+          ctx.font = `${entry.weight} ${size}px ${entry.family}`;
+          return Math.max(...lines.map((line) => ctx.measureText(line).width));
+        };
+        const room = width * (wide ? 0.42 : 0.78);
+        if (widest() > room) size *= room / widest();
         ctx.font = `${entry.weight} ${size}px ${entry.family}`;
-        return Math.max(...lines.map((line) => ctx.measureText(line).width));
-      };
-      // Wide screens keep the left for the list, so the name sits in the right.
-      const room = width * (wide ? 0.46 : 0.78);
-      if (widest() > room) size *= room / widest();
-      ctx.font = `${entry.weight} ${size}px ${entry.family}`;
-
-      const midX = width * (wide ? 0.64 : 0.5);
-      const foot = height * (wide ? 0.52 : 0.4);
-      lines.forEach((line, i) => {
-        ctx.fillText(line, midX, foot - (lines.length - 1 - i) * size * 0.86);
-      });
+        const foot = midY + size * 0.36;
+        lines.forEach((line, i) => {
+          ctx.fillText(line, midX, foot - (lines.length - 1 - i) * size * 0.86);
+        });
+      } else {
+        const art = loaded.get(entry.src);
+        if (art?.width) {
+          const w = width * (wide ? entry.width : entry.width * 1.4);
+          const h = w * (art.height / art.width);
+          ctx.save();
+          // Leland's mark is dark on a pale ground, so it is turned over first —
+          // the same move his own photograph of the car needed.
+          if (entry.invert) ctx.filter = 'grayscale(1) invert(1)';
+          ctx.drawImage(art, midX - w / 2, midY - h / 2, w, h);
+          ctx.restore();
+        }
+      }
 
       const out = new Float32Array(count * 2);
       const step = scatterMask(mask, ctx, dpr, out, null);
       wordSets.push(inReadingOrder(out));
-      // Fewer pixels than his name, so the same dots pack tighter: size follows.
+      // Each mark covers a different amount of the view, so its dots are sized
+      // from its own coverage rather than from one figure for all five.
       wordSizes.push(step === 0 ? 1 : Math.min(Math.max(1.05 * Math.sqrt(step), 0.3), 1.6));
-    }
+    });
     showWords(shown, shownB);
   };
 

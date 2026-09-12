@@ -31,4 +31,8 @@ Every visual is tagged by where it comes from:
 - Scroll speed is never taken over. Animations follow the scroll; they don't control it.
 - The "Work" link is always one click away.
 - `prefers-reduced-motion` gets a calm, static version of the site.
-- No internal screenshots or logos from Hilton, Airbnb, or OpsiClear. Use diagrams and generic UI instead.
+- No internal screenshots from Hilton, Airbnb, or OpsiClear. Use diagrams and generic UI instead.
+- Company logos: Wasif lifted the no-logos half of this rule on 2026-09-12 and asked for the marks
+  of the places he has worked to be shown in the experience chapter. They are rendered as dots, in
+  the same point system as the rest of the story, and used only to identify real employers — never
+  in a way that implies endorsement. Internal screens are still out.
