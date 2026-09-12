@@ -1,0 +1,162 @@
+---
+/**
+ * Chapter 04: Hilton, summer 2024.
+ *
+ * A deliberate change of form. The chapters before this one each held a single
+ * shape — a globe, a building, a machine, two words — and a third in a row
+ * would start to read as a template. Here the dots draw structure instead: the
+ * path a request takes, with the request itself running it as you scroll.
+ *
+ * The drawing is in src/lib/story-stage.ts; the labels stay as real text so
+ * they are crisp and readable. Facts from src/data/scenes.ts: Software
+ * Engineering Intern, six REST endpoints, a Tableau dashboard, CI/CD. No
+ * internal screens or Hilton branding, per CLAUDE.md.
+ */
+---
+
+<section class="hs" id="hilton" data-hilton aria-labelledby="hs-title">
+  <div class="hs__pin">
+    <ol class="hs__stops" data-stops aria-hidden="true">
+      <li data-stop="0"><span class="mono">App</span></li>
+      <li data-stop="1"><span class="mono">6 endpoints</span></li>
+      <li data-stop="2"><span class="mono">PostgreSQL</span></li>
+    </ol>
+
+    <span class="hs__pulse" data-pulse aria-hidden="true"></span>
+
+    <div class="hs__readout" data-readout>
+      <p class="mono hs__where">Hilton · Summer 2024</p>
+      <p class="mono hs__role">Software Engineering Intern</p>
+    </div>
+
+    <div class="hs__chapter" data-chapter-text>
+      <p class="mono hs__meta">Chapter 04 · 2024</p>
+      <h2 class="hs__title" id="hs-title">Six endpoints, <em>and the dashboard that read them.</em></h2>
+      <p class="hs__sub">REST services, a Tableau dashboard, and the pipeline that shipped them.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hs { position: relative; }
+
+  :global(html.js-motion) .hs { height: 300svh; }
+
+  .hs__pin { position: relative; overflow: hidden; background: var(--night); }
+  :global(html.js-motion) .hs__pin { position: sticky; top: 0; height: 100svh; min-height: 36rem; background: transparent; }
+
+  /* Labels sit on the drawing the dots make; without motion they are the list. */
+  .hs__stops { display: grid; gap: 0.6rem; margin: 0; padding: 3rem var(--gutter) 0; list-style: none; counter-reset: stop; }
+  .hs__stops li { color: var(--silver); }
+  .hs__stops li::before { content: counter(stop, decimal-leading-zero) ' · '; counter-increment: stop; color: var(--dim); font-family: var(--mono); }
+
+  :global(html.js-motion) .hs__stops { position: absolute; inset: 0; z-index: 3; display: block; padding: 0; opacity: 0; }
+  :global(html.js-motion) .hs__stops li { position: absolute; translate: -50% 0; white-space: nowrap; }
+  :global(html.js-motion) .hs__stops li::before { content: none; }
+  :global(html.js-motion) .hs__stops li[data-stop='0'] { left: 25%; top: 55.5%; }
+  :global(html.js-motion) .hs__stops li[data-stop='1'] { left: 50%; top: 55.5%; }
+  :global(html.js-motion) .hs__stops li[data-stop='2'] { left: 75%; top: 55.5%; }
+
+  .hs__pulse { display: none; }
+  :global(html.js-motion) .hs__pulse {
+    position: absolute;
+    left: 25%;
+    top: 45%;
+    z-index: 3;
+    display: block;
+    width: 9px;
+    height: 9px;
+    margin: -4.5px 0 0 -4.5px;
+    border-radius: 50%;
+    background: var(--flight);
+    box-shadow: 0 0 14px 3px rgb(233 207 166 / 0.55);
+    opacity: 0;
+  }
+
+  .hs__readout { display: grid; gap: 0.35rem; margin: 2rem var(--gutter) 0; }
+  :global(html.js-motion) .hs__readout { position: absolute; right: calc(var(--gutter) + 6rem); top: 2.25rem; z-index: 3; margin: 0; text-align: right; opacity: 0; }
+  .hs__readout p { margin: 0; }
+  .hs__where { color: var(--flight); }
+  .hs__role { color: var(--dim); }
+
+  .hs__chapter { position: relative; z-index: 3; display: grid; gap: 0.9rem; padding: 2rem var(--gutter) 4rem; }
+  :global(html.js-motion) .hs__chapter {
+    position: absolute;
+    left: var(--gutter);
+    bottom: clamp(2rem, 8svh, 5rem);
+    width: min(46%, 34rem);
+    padding: 0;
+    opacity: 0;
+  }
+  .hs__meta { margin: 0; color: var(--silver); }
+  .hs__title { margin: 0; font: 400 clamp(2.2rem, 1.3rem + 2.6vw, 3.8rem)/1 var(--serif); letter-spacing: -0.015em; text-wrap: balance; }
+  .hs__title em { color: var(--silver); }
+  .hs__sub { margin: 0; font-size: clamp(0.98rem, 0.93rem + 0.25vw, 1.1rem); color: var(--silver); }
+
+  @media (max-width: 59.99rem) {
+    :global(html.js-motion) .hs__readout { right: var(--gutter); }
+    :global(html.js-motion) .hs__chapter { width: auto; right: var(--gutter); }
+    /* Narrow: stacked, the space under each box is where the connector runs,
+       so the labels sit inside the boxes, which are drawn as empty outlines. */
+    :global(html.js-motion) .hs__stops li { translate: -50% -50%; }
+    :global(html.js-motion) .hs__stops li[data-stop='0'] { left: 50%; top: 26%; }
+    :global(html.js-motion) .hs__stops li[data-stop='1'] { left: 50%; top: 44%; }
+    :global(html.js-motion) .hs__stops li[data-stop='2'] { left: 50%; top: 62%; }
+  }
+</style>
+
+<script>
+  import { ScrollTrigger, initMotion } from '../../lib/motion';
+  import { openStage, setStage } from '../../lib/story-stage';
+
+  const root = document.querySelector<HTMLElement>('[data-hilton]');
+  const q = <T extends HTMLElement>(s: string) => root?.querySelector<T>(s) ?? null;
+  const stops = q('[data-stops]');
+  const pulse = q('[data-pulse]');
+  const readout = q('[data-readout]');
+  const chapter = q('[data-chapter-text]');
+
+  const clamp = (v: number) => Math.min(Math.max(v, 0), 1);
+  const span = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
+  const smooth = (t: number) => t * t * (3 - 2 * t);
+
+  if (root && stops && pulse && readout && chapter && initMotion()) {
+    openStage();
+    const narrow = window.matchMedia('(max-width: 59.99rem)');
+
+    const apply = (p: number) => {
+      if (p > 0.001) {
+        setStage({
+          enter: 1, scatter: 1, assemble: 1, flight: 1, morph: 1,
+          fade: 0, machine: 1, word: 1,
+          plan: smooth(span(p, 0.08, 0.42)),
+        });
+      }
+
+      readout.style.opacity = String(smooth(span(p, 0.34, 0.46)));
+      stops.style.opacity = String(smooth(span(p, 0.4, 0.52)));
+
+      // The request runs the path it just drew: app, endpoints, database.
+      const run = span(p, 0.46, 0.74);
+      pulse.style.opacity = run > 0.001 && run < 0.999 ? '1' : '0';
+      if (narrow.matches) {
+        pulse.style.left = '50%';
+        pulse.style.top = `${32 + run * 36}%`;
+      } else {
+        pulse.style.left = `${25 + run * 50}%`;
+        pulse.style.top = '45%';
+      }
+
+      const title = smooth(span(p, 0.64, 0.76));
+      chapter.style.opacity = String(title);
+      chapter.style.transform = `translateY(${(1 - title) * 24}px)`;
+
+      const here = p > 0.5;
+      document.querySelector('[data-rail-year="2024"]')?.classList.toggle('is-current', here);
+      document.querySelector('[data-rail-year="2023"]')?.classList.toggle('is-current', !here);
+    };
+
+    ScrollTrigger.create({ trigger: root, start: 'top top', end: 'bottom bottom', onUpdate: (self) => apply(self.progress) });
+    apply(0);
+  }
+</script>
