@@ -17,12 +17,25 @@ const data = pointsJson as unknown as StoryPoints;
  * Airbnb have marks; think[box] sets its name as type, brackets and all, and
  * OpsiClear has none to find. See public/logos/SOURCES.md.
  */
+/**
+ * Each place, with the colour its dots take while it is held.
+ *
+ * The colours are the real ones, lifted where a literal value would not survive
+ * a black page: Hilton's mark is genuinely black and its brand blue is #003087,
+ * and think[box]'s panel is #062e4c — rendered literally the first is invisible
+ * and the two are indistinguishable. So Hilton stays white, because its brand
+ * really is monochrome, and think[box] keeps its navy's hue at a luminance that
+ * reads. Colour is used where colour actually exists.
+ */
 const MARKS: Mark[] = [
-  { kind: 'image', src: '/logos/leland.png', width: 0.13, invert: true },
-  { kind: 'image', src: '/logos/hilton.svg', width: 0.26 },
-  { kind: 'image', src: '/logos/airbnb.svg', width: 0.15 },
-  { kind: 'text', lines: ['think[box]'], weight: 850, family: "'Big Shoulders Display Variable', 'Arial Narrow', sans-serif" },
-  { kind: 'text', lines: ['OpsiClear'], weight: 850, family: "'Big Shoulders Display Variable', 'Arial Narrow', sans-serif" },
+  { kind: 'image', src: '/logos/leland.png', tint: [1.0, 0.85, 0.44] },
+  { kind: 'image', src: '/logos/hilton.png', tint: [0.95, 0.94, 0.92] },
+  // The Belo is an outline, so it carries less ink than the others at the same
+  // box size and can stand a little larger.
+  { kind: 'image', src: '/logos/airbnb.png', scale: 1.1, tint: [1.0, 0.42, 0.42] },
+  { kind: 'image', src: '/logos/thinkbox.png', tint: [0.42, 0.66, 0.9] },
+  // Black and greys with no colour of its own, so it reads white like Hilton.
+  { kind: 'image', src: '/logos/opsiclear.png', tint: [0.84, 0.88, 0.9] },
 ];
 
 let scene: StoryScene | null = null;

@@ -4,8 +4,10 @@
  * The site reads as one film. It opens in black and white on Wasif now, then
  * the story starts at night in 2022 and moves forward year by year. Type does
  * the heavy lifting: Big Shoulders Display for his name and the years (a face
- * drawn for Chicago signage, where he's photographed), Instrument Serif for
- * the story's lines, Geist for reading, Geist Mono for dates and places.
+ * drawn for signage, and the one the dots are cut from), Newsreader for the
+ * story's lines — a reading serif with an optical axis, so it holds at caption
+ * size as well as at display — Archivo for reading and Chivo Mono for dates and
+ * places.
  */
 :root {
   --night: #0b0c0e;
@@ -18,9 +20,9 @@
   --flight: #e9cfa6;
 
   --display: 'Big Shoulders Display Variable', 'Arial Narrow', Impact, sans-serif;
-  --serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
-  --sans: 'Geist Variable', 'Helvetica Neue', Arial, sans-serif;
-  --mono: 'Geist Mono Variable', ui-monospace, Menlo, monospace;
+  --serif: 'Newsreader Variable', 'Iowan Old Style', Georgia, serif;
+  --sans: 'Archivo Variable', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'Chivo Mono Variable', ui-monospace, Menlo, monospace;
 
   --gutter: clamp(1.1rem, 3.2vw, 2.75rem);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -35,7 +37,7 @@ body {
   margin: 0;
   background: var(--night);
   color: var(--paper);
-  font: 400 16px/1.6 var(--sans);
+  font: 400 17px/1.62 var(--sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -43,11 +45,13 @@ body {
 a { color: inherit; text-decoration: none; }
 a:focus-visible, button:focus-visible { outline: 1px solid var(--paper); outline-offset: 5px; }
 
+/* Labels: dates, places, figures. Small, but never so small or so tightly
+   tracked that they stop being readable — they carry real information. */
 .mono {
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 400;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.045em;
   text-transform: uppercase;
 }
 

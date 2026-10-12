@@ -33,6 +33,8 @@ import sharp from 'sharp';
 import { feature } from 'topojson-client';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+// Needed to load world-atlas below: it is JSON, and this file is an ES module.
+// The type checker reports this as unused; it is not. Do not remove it.
 const require = createRequire(import.meta.url);
 const COUNTS = { desktop: 64000, mobile: 26000 };
 // In the order the dots take them.

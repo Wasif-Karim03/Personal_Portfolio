@@ -16,7 +16,17 @@ import YearRail from '../components/story/YearRail.astro';
 
 <StoryLayout title="Wasif Karim" description="Wasif Karim, robotics software engineer. The story from Dhaka in 2022 to Cleveland now.">
   <script is:inline>
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('js-motion');
+    // The motion layout hides the story behind a full-screen loader and holds
+    // every chapter at zero opacity, and only the module bundle ever lifts them.
+    // If that bundle never runs — a 404, a throw, a syntax the browser refuses —
+    // this drops back to the static layout instead of leaving a black screen.
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('js-motion');
+      window.__storyFailsafe = setTimeout(() => {
+        document.documentElement.classList.remove('js-motion');
+        document.querySelector('[data-loader]')?.remove();
+      }, 10000);
+    }
   </script>
   <Loader />
   <Stage />
@@ -37,6 +47,9 @@ import YearRail from '../components/story/YearRail.astro';
 <script>
   import { gsap, ScrollTrigger, initMotion } from '../lib/motion';
   import { enterStage } from '../lib/story-stage';
+
+  // The bundle is running, so the static-layout failsafe is not needed.
+  clearTimeout((window as unknown as { __storyFailsafe?: number }).__storyFailsafe);
 
   const motion = initMotion();
   const loader = document.querySelector<HTMLElement>('[data-loader]');

@@ -58,9 +58,10 @@ export interface NameSetting {
  * One thing the dots draw in the experience chapter: a company's real mark where
  * one exists, or its name set as type where the name is the mark.
  */
-export type Mark =
+export type Mark = { tint?: [number, number, number] } & (
   | { kind: 'text'; lines: string[]; weight: number; family: string }
-  | { kind: 'image'; src: string; width: number; invert?: boolean };
+  | { kind: 'image'; src: string; scale?: number; invert?: boolean }
+);
 
 /** Where the scene is, each 0 to 1. */
 export interface Phases {
@@ -134,6 +135,8 @@ const vertexShader = /* glsl */ `
   uniform float uWordBlend;
   uniform float uWordSize;
   uniform float uWordSizeB;
+  uniform vec3 uWordTint;
+  uniform vec3 uWordTintB;
   uniform vec2 uTilt;
   uniform float uTime;
   uniform float uThick;
@@ -193,6 +196,9 @@ const vertexShader = /* glsl */ `
     float cross = ramp(clamp(uWordBlend * 3.2 - aRank * 2.2, 0.0, 1.0));
     vec2 saying = mix(aWord, aWordB, cross);
     float travelling = cross * (1.0 - cross) * 4.0;
+    // Each place carries its own colour, and the dots cool to white as they
+    // cross to the next, so colour marks the place and not the movement.
+    vec3 brand = mix(uWordTint, uWordTintB, cross);
 
     // Depth belongs to the crossing, not to the name standing still: at rest
     // this is type and has to stay sharp, so it keeps only a trace of it.
@@ -225,7 +231,7 @@ const vertexShader = /* glsl */ `
     vec3 machineTone = vec3(pow(aLight2, 0.85)) * 0.76;
     // Warm while they are travelling, cooling to white as they settle, and a
     // little dimmer the further back they stand.
-    vec3 wordTone = mix(nameTone, uRouteTone, travelling * 0.6) * (1.0 - 0.3 * (0.5 - deep / max(uThick, 0.001)));
+    vec3 wordTone = mix(brand, nameTone, travelling * 0.75) * (1.0 - 0.3 * (0.5 - deep / max(uThick, 0.001)));
     vColor = mix(mix(mix(mix(nameTone, globeTone, ta), pictureTone, tm), machineTone, tw), wordTone, tq);
 
     float said = mix(uWordSize, uWordSizeB, cross);
@@ -372,6 +378,8 @@ export async function createStoryScene(
     uWordBlend: { value: 0 },
     uWordSize: { value: 1 },
     uWordSizeB: { value: 1 },
+    uWordTint: { value: new Vector3(0.95, 0.94, 0.92) },
+    uWordTintB: { value: new Vector3(0.95, 0.94, 0.92) },
     uTilt: { value: [0, 0] as [number, number] },
     uTime: { value: 0 },
     uThick: { value: 0.07 },
@@ -448,8 +456,10 @@ export async function createStoryScene(
         loaded.set(entry.src, art);
       }),
   );
-  const wordSets: Float32Array[] = [];
+  const wordSets: (Float32Array | null)[] = [];
   const wordSizes: number[] = [];
+  const wordTints: [number, number, number][] = [];
+  const paper: [number, number, number] = [0.95, 0.94, 0.92];
   const globeOffset = new Vector3();
   let phases: Phases = { enter: name ? 0 : 1, scatter: name ? 0 : 1, assemble: 0, flight: 0, morph: 0, fade: 0, machine: 0, word: 0, wordBlend: 0 };
 
@@ -545,11 +555,19 @@ export async function createStoryScene(
     if (!words?.length) return;
     wordSets.length = 0;
     wordSizes.length = 0;
+    wordTints.length = 0;
     const wide = width >= 960;
 
     words.forEach((entry, index) => {
       const sheet = freshMask(1);
-      if (!sheet) return;
+      if (!sheet) {
+        // Keep the places aligned with their marks: an entry that cannot be
+        // drawn still has to occupy its slot, or every later mark shifts by one.
+        wordSets.push(null);
+        wordSizes.push(1);
+        wordTints.push(paper);
+        return;
+      }
       const { mask, ctx, dpr } = sheet;
 
       // The journey zig-zags down the page: each place stands on the opposite
@@ -575,8 +593,15 @@ export async function createStoryScene(
       } else {
         const art = loaded.get(entry.src);
         if (art?.width) {
-          const w = width * (wide ? entry.width : entry.width * 1.4);
-          const h = w * (art.height / art.width);
+          // Every mark is fitted into one box rather than given a width of its
+          // own. Their proportions run from 0.93 to 4.56, so a width fraction
+          // makes a wordmark a stripe beside a square symbol; a shared box gives
+          // them comparable weight the way a row of logos is normally set.
+          const boxW = width * (wide ? 0.3 : 0.62);
+          const boxH = height * (wide ? 0.24 : 0.17);
+          const fit = Math.min(boxW / art.width, boxH / art.height) * (entry.scale ?? 1);
+          const w = art.width * fit;
+          const h = art.height * fit;
           ctx.save();
           // Leland's mark is dark on a pale ground, so it is turned over first —
           // the same move his own photograph of the car needed.
@@ -588,17 +613,28 @@ export async function createStoryScene(
 
       const out = new Float32Array(count * 2);
       const step = scatterMask(mask, ctx, dpr, out, null);
+      if (step === 0) {
+        // Nothing was lit — a picture that failed to load, or one that drew
+        // outside the frame. The array is still all zeros, and taking it would
+        // gather every dot onto a single point in the middle of the screen.
+        console.warn('story: mark drew nothing', entry);
+        wordSets.push(null);
+        wordSizes.push(1);
+        wordTints.push(paper);
+        return;
+      }
       wordSets.push(inReadingOrder(out));
       // Each mark covers a different amount of the view, so its dots are sized
       // from its own coverage rather than from one figure for all five.
-      wordSizes.push(step === 0 ? 1 : Math.min(Math.max(1.05 * Math.sqrt(step), 0.3), 1.6));
+      wordSizes.push(Math.min(Math.max(1.05 * Math.sqrt(step), 0.3), 1.6));
+      wordTints.push(entry.tint ?? paper);
     });
     showWords(shown, shownB);
   };
 
   /**
    * Sorts a name's dots left to right: banded into columns across the line,
-   * then down within each column.
+   * then up each column (world Y points up, and these are sorted ascending).
    *
    * Two names are crossed by pairing the nth dot of one with the nth dot of the
    * other, so the order they are stored in is the order they travel in — and
@@ -646,6 +682,8 @@ export async function createStoryScene(
     wordBXY.set(to);
     uniforms.uWordSize.value = wordSizes[a];
     uniforms.uWordSizeB.value = wordSizes[b];
+    uniforms.uWordTint.value.fromArray(wordTints[a] ?? paper);
+    uniforms.uWordTintB.value.fromArray(wordTints[b] ?? paper);
     geometry.attributes.aWord.needsUpdate = true;
     geometry.attributes.aWordB.needsUpdate = true;
   };

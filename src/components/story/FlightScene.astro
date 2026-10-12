@@ -75,7 +75,7 @@ const config = JSON.stringify({
 
   /* With motion the dots are on the fixed stage behind the page, so the pin
      must not paint over it. */
-  :global(html.js-motion) .fs__pin { position: sticky; top: 0; height: 100svh; min-height: 36rem; background: transparent; }
+  :global(html.js-motion) .fs__pin { position: sticky; top: 0; height: 100svh; background: transparent; }
 
   .fs__canvas { display: block; width: 100%; height: 80svh; }
   :global(html.js-motion) .fs__canvas { position: absolute; inset: 0; height: 100%; }
